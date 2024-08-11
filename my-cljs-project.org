@@ -1,0 +1,85 @@
+* Commands>
+** execute-src-block : 
+(save-excursion (progn (org-babel-goto-named-src-block "auto-tangle-block") (org-babel-execute-src-block)))
+(save-excursion (let () (org-babel-goto-named-src-block "auto-tangle-block") (org-babel-execute-src-block)))
+and then name the block you want to execute automatically:
+
+** find-file : 
+[[elisp:(org-babel-tangle)
+]]
+(find-file-other-frame "~/INI/hydra-cfg.el")
+(load "~/INI/hydra-cfg.el")
+(org-babel-tangle)
+** auto-tangle-block : 
+#+NAME: auto-tangle-block
+#+begin_src emacs-lisp :results output silent :tangle no
+(setq org-src-preserve-indentation t)
+(untabify (point-min) (point-max))
+(save-buffer)
+(org-babel-tangle)
+;; (find-file-other-frame "~/INI/hydra-cfg.el")
+;; (load "~/INI/hydra-cfg.el")
+;; (load "~/ELs/BuYn/reader.el")
+ #+end_src
+
+ 
+#+begin_src emacs-lisp :results output silent :tangle no
+(save-buffer)
+(org-babel-tangle)
+(load "~/INI/hydra-cfg.el")
+(load "~/ELs/BuYn/reader.el")
+ #+end_src
+
+from
+#+HEADER: :tangle ~/INI/hydra-cfg.el
+
+#+PROPERTY:    tangle ~/INI/hydra-cfg.el
+
+:header-args: :tangle  "~/INI/hydra-cfg.el"
+* Sorce files
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+** deps.edn
+:PROPERTIES:
+:header-args: :tangle  deps.edn
+:END:
+#+begin_src edn
+{:deps {org.clojure/clojurescript {:mvn/version "1.10.773"}}
+ :paths ["src"]}
+#+end_src
+** src/my_cljs_project/core.cljs
+:PROPERTIES:
+:header-args: :tangle  src/my_cljs_project/core.cljs
+:END:
+#+begin_src clojudr  
+(ns my-cljs-project.core)                                  ;; <1>
+
+(js/alert "Hello World")                                   ;; <2>
+#+end_src
+* get info
+** tree
+#+begin_src eshell
+tree -a 
+#+end_src
+
+#+RESULTS:
+: .
+: |-- .#my-cljs-project.org -> buyn@archiSTL.1187:1723275186
+: |-- deps.edn
+: |-- my-cljs-project.org
+: `-- src
+:     `-- my_cljs_project
+:         `-- core.cljs
+: 
+: 3 directories, 4 files
+
+#+begin_src eshell
+tree -a ../..
+#+end_src
+
+* 2024-08-10
+** Necroteuch.org : 
+#+begin_src emacs-lisp  :results output silent tangle: no
+(find-file-other-frame "~/Dropbox/orgs/capture/Necroteuch.org")
+    #+end_src
