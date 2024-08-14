@@ -57,6 +57,46 @@ To provide your own custom page, place an index.html file in the REPL launch dir
     <script src="out/main.js" type="text/javascript"></script>
   </body>
 </html>
+*** new project
+clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
+**** explane
+Since this command includes some unfamiliar syntax, let’s take a
+moment to dissect it. As we just learned, the first part of the
+command, clj -X:new, invokes the clj-new/create function, and
+the remainder of the arguments are passed to this function. We use
+Clojure keyword syntax to pass :template, :name, and :args
+options. :template unsurprisingly specifies the name of the
+template to use, :name is the name of the project to create, and :
+args are additional arguments that the figwheel-main template
+will interpret. Since figwheel-main is not a built-in template, clj-new
+will fetch the template from Clojure’s central repository, Clojars.
+
+We need to understand a bit of convention in order to make sense
+of the structure of the generated project. Most Clojure and
+ClojureScript projects use a namespace-qualified package name to
+reduce the likelihood of naming conflicts between projects that are
+pushed to a central registry. The namespace is the portion before
+the forward slash and is commonly the GitHub username of the
+developer or the reverse domain name of the organization that
+owns the code, although it can be anything you like. For this book,
+we will use learn-cljs as the namespace for all of our projects.1
+
+Project Namespace and Name 
+
+Project Namespace and Name
+
+The final argument is a bit odd-looking: :args '["+deps"
+"--reagent"]'. This passes a vector of strings as arguments to the
+figwheel-main template. The exact arguments supported vary from
+template to template, but Figwheel uses these to configure
+optional extensions to the base template. In our case, we are
+specifying that we want to use a deps.edn file to manage
+dependencies, and we want to include the Reagent web framework.
+*** help from fresh figwheel-main project
+Generating fresh figwheel-main project.
+  To get started:
+  -->  Change into the 'weather' directory
+  -->  Start build with 'clojure -M:fig:build'
 
 * Sorce files
 :PROPERTIES:
@@ -99,6 +139,9 @@ To provide your own custom page, place an index.html file in the REPL launch dir
 </html>
 #+end_src
 * project comands
+** new project
+clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
+$ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
 ** run console in org root
 clj -M:dev
 clojure -m cljs.main --compile my-cljs-project.core --repl
@@ -136,6 +179,9 @@ tree -a
 #+begin_example
 .
 |-- .cpcache
+|   |-- 2249099292.basis
+|   |-- 2249099292.cp
+|   |-- 2249099292.main
 |   |-- 3387647126.basis
 |   `-- 3387647126.cp
 |-- .git
@@ -168,18 +214,30 @@ tree -a
 |   |       `-- heads
 |   |           `-- master
 |   |-- objects
+|   |   |-- 0c
+|   |   |   `-- bbd03849c4225b912c29c5cc1a1eb95e004406
 |   |   |-- 0e
 |   |   |   `-- 870ed249cff3194b020b449194b8cba79a49d3
+|   |   |-- 17
+|   |   |   `-- a3e74549f59d14a57aaa5d946f87798ecd2d27
 |   |   |-- 1f
 |   |   |   `-- 93999b09a0a7b82e830a7b9090f0551d0f280e
 |   |   |-- 32
 |   |   |   `-- 4d99a0a2eb602de5639061c10905a14f2ec25c
 |   |   |-- 45
 |   |   |   `-- 374bcfb2934e4cb107dd25d948d3b9a008f723
+|   |   |-- 50
+|   |   |   `-- 6579660ab72264aaa634f26bf26ae7ffbdc418
 |   |   |-- 64
 |   |   |   `-- 5a17d70fa7f64e2c3119372d253464688197af
+|   |   |-- 65
+|   |   |   `-- a5e52de8afa978f2bb081da49308b6cd34291d
 |   |   |-- 68
 |   |   |   `-- d8c0c529bb0772b6720ad9e763d778f384d54c
+|   |   |-- 6a
+|   |   |   `-- 3417b8d9d0a2fec34cf79ef2b46cc63a28b7d8
+|   |   |-- 71
+|   |   |   `-- 0abb86e53c60cd50c35ef8e3c3974ecd5a166c
 |   |   |-- 78
 |   |   |   `-- 57d22f338d2bf5a11f2c9989019274e89e11bf
 |   |   |-- 8e
@@ -188,25 +246,45 @@ tree -a
 |   |   |   `-- 5fa94e812daa483ce03c6d57b8406559ba308c
 |   |   |-- a9
 |   |   |   `-- 3c6e57355bd80bf964904be7322c2f011e0d22
+|   |   |-- af
+|   |   |   `-- 4f6bcd17f983891885b2da5bb50d94247eafde
+|   |   |-- b5
+|   |   |   `-- 37353beaf2793d612857b56c29e2c6bfc6f3bb
 |   |   |-- bf
 |   |   |   `-- 8bf5fb01b57c3c6914e97292b05eadeb0b78a6
 |   |   |-- c0
 |   |   |   `-- 75bf98b67f24573980200a3389426360f42eed
+|   |   |-- c4
+|   |   |   `-- 49315d9c35a5d2431f95a1d2d4e4831a3a00af
 |   |   |-- cd
 |   |   |   `-- fc3fe15c3684ed37efdd455b8de454e72d0ea0
+|   |   |-- d5
+|   |   |   `-- e6c53f1c5365bb3647bf2c492687effb1a4034
+|   |   |-- de
+|   |   |   `-- 743adcae8dd63e093efe46f514c7536e24752a
+|   |   |-- ee
+|   |   |   `-- d014ac3bfe7e79af47e2e71dbbb5348f55c8a3
+|   |   |-- fb
+|   |   |   `-- 9af43c306f53f296e24ec6309badfcf4e1345c
 |   |   |-- info
 |   |   `-- pack
 |   `-- refs
 |       |-- heads
 |       |   `-- master
 |       `-- tags
+|-- .gitignore
 |-- deps.edn
+|-- index.html
 |-- my-cljs-project.org
 |-- out
 |   |-- cljs
 |   |   |-- core.cljs
 |   |   |-- core.js
 |   |   |-- core.js.map
+|   |   |-- pprint.cljs
+|   |   |-- pprint.cljs.cache.json
+|   |   |-- pprint.js
+|   |   |-- pprint.js.map
 |   |   |-- repl.cljs
 |   |   |-- repl.cljs.cache.json
 |   |   |-- repl.js
@@ -394,7 +472,7 @@ tree -a
     `-- my_cljs_project
         `-- core.cljs
 
-70 directories, 189 files
+83 directories, 211 files
 #+end_example
 
 #+begin_src eshell
