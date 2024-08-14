@@ -36,6 +36,10 @@ from
 #+PROPERTY:    tangle ~/INI/hydra-cfg.el
 
 :header-args: :tangle  "~/INI/hydra-cfg.el"
+* docs
+** link to turial
+(eww-of "https://www.learn-clojurescript.com/")
+(eww-of "https://www.learn-clojurescript.com/section-1/lesson-5-bootstrapping-a-clojurescript-project/")
 * Sorce files
 :PROPERTIES:
 :header-args: :mkdirp yes
@@ -52,11 +56,21 @@ from
 :PROPERTIES:
 :header-args: :tangle  src/my_cljs_project/core.cljs
 :END:
-#+begin_src clojudr  
+#+begin_src clojure
 (ns my-cljs-project.core)                                  ;; <1>
 
-(js/alert "Hello World")                                   ;; <2>
+(js/alert "Hello World!")                                   ;; <2>
 #+end_src
+* project comands
+** run repl
+#+begin_src eshell
+clj -m cljs.main --compile my-cljs-project.core --repl
+
+
+#+end_src
+
+#+RESULTS:
+
 * get info
 ** tree
 #+begin_src eshell
@@ -64,20 +78,77 @@ tree -a
 #+end_src
 
 #+RESULTS:
-: .
-: |-- .#my-cljs-project.org -> buyn@archiSTL.1187:1723275186
-: |-- deps.edn
-: |-- my-cljs-project.org
-: `-- src
-:     `-- my_cljs_project
-:         `-- core.cljs
-: 
-: 3 directories, 4 files
+#+begin_example
+.
+|-- .git
+|   |-- COMMIT_EDITMSG
+|   |-- HEAD
+|   |-- branches
+|   |-- config
+|   |-- description
+|   |-- hooks
+|   |   |-- applypatch-msg.sample
+|   |   |-- commit-msg.sample
+|   |   |-- fsmonitor-watchman.sample
+|   |   |-- post-update.sample
+|   |   |-- pre-applypatch.sample
+|   |   |-- pre-commit.sample
+|   |   |-- pre-merge-commit.sample
+|   |   |-- pre-push.sample
+|   |   |-- pre-rebase.sample
+|   |   |-- pre-receive.sample
+|   |   |-- prepare-commit-msg.sample
+|   |   |-- push-to-checkout.sample
+|   |   |-- sendemail-validate.sample
+|   |   `-- update.sample
+|   |-- index
+|   |-- info
+|   |   `-- exclude
+|   |-- logs
+|   |   |-- HEAD
+|   |   `-- refs
+|   |       `-- heads
+|   |           `-- master
+|   |-- objects
+|   |   |-- 0e
+|   |   |   `-- 870ed249cff3194b020b449194b8cba79a49d3
+|   |   |-- 64
+|   |   |   `-- 5a17d70fa7f64e2c3119372d253464688197af
+|   |   |-- 8e
+|   |   |   `-- 9d30e7d6e5c5c5cf8797dddb89c36afcd3ba53
+|   |   |-- a4
+|   |   |   `-- 5fa94e812daa483ce03c6d57b8406559ba308c
+|   |   |-- bf
+|   |   |   `-- 8bf5fb01b57c3c6914e97292b05eadeb0b78a6
+|   |   |-- c0
+|   |   |   `-- 75bf98b67f24573980200a3389426360f42eed
+|   |   |-- cd
+|   |   |   `-- fc3fe15c3684ed37efdd455b8de454e72d0ea0
+|   |   |-- info
+|   |   `-- pack
+|   `-- refs
+|       |-- heads
+|       |   `-- master
+|       `-- tags
+|-- deps.edn
+|-- my-cljs-project.org
+`-- src
+    `-- my_cljs_project
+        `-- core.cljs
+
+23 directories, 33 files
+#+end_example
 
 #+begin_src eshell
 tree -a ../..
 #+end_src
 
+* todo
+** get error
+~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
+Please install rlwrap for command editing or use "clojure" instead.
+** add line for open console
+to projet root
 * 2024-08-10
 ** Necroteuch.org : 
 #+begin_src emacs-lisp  :results output silent tangle: no
