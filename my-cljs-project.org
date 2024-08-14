@@ -40,6 +40,24 @@ from
 ** link to turial
 (eww-of "https://www.learn-clojurescript.com/")
 (eww-of "https://www.learn-clojurescript.com/section-1/lesson-5-bootstrapping-a-clojurescript-project/")
+** manuals
+*** info from new page
+Welcome to the ClojureScript browser REPL.
+
+This page hosts your REPL and application evaluation environment. Validate the connection by typing (js/alert "Hello CLJS!") in the REPL.
+
+To provide your own custom page, place an index.html file in the REPL launch directory, starting with this template:
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <script src="out/main.js" type="text/javascript"></script>
+  </body>
+</html>
+
 * Sorce files
 :PROPERTIES:
 :header-args: :mkdirp yes
@@ -50,7 +68,11 @@ from
 :END:
 #+begin_src edn
 {:deps {org.clojure/clojurescript {:mvn/version "1.10.773"}}
- :paths ["src"]}
+ :paths ["src"]
+:aliases
+  {:dev {:main-opts ["-m" "cljs.main"
+                     "--compile" "my-cljs-project.core"
+                     "--repl"]}}}
 #+end_src
 ** src/my_cljs_project/core.cljs
 :PROPERTIES:
@@ -61,7 +83,7 @@ from
 
 (js/alert "Hello World!")                                   ;; <2>
 #+end_src
-** deps.edn
+** index.html
 :PROPERTIES:
 :header-args: :tangle  index.html
 :END:
@@ -78,6 +100,8 @@ from
 #+end_src
 * project comands
 ** run console in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
 #+begin_src elisp :results output silent
 (buyn-shell-start "konsole")
 (evil-previous-line)
@@ -96,7 +120,7 @@ clj -m cljs.main --compile my-cljs-project.core --repl
 #+RESULTS:
 ** run console with command
 #+begin_src elisp :results output silent
-(buyn-shell-start "konsole -e /bin/bash --rcfile <(ls)")
+(buyn-shell-start "konsole -e /bin/bash --rcfile <(clj -M:dev)")
 (evil-previous-line)
 (org-cycle)
 (delete-other-windows)
@@ -378,7 +402,8 @@ tree -a ../..
 #+end_src
 
 * todo
-** add line for open console
+** DONE add line for open console
+CLOSED: [2024-08-14 Wed 09:18]
 to projet root
 ** 
 ** geting error
