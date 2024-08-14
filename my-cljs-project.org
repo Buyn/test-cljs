@@ -62,7 +62,16 @@ from
 (js/alert "Hello World!")                                   ;; <2>
 #+end_src
 * project comands
+** run console in org root
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
+
 ** run repl
+clojure -m cljs.main --compile my-cljs-project.core --repl
 #+begin_src eshell
 clj -m cljs.main --compile my-cljs-project.core --repl
 
@@ -70,6 +79,13 @@ clj -m cljs.main --compile my-cljs-project.core --repl
 #+end_src
 
 #+RESULTS:
+** run console with command
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole -e /bin/bash --rcfile <(ls)")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
 
 * get info
 ** tree
@@ -80,6 +96,9 @@ tree -a
 #+RESULTS:
 #+begin_example
 .
+|-- .cpcache
+|   |-- 3387647126.basis
+|   `-- 3387647126.cp
 |-- .git
 |   |-- COMMIT_EDITMSG
 |   |-- HEAD
@@ -112,12 +131,24 @@ tree -a
 |   |-- objects
 |   |   |-- 0e
 |   |   |   `-- 870ed249cff3194b020b449194b8cba79a49d3
+|   |   |-- 1f
+|   |   |   `-- 93999b09a0a7b82e830a7b9090f0551d0f280e
+|   |   |-- 32
+|   |   |   `-- 4d99a0a2eb602de5639061c10905a14f2ec25c
+|   |   |-- 45
+|   |   |   `-- 374bcfb2934e4cb107dd25d948d3b9a008f723
 |   |   |-- 64
 |   |   |   `-- 5a17d70fa7f64e2c3119372d253464688197af
+|   |   |-- 68
+|   |   |   `-- d8c0c529bb0772b6720ad9e763d778f384d54c
+|   |   |-- 78
+|   |   |   `-- 57d22f338d2bf5a11f2c9989019274e89e11bf
 |   |   |-- 8e
 |   |   |   `-- 9d30e7d6e5c5c5cf8797dddb89c36afcd3ba53
 |   |   |-- a4
 |   |   |   `-- 5fa94e812daa483ce03c6d57b8406559ba308c
+|   |   |-- a9
+|   |   |   `-- 3c6e57355bd80bf964904be7322c2f011e0d22
 |   |   |-- bf
 |   |   |   `-- 8bf5fb01b57c3c6914e97292b05eadeb0b78a6
 |   |   |-- c0
@@ -132,11 +163,199 @@ tree -a
 |       `-- tags
 |-- deps.edn
 |-- my-cljs-project.org
+|-- out
+|   |-- cljs
+|   |   |-- core.cljs
+|   |   |-- core.js
+|   |   |-- core.js.map
+|   |   |-- repl.cljs
+|   |   |-- repl.cljs.cache.json
+|   |   |-- repl.js
+|   |   |-- repl.js.map
+|   |   `-- spec
+|   |       |-- alpha.cljs
+|   |       |-- alpha.cljs.cache.json
+|   |       |-- alpha.js
+|   |       |-- alpha.js.map
+|   |       `-- gen
+|   |           |-- alpha.cljs
+|   |           |-- alpha.cljs.cache.json
+|   |           |-- alpha.js
+|   |           `-- alpha.js.map
+|   |-- cljs_deps.js
+|   |-- cljsc_opts.edn
+|   |-- clojure
+|   |   |-- browser
+|   |   |   |-- event.cljs
+|   |   |   |-- event.cljs.cache.json
+|   |   |   |-- event.js
+|   |   |   |-- event.js.map
+|   |   |   |-- net.cljs
+|   |   |   |-- net.cljs.cache.json
+|   |   |   |-- net.js
+|   |   |   |-- net.js.map
+|   |   |   |-- repl
+|   |   |   |   |-- preload.cljs
+|   |   |   |   |-- preload.cljs.cache.json
+|   |   |   |   |-- preload.js
+|   |   |   |   `-- preload.js.map
+|   |   |   |-- repl.cljs
+|   |   |   |-- repl.cljs.cache.json
+|   |   |   |-- repl.js
+|   |   |   `-- repl.js.map
+|   |   |-- string.cljs
+|   |   |-- string.cljs.cache.json
+|   |   |-- string.js
+|   |   |-- string.js.map
+|   |   |-- walk.cljs
+|   |   |-- walk.cljs.cache.json
+|   |   |-- walk.js
+|   |   `-- walk.js.map
+|   |-- goog
+|   |   |-- array
+|   |   |   `-- array.js
+|   |   |-- asserts
+|   |   |   `-- asserts.js
+|   |   |-- async
+|   |   |   |-- delay.js
+|   |   |   |-- freelist.js
+|   |   |   |-- nexttick.js
+|   |   |   |-- run.js
+|   |   |   `-- workqueue.js
+|   |   |-- base.js
+|   |   |-- debug
+|   |   |   |-- debug.js
+|   |   |   |-- entrypointregistry.js
+|   |   |   |-- error.js
+|   |   |   |-- errorcontext.js
+|   |   |   |-- logbuffer.js
+|   |   |   |-- logger.js
+|   |   |   `-- logrecord.js
+|   |   |-- deps.js
+|   |   |-- disposable
+|   |   |   |-- disposable.js
+|   |   |   `-- idisposable.js
+|   |   |-- dom
+|   |   |   |-- asserts.js
+|   |   |   |-- browserfeature.js
+|   |   |   |-- dom.js
+|   |   |   |-- htmlelement.js
+|   |   |   |-- nodetype.js
+|   |   |   |-- safe.js
+|   |   |   |-- tagname.js
+|   |   |   `-- tags.js
+|   |   |-- events
+|   |   |   |-- browserevent.js
+|   |   |   |-- browserfeature.js
+|   |   |   |-- event.js
+|   |   |   |-- eventhandler.js
+|   |   |   |-- eventid.js
+|   |   |   |-- events.js
+|   |   |   |-- eventtarget.js
+|   |   |   |-- eventtype.js
+|   |   |   |-- listenable.js
+|   |   |   |-- listener.js
+|   |   |   `-- listenermap.js
+|   |   |-- fs
+|   |   |   `-- url.js
+|   |   |-- functions
+|   |   |   `-- functions.js
+|   |   |-- html
+|   |   |   |-- legacyconversions.js
+|   |   |   |-- safehtml.js
+|   |   |   |-- safescript.js
+|   |   |   |-- safestyle.js
+|   |   |   |-- safestylesheet.js
+|   |   |   |-- safeurl.js
+|   |   |   |-- trustedresourceurl.js
+|   |   |   |-- trustedtypes.js
+|   |   |   `-- uncheckedconversions.js
+|   |   |-- i18n
+|   |   |   `-- bidi.js
+|   |   |-- iter
+|   |   |   `-- iter.js
+|   |   |-- json
+|   |   |   |-- hybrid.js
+|   |   |   `-- json.js
+|   |   |-- labs
+|   |   |   `-- useragent
+|   |   |       |-- browser.js
+|   |   |       |-- engine.js
+|   |   |       |-- platform.js
+|   |   |       `-- util.js
+|   |   |-- log
+|   |   |   `-- log.js
+|   |   |-- math
+|   |   |   |-- coordinate.js
+|   |   |   |-- integer.js
+|   |   |   |-- long.js
+|   |   |   |-- math.js
+|   |   |   `-- size.js
+|   |   |-- messaging
+|   |   |   |-- abstractchannel.js
+|   |   |   `-- messagechannel.js
+|   |   |-- mochikit
+|   |   |   `-- async
+|   |   |       `-- deferred.js
+|   |   |-- net
+|   |   |   |-- errorcode.js
+|   |   |   |-- eventtype.js
+|   |   |   |-- httpstatus.js
+|   |   |   |-- websocket.js
+|   |   |   |-- wrapperxmlhttpfactory.js
+|   |   |   |-- xhrio.js
+|   |   |   |-- xhrlike.js
+|   |   |   |-- xmlhttp.js
+|   |   |   |-- xmlhttpfactory.js
+|   |   |   `-- xpc
+|   |   |       |-- crosspagechannel.js
+|   |   |       |-- crosspagechannelrole.js
+|   |   |       |-- directtransport.js
+|   |   |       |-- nativemessagingtransport.js
+|   |   |       |-- transport.js
+|   |   |       `-- xpc.js
+|   |   |-- object
+|   |   |   `-- object.js
+|   |   |-- promise
+|   |   |   |-- promise.js
+|   |   |   |-- resolver.js
+|   |   |   `-- thenable.js
+|   |   |-- reflect
+|   |   |   `-- reflect.js
+|   |   |-- string
+|   |   |   |-- const.js
+|   |   |   |-- internal.js
+|   |   |   |-- string.js
+|   |   |   |-- stringbuffer.js
+|   |   |   |-- stringformat.js
+|   |   |   `-- typedstring.js
+|   |   |-- structs
+|   |   |   |-- map.js
+|   |   |   `-- structs.js
+|   |   |-- timer
+|   |   |   `-- timer.js
+|   |   |-- uri
+|   |   |   |-- uri.js
+|   |   |   `-- utils.js
+|   |   `-- useragent
+|   |       |-- product.js
+|   |       `-- useragent.js
+|   |-- main.js
+|   |-- my_cljs_project
+|   |   |-- core.cljs
+|   |   |-- core.cljs.cache.json
+|   |   |-- core.js
+|   |   `-- core.js.map
+|   `-- process
+|       |-- env.cljs
+|       |-- env.cljs.cache.json
+|       |-- env.js
+|       `-- env.js.map
 `-- src
     `-- my_cljs_project
         `-- core.cljs
 
-23 directories, 33 files
+70 directories, 189 files
 #+end_example
 
 #+begin_src eshell
@@ -144,11 +363,13 @@ tree -a ../..
 #+end_src
 
 * todo
-** get error
-~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
-Please install rlwrap for command editing or use "clojure" instead.
 ** add line for open console
 to projet root
+** 
+** geting error
+~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
+Please install rlwrap for command editing or use "clojure" instead.
+
 * 2024-08-10
 ** Necroteuch.org : 
 #+begin_src emacs-lisp  :results output silent tangle: no
