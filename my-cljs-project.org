@@ -61,6 +61,21 @@ from
 
 (js/alert "Hello World!")                                   ;; <2>
 #+end_src
+** deps.edn
+:PROPERTIES:
+:header-args: :tangle  index.html
+:END:
+#+begin_src edn
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <script src="out/main.js" type="text/javascript"></script>
+  </body>
+</html>
+#+end_src
 * project comands
 ** run console in org root
 #+begin_src elisp :results output silent
