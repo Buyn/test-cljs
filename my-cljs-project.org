@@ -16,6 +16,8 @@ and then name the block you want to execute automatically:
 (setq org-src-preserve-indentation t)
 (untabify (point-min) (point-max))
 (save-buffer)
+(universal-argument)
+(universal-argument)
 (org-babel-tangle)
 ;; (find-file-other-frame "~/INI/hydra-cfg.el")
 ;; (load "~/INI/hydra-cfg.el")
@@ -189,20 +191,20 @@ $ clj -A:fig:build                                         # <2>
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]))
 
-(println "This text is printed from src/learn_cljs/weather.cljs. Go ahead and edit it and see reloading in action.")
+(println "This text is printed from src/learn_cljs/weather.cljs. Go ahead and edit it and see reloading in action.(c) buyn")
 
 (defn multiply [a b] (* a b))
 
-;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:text "Hello world!"}))
+;; (defonce app-state (atom {:text "Hello world!"}))
+(defonce app-state (atom {:text "Live reloading rocks!"}))
 
 (defn get-app-element []
   (gdom/getElement "app"))
 
 (defn hello-world []
   [:div
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this in src/learn_cljs/weather.cljs and watch it change! by Me?"]])
+   [:h1 "I say: " (:text @app-state)]
+   [:h3 "I Edit this in src/learn_cljs/weather.cljs and watch it change! by Me? Argument is activ"]])
 
 (defn mount [el]
   (rdom/render [hello-world] el))

@@ -4,20 +4,20 @@
    [reagent.core :as reagent :refer [atom]]
    [reagent.dom :as rdom]))
 
-(println "This text is printed from src/learn_cljs/weather.cljs. Go ahead and edit it and see reloading in action.")
+(println "This text is printed from src/learn_cljs/weather.cljs. Go ahead and edit it and see reloading in action.(c) buyn")
 
 (defn multiply [a b] (* a b))
 
-
-(defonce app-state (atom {:text "Hello world!"}))
+;; (defonce app-state (atom {:text "Hello world!"}))
+(defonce app-state (atom {:text "Live reloading rocks!"}))
 
 (defn get-app-element []
   (gdom/getElement "app"))
 
 (defn hello-world []
   [:div
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this in src/learn_cljs/weather.cljs and watch it change! by Me? And now?"]])
+   [:h1 "I say: " (:text @app-state)]
+   [:h3 "I Edit this in src/learn_cljs/weather.cljs and watch it change! by Me? Argument is activ"]])
 
 (defn mount [el]
   (rdom/render [hello-world] el))
