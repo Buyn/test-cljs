@@ -37,9 +37,14 @@ from
 
 :header-args: :tangle  "~/INI/hydra-cfg.el"
 * docs
-** link to turial
+** link to turials
+*** content
 (eww-of "https://www.learn-clojurescript.com/")
+*** fers src and new gen
 (eww-of "https://www.learn-clojurescript.com/section-1/lesson-5-bootstrapping-a-clojurescript-project/")
+*** stoped
+ * [[https://www.learn-clojurescript.com/section-1/lesson-6-receiving-rapid-feedback-with-figwheel/][Receiving Rapid Feedback With Figwheel]]
+
 ** manuals
 *** info from new page
 Welcome to the ClojureScript browser REPL.
@@ -97,12 +102,43 @@ Generating fresh figwheel-main project.
   To get started:
   -->  Change into the 'weather' directory
   -->  Start build with 'clojure -M:fig:build'
+*** figwheel readme.md 
+To get an interactive development environment run:
 
+    clojure -A:fig:build
+
+This will auto compile and send all changes to the browser without the
+need to reload. After the compilation process is complete, you will
+get a Browser Connected REPL. An easy way to try it is:
+
+    (js/alert "Am I connected?")
+
+and you should see an alert in the browser window.
+
+To clean all compiled files:
+
+    rm -rf target/public
+
+To create a production build run:
+
+  rm -rf target/public
+  clojure -A:fig:min
+* Log
+** weather
+*** new project
+clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
+$ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
+*** bilde
+$ cd weather                                               # <1>
+$ clj -A:fig:build                                         # <2>
+*** Running Figwheel
+автоматически
 * Sorce files
+** Sorce files project ferst
 :PROPERTIES:
 :header-args: :mkdirp yes
 :END:
-** deps.edn
+*** deps.edn
 :PROPERTIES:
 :header-args: :tangle  deps.edn
 :END:
@@ -114,7 +150,7 @@ Generating fresh figwheel-main project.
                      "--compile" "my-cljs-project.core"
                      "--repl"]}}}
 #+end_src
-** src/my_cljs_project/core.cljs
+*** src/my_cljs_project/core.cljs
 :PROPERTIES:
 :header-args: :tangle  src/my_cljs_project/core.cljs
 :END:
@@ -123,7 +159,7 @@ Generating fresh figwheel-main project.
 
 (js/alert "Hello World!")                                   ;; <2>
 #+end_src
-** index.html
+*** index.html
 :PROPERTIES:
 :header-args: :tangle  index.html
 :END:
@@ -138,6 +174,58 @@ Generating fresh figwheel-main project.
   </body>
 </html>
 #+end_src
+** weather
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** src/my_cljs_project/core.cljs
+:PROPERTIES:
+:header-args: :tangle  weather/src/learn_cljs/weather.cljs
+:END:
+#+begin_src clojure
+(ns ^:figwheel-hooks learn-cljs.weather
+  (:require
+   [goog.dom :as gdom]
+   [reagent.core :as reagent :refer [atom]]
+   [reagent.dom :as rdom]))
+
+(println "This text is printed from src/learn_cljs/weather.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+(defn hello-world []
+  [:div
+   [:h1 (:text @app-state)]
+   [:h3 "Edit this in src/learn_cljs/weather.cljs and watch it change! by Me?"]])
+
+(defn mount [el]
+  (rdom/render [hello-world] el))
+
+(defn mount-app-element []
+  (when-let [el (get-app-element)]
+    (mount el)))
+
+;; conditionally start your application based on the presence of an "app" element
+;; this is particularly helpful for testing this ns without launching the app
+(mount-app-element)
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  (mount-app-element)
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+#+end_src
+[[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
+
+
 * project comands
 ** new project
 clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
@@ -170,6 +258,43 @@ clj -m cljs.main --compile my-cljs-project.core --repl
 #+end_src
 
 * get info
+** tree weather
+#+begin_src eshell
+tree -a ./weather/
+#+end_src
+
+#+RESULTS:
+#+begin_example
+./weather/
+|-- .gitignore
+|-- README.md
+|-- deps.edn
+|-- dev.cljs.edn
+|-- figwheel-main.edn
+|-- resources
+|   `-- public
+|       |-- css
+|       |   `-- style.css
+|       |-- index.html
+|       `-- test.html
+|-- src
+|   `-- learn_cljs
+|       `-- weather.cljs
+|-- target
+|   `-- public
+|-- test
+|   `-- learn_cljs
+|       |-- test_runner.cljs
+|       `-- weather_test.cljs
+`-- test.cljs.edn
+
+10 directories, 12 files
+#+end_example
+
+#+begin_src eshell
+tree -a ../..
+#+end_src
+
 ** tree
 #+begin_src eshell
 tree -a 
