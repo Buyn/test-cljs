@@ -180,7 +180,7 @@ $ clj -A:fig:build                                         # <2>
 :PROPERTIES:
 :header-args: :mkdirp yes
 :END:
-*** src/my_cljs_project/core.cljs
+*** core.cljs
 :PROPERTIES:
 :header-args: :tangle  weather/src/learn_cljs/weather.cljs
 :END:
@@ -227,6 +227,22 @@ $ clj -A:fig:build                                         # <2>
 #+end_src
 [[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
 
+*** style.css
+:PROPERTIES:
+:header-args: :tangle  weather/resources/public/css/style.css
+:END:
+#+begin_src clojure
+body {
+  background-color: #02a4ff;
+  color: #ffffff;
+}
+
+h1 {
+  font-family: Helvetica, Arial, sans-serif;
+  font-weight: 300;
+}
+#+end_src
+[[file:weather/resources/public/css/style.css::/* some style */]]
 
 * project comands
 ** new project

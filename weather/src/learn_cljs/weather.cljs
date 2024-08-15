@@ -8,7 +8,7 @@
 
 (defn multiply [a b] (* a b))
 
-;; (defonce app-state (atom {:text "Hello world!"}))
+
 (defonce app-state (atom {:text "Live reloading rocks!"}))
 
 (defn get-app-element []
