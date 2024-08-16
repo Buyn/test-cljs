@@ -243,8 +243,8 @@ clj -A:fig:build
 :PROPERTIES:
 :header-args: :tangle  weather/src/learn_cljs/weather.cljs
 :END:
+**** link
 [[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
-
 **** ns
 #+begin_src clojure
 (ns ^:figwheel-hooks learn-cljs.weather                    ;; <1>
