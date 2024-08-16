@@ -239,6 +239,19 @@ clj -A:fig:build
 :PROPERTIES:
 :header-args: :mkdirp yes
 :END:
+*** dev.cljs.edn
+:PROPERTIES:
+:header-args: :tangle  weather/dev.cljs.edn
+:END:
+[[file:weather/dev.cljs.edn::^{:watch-dirs \["test" "src"\]]]
+#+begin_src clojure
+^{:watch-dirs ["test" "src"]
+  :css-dirs ["resources/public/css"]
+  :auto-testing true
+   }
+{:main learn-cljs.weather}
+#+end_src
+
 *** core.cljs
 :PROPERTIES:
 :header-args: :tangle  weather/src/learn_cljs/weather.cljs
