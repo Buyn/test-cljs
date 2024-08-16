@@ -239,6 +239,36 @@ clj -A:fig:build
 :PROPERTIES:
 :header-args: :mkdirp yes
 :END:
+*** core.cljs
+:PROPERTIES:
+:header-args: :tangle  weather/src/learn_cljs/weather.cljs
+:END:
+[[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
+
+**** ns
+#+begin_src clojure
+(ns ^:figwheel-hooks learn-cljs.weather                    ;; <1>
+  (:require
+   [goog.dom :as gdom]
+   [reagent.dom :as rdom]
+   [reagent.core :as r]))
+#+end_src
+**** structur
+#+begin_src clojure
+(defn hello-world []                                       ;; <2>
+  [:div
+   [:h1 {:class "app-title"} "Hello, World"]])
+#+end_src
+**** render
+#+begin_src clojure
+(defn mount-app-element []                                 ;; <3>
+  (rdom/render [hello-world] (gdom/getElement "app")))
+(mount-app-element)
+
+(defn ^:after-load on-reload []                            ;; <4>
+  (mount-app-element))
+#+end_src
+
 *** dev.cljs.edn
 :PROPERTIES:
 :header-args: :tangle  weather/dev.cljs.edn
@@ -250,30 +280,6 @@ clj -A:fig:build
   :auto-testing true
    }
 {:main learn-cljs.weather}
-#+end_src
-
-*** core.cljs
-:PROPERTIES:
-:header-args: :tangle  weather/src/learn_cljs/weather.cljs
-:END:
-[[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
-#+begin_src clojure
-(ns ^:figwheel-hooks learn-cljs.weather                    ;; <1>
-  (:require
-   [goog.dom :as gdom]
-   [reagent.dom :as rdom]
-   [reagent.core :as r]))
-
-(defn hello-world []                                       ;; <2>
-  [:div
-   [:h1 {:class "app-title"} "Hello, World"]])
-
-(defn mount-app-element []                                 ;; <3>
-  (rdom/render [hello-world] (gdom/getElement "app")))
-(mount-app-element)
-
-(defn ^:after-load on-reload []                            ;; <4>
-  (mount-app-element))
 #+end_src
 
 *** style.css
