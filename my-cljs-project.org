@@ -99,6 +99,12 @@ template to template, but Figwheel uses these to configure
 optional extensions to the base template. In our case, we are
 specifying that we want to use a deps.edn file to manage
 dependencies, and we want to include the Reagent web framework.
+*** --serve flag
+You can test that this file still works by running the built in simple
+web server via the --serve flag:
+
+clj -M -m cljs.main --serve
+
 *** help from fresh figwheel-main project
 Generating fresh figwheel-main project.
   To get started:
@@ -125,6 +131,14 @@ To create a production build run:
 
   rm -rf target/public
   clojure -A:fig:min
+*** creat project structure
+mkdir hello_seymore
+cd hello_seymore
+touch project.clj
+touch index.html
+mkdir -p src/hello_seymore
+touch src/hello_seymore/core.cljs
+
 * Log
 ** weather
 *** new project
@@ -134,7 +148,52 @@ $ clj -X:new :template figwheel-main :name learn-cljs/weather :args
 $ cd weather                                               # <1>
 $ clj -A:fig:build                                         # <2>
 *** Running Figwheel
-автоматически
+*** run in eshell
+**** run  eshell
+#+begin_src elisp :results output silent
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+	(evil-window-split)
+				(eshell)
+				(evil-quit)
+				(switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** comannds
+cd weather
+clj -A:fig:build
+*** repls commands
+**** test 
+(in-ns 'learn-cljs.weather)                                ;; <1>
+;; nil
+
+(def input (.createElement js/document "input"))           ;; <2>
+;; #'learn-cljs.weather/input                              ;; <3>
+
+(.appendChild (.-body js/document) input)
+;; #object[HTMLInputElement [object HTMLInputElement]]
+
+(set! (.-placeholder input) "Enter something")             ;; <4>
+;; "Enter something"
+
+(defn handle-input [e]                                     ;; <5>
+  (swap! app-state assoc :text (-> e .-target .-value)))
+;; #'learn-cljs.weather/handle-input
+
+(set! (.-onkeyup input) handle-input)
+;; #object[learn_cljs$weather$handle_input ...]
+**** refactored
+(defn event-value [e] (-> e .-target .-value))
+;; #'learn-cljs.weather/event-value
+
+(defn update-text [value]
+  (swap! app-state assoc :text value))
+;; #'learn-cljs.weather/update-text
+
+(defn handle-input [e]
+  (update-text (event-value e)))
+;; #'learn-cljs.weather/handle-input
 * Sorce files
 ** Sorce files project ferst
 :PROPERTIES:
@@ -184,6 +243,7 @@ $ clj -A:fig:build                                         # <2>
 :PROPERTIES:
 :header-args: :tangle  weather/src/learn_cljs/weather.cljs
 :END:
+[[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
 #+begin_src clojure
 (ns ^:figwheel-hooks learn-cljs.weather
   (:require
@@ -225,7 +285,6 @@ $ clj -A:fig:build                                         # <2>
   ;; (swap! app-state update-in [:__figwheel_counter] inc)
 )
 #+end_src
-[[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
 
 *** style.css
 :PROPERTIES:
@@ -245,9 +304,28 @@ h1 {
 [[file:weather/resources/public/css/style.css::/* some style */]]
 
 * project comands
+** run eshell in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+#+begin_src elisp :results output silent
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+				(evil-window-split)
+				(eshell)
+				(evil-quit)
+				(switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+
+			;; (execute-kbd-macro "A \C-m")
 ** new project
 clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
 $ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
+** cider
+If you have a Clojure project in your file system and want CIDER to launch an nREPL session for it, simply visit a file that belongs to the project, and type M-x cider-jack-in RET.[1] CIDER will start an nREPL server and automatically connect to it.
+	In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
+
 ** run console in org root
 clj -M:dev
 clojure -m cljs.main --compile my-cljs-project.core --repl
@@ -626,7 +704,10 @@ tree -a ../..
 ** DONE add line for open console
 CLOSED: [2024-08-14 Wed 09:18]
 to projet root
+** eshell package for send rigeon to eshell
+** auto save bookmarks
 ** 
+
 ** geting error
 ~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
 Please install rlwrap for command editing or use "clojure" instead.
