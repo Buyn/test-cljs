@@ -1,39 +1,16 @@
-(ns ^:figwheel-hooks learn-cljs.weather
+(ns ^:figwheel-hooks learn-cljs.weather                    ;; <1>
   (:require
    [goog.dom :as gdom]
-   [reagent.core :as reagent :refer [atom]]
-   [reagent.dom :as rdom]))
+   [reagent.dom :as rdom]
+   [reagent.core :as r]))
 
-(println "This text is printed from src/learn_cljs/weather.cljs. Go ahead and edit it and see reloading in action.(c) buyn")
-
-(defn multiply [a b] (* a b))
-
-
-(defonce app-state (atom {:text "Live reloading rocks!"}))
-
-(defn get-app-element []
-  (gdom/getElement "app"))
-
-(defn hello-world []
+(defn hello-world []                                       ;; <2>
   [:div
-   [:h1 "BuYn say: " (:text @app-state)]
-   [:h3 "I Edit this in src/learn_cljs/weather.cljs and watch it change! by Me? Argument is activ"]])
+   [:h1 {:class "app-title"} "Hello, World"]])
 
-(defn mount [el]
-  (rdom/render [hello-world] el))
-
-(defn mount-app-element []
-  (when-let [el (get-app-element)]
-    (mount el)))
-
-
-
+(defn mount-app-element []                                 ;; <3>
+  (rdom/render [hello-world] (gdom/getElement "app")))
 (mount-app-element)
 
-
-(defn ^:after-load on-reload []
-  (mount-app-element)
-
-
-
-)
+(defn ^:after-load on-reload []                            ;; <4>
+  (mount-app-element))
