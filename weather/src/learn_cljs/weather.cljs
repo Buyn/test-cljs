@@ -4,6 +4,7 @@
    [reagent.dom :as rdom]
    [reagent.core :as r]))
 
+
 (defonce app-state (r/atom {:title "WhichWeather"
                             :postal-code ""
                             :temperatures {:today {:label "Today"
@@ -22,11 +23,12 @@
 
 (defn postal-code []
   [:div {:class "postal-code"}
-   [:h3 "Enter your postal code"]
-   [:input {:type "text"
-            :placeholder "Postal Code"
-            :value (:postal-code @app-state)}]
-   [:button "Go"]])
+    [:h3 "Enter your postal code"]
+  	[:input {:type "text"
+					:placeholder "Postal Code"
+					:value (:postal-code @app-state)
+					:on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
+    [:button "Go"]])
 
 (defn app []
   [:div {:class "app"}

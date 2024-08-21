@@ -1,16 +1,16 @@
 * Commands>
-** execute-src-block : 
+** execute-src-block:
 (save-excursion (progn (org-babel-goto-named-src-block "auto-tangle-block") (org-babel-execute-src-block)))
 (save-excursion (let () (org-babel-goto-named-src-block "auto-tangle-block") (org-babel-execute-src-block)))
 and then name the block you want to execute automatically:
 
-** find-file : 
+** find-file:
 [[elisp:(org-babel-tangle)
 ]]
 (find-file-other-frame "~/INI/hydra-cfg.el")
 (load "~/INI/hydra-cfg.el")
 (org-babel-tangle)
-** auto-tangle-block : 
+** auto-tangle-block:
 #+NAME: auto-tangle-block
 #+begin_src emacs-lisp :results output silent :tangle no
 (setq org-src-preserve-indentation t)
@@ -42,6 +42,13 @@ from
 ** link to turials
 *** content
 (eww-of "https://www.learn-clojurescript.com/")
+*** git
+(eww-of "https://github.com/kendru/learn-cljs")
+https://github.com/kendru/learn-cljs
+
+https://github.com/kendru/learn-cljs.git
+
+https://github.com/kendru/learn-cljs/blob/main/code/lesson-8/weather/resources/public/css/style.css
 *** fers src and new gen
 (eww-of "https://www.learn-clojurescript.com/section-1/lesson-5-bootstrapping-a-clojurescript-project/")
 *** stoped
@@ -145,8 +152,8 @@ touch src/hello_seymore/core.cljs
 clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
 $ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
 *** bilde
-$ cd weather                                               # <1>
-$ clj -A:fig:build                                         # <2>
+cd weather                                               # <1>
+clj -A:fig:build                                         # <2>
 *** Running Figwheel
 *** run in eshell
 **** run  eshell
@@ -164,7 +171,7 @@ $ clj -A:fig:build                                         # <2>
 cd weather
 clj -A:fig:build
 *** repls commands
-**** test 
+**** test
 (in-ns 'learn-cljs.weather)                                ;; <1>
 ;; nil
 
@@ -194,6 +201,8 @@ clj -A:fig:build
 (defn handle-input [e]
   (update-text (event-value e)))
 ;; #'learn-cljs.weather/handle-input
+**** add button
+(in-ns 'learn-cljs.weather)                                ;; <1>
 * Sorce files
 ** Sorce files project ferst
 :PROPERTIES:
@@ -275,11 +284,12 @@ clj -A:fig:build
 
 (defn postal-code []
   [:div {:class "postal-code"}
-   [:h3 "Enter your postal code"]
-   [:input {:type "text"
-            :placeholder "Postal Code"
-            :value (:postal-code @app-state)}]
-   [:button "Go"]])
+    [:h3 "Enter your postal code"]
+  	[:input {:type "text"
+					:placeholder "Postal Code"
+					:value (:postal-code @app-state)
+					:on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
+    [:button "Go"]])
 
 (defn app []
   [:div {:class "app"}
@@ -318,6 +328,7 @@ clj -A:fig:build
 :PROPERTIES:
 :header-args: :tangle  weather/resources/public/css/style.css
 :END:
+[[file:weather/resources/public/css/style.css::/* some style */]]
 #+begin_src css
 body {
   font-family: Helvetica, Arial, sans-serif;
@@ -372,9 +383,21 @@ button {
   border-bottom-right-radius: 10px;
 }
 #+end_src
-[[file:weather/resources/public/css/style.css::/* some style */]]
 
 * project comands
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+** save буфер фреймы проекта
+#+begin_src emacs-lisp  :results output silent
+(use-package burly
+ :ensure t
+ ;; :config
+	)
+(burly-bookmark-frames "weather buffers")
+(burly-bookmark-frames "buffers LAST SAVE")
+(bookmark-save)
+#+end_src
 ** run eshell in org root
 clj -M:dev
 clojure -m cljs.main --compile my-cljs-project.core --repl
@@ -777,9 +800,8 @@ CLOSED: [2024-08-14 Wed 09:18]
 to projet root
 ** eshell package for send rigeon to eshell
 ** auto save bookmarks
-** 
-
-** geting error
+** DONE geting error
+CLOSED: [2024-08-18 Sun 11:11]
 ~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
 Please install rlwrap for command editing or use "clojure" instead.
 
