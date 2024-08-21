@@ -273,6 +273,7 @@ clj -A:fig:build
 #+begin_src clojure
 (defonce app-state (r/atom {:title "WhichWeather"
                             :postal-code ""
+                            :api-key ""
                             :temperatures {:today {:label "Today"
                                                    :value nil}
                                            :tomorrow {:label "Tomorrow"
@@ -313,6 +314,10 @@ clj -A:fig:build
 (defn postal-code []
   [:div {:class "postal-code"}
     [:h3 "Enter your postal code"]
+  	[:input {:type "text"
+					:placeholder "API key"
+					:value (:api-key @app-state)
+					:on-change #(swap! app-state assoc :api-key (-> % .-target .-value))}]
   	[:input {:type "text"
 					:placeholder "Postal Code"
 					:value (:postal-code @app-state)

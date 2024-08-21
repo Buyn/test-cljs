@@ -7,6 +7,7 @@
 
 (defonce app-state (r/atom {:title "WhichWeather"
                             :postal-code ""
+                            :api-key ""
                             :temperatures {:today {:label "Today"
                                                    :value nil}
                                            :tomorrow {:label "Tomorrow"
@@ -15,12 +16,16 @@
 (defn handle-response [resp]
   (let [today (get-in resp ["list" 0 "main" "temp"])       ;; <1>
         tomorrow (get-in resp ["list" 8 "main" "temp"])]
+
+    (println "end response")
+    (println resp)
     (swap! app-state                                       ;; <2>
         update-in [:temperatures :today :value] (constantly today))
     (swap! app-state
         update-in [:temperatures :tomorrow :value] (constantly tomorrow))))
 
 (defn get-forecast! []
+  (println "start forecost")
   (let [postal-code (:postal-code @app-state)]             ;; <1>
     (ajax/GET "http://api.openweathermap.org/data/2.5/forecast"
          {:params {"q" postal-code
@@ -41,10 +46,15 @@
   [:div {:class "postal-code"}
     [:h3 "Enter your postal code"]
   	[:input {:type "text"
+					:placeholder "API key"
+					:value (:api-key @app-state)
+					:on-change #(swap! app-state assoc :api-key (-> % .-target .-value))}]
+  	[:input {:type "text"
 					:placeholder "Postal Code"
 					:value (:postal-code @app-state)
 					:on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
     [:button {:on-click get-forecast!} "Go"]])
+
 
 (defn app []
   [:div {:class "app"}
