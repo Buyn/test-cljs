@@ -117,6 +117,12 @@ Generating fresh figwheel-main project.
   To get started:
   -->  Change into the 'weather' directory
   -->  Start build with 'clojure -M:fig:build'
+*** repl help
+In the cljs.user ns, controls can be called without ns ie. (conns) instead of (figwheel.repl/conns)
+    Docs: (doc function-name-here)
+    Exit: :cljs/quit
+ Results: Stored in vars *1, *2, *3, *e holds last exception object
+[Rebel readline] Type :repl/help for online help info
 *** figwheel readme.md 
 To get an interactive development environment run:
 
@@ -260,7 +266,8 @@ clj -A:fig:build
   (:require
    [goog.dom :as gdom]
    [reagent.dom :as rdom]
-   [reagent.core :as r]))
+   [reagent.core :as r]
+	 [ajax.core :as ajax]))
 #+end_src
 **** defonce
 #+begin_src clojure
@@ -270,6 +277,27 @@ clj -A:fig:build
                                                    :value nil}
                                            :tomorrow {:label "Tomorrow"
                                                       :value nil}}}))
+#+end_src
+**** ajax get forecast
+***** handle-response
+#+begin_src clojure
+(defn handle-response [resp]
+  (let [today (get-in resp ["list" 0 "main" "temp"])       ;; <1>
+        tomorrow (get-in resp ["list" 8 "main" "temp"])]
+    (swap! app-state                                       ;; <2>
+        update-in [:temperatures :today :value] (constantly today))
+    (swap! app-state
+        update-in [:temperatures :tomorrow :value] (constantly tomorrow))))
+#+end_src
+***** get-forecast!
+#+begin_src clojure
+(defn get-forecast! []
+  (let [postal-code (:postal-code @app-state)]             ;; <1>
+    (ajax/GET "http://api.openweathermap.org/data/2.5/forecast"
+         {:params {"q" postal-code
+                   "appid" "API_KEY"
+                   "units" "imperial"}
+          :handler handle-response})))                     ;; <2>
 #+end_src
 **** structur
 #+begin_src clojure
@@ -289,7 +317,7 @@ clj -A:fig:build
 					:placeholder "Postal Code"
 					:value (:postal-code @app-state)
 					:on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
-    [:button "Go"]])
+    [:button {:on-click get-forecast!} "Go"]])
 
 (defn app []
   [:div {:class "app"}
@@ -324,7 +352,7 @@ clj -A:fig:build
 {:main learn-cljs.weather}
 #+end_src
 
-*** dev.cljs.edn
+*** deps.edn
 :PROPERTIES:
 :header-args: :tangle  weather/deps.edn
 :END:
