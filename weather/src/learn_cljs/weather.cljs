@@ -29,7 +29,7 @@
   (let [postal-code (:postal-code @app-state)]             ;; <1>
     (ajax/GET "http://api.openweathermap.org/data/2.5/forecast"
          {:params {"q" postal-code
-                   "appid" "API_KEY"
+                   "appid" "12b0904cfab748cbcb6e98a5dc7c7ac4"
                    "units" "imperial"}
           :handler handle-response})))                     ;; <2>
 
@@ -53,8 +53,10 @@
 					:placeholder "Postal Code"
 					:value (:postal-code @app-state)
 					:on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
-    [:button {:on-click get-forecast!} "Go"]])
-
+    [:button {:on-click get-forecast!} "Go"]
+   ;; [:a {:href (:url "https://home.openweathermap.org/users/sign_up")}]
+    [:url "https://home.openweathermap.org/users/sign_up"]
+   ])
 
 (defn app []
   [:div {:class "app"}
