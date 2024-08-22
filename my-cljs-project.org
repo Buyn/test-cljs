@@ -209,6 +209,36 @@ clj -A:fig:build
 ;; #'learn-cljs.weather/handle-input
 **** add button
 (in-ns 'learn-cljs.weather)                                ;; <1>
+** starbase
+*** run in eshell
+**** run eshell
+#+begin_src elisp :results output silent
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+	(evil-window-split)
+				(eshell)
+				(evil-quit)
+				(switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** comannds
+cd starbase
+clj -A:fig:build
+*** 1
+(defn prompt [game current]                                ;; <1>
+  (let [scene (get game current)                           ;; <2>
+        type (:type scene)]
+    (io/clear term)
+    (when (or (= :win type)                                ;; <3>
+              (= :lose type))
+      (io/print term
+                (if (= :win type)                          ;; <4>
+                    "You've Won! "
+                    "Game Over ")))
+    (io/println term (:title scene))                       ;; <5>
+    (io/println term (:dialog scene))
+    (io/read term #(on-answer game current %))))           ;; <6>
 * Sorce files
 ** Sorce files project ferst
 :PROPERTIES:
@@ -441,7 +471,50 @@ button {
 }
 #+end_src
 ** starbase
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** starbase.cljs
+:PROPERTIES:
+:header-args: :tangle  starbase/src/learn_cljs/starbase.cljs
+:END:
+[[file:starbase/src/learn_cljs/starbase.cljs::(ns learn-cljs.starbase]]
+#+begin_src clojure
+(ns learn-cljs.starbase
+  (:require [bterm.core :as bterm]
+            [bterm.io :as io]
+            [learn-cljs.starbase.data :as data]
+            [goog.dom :as gdom]))
+
+(enable-console-print!)
+
+(def term
+  (bterm/attach (gdom/getElement "app")
+                {:prompt "=> "
+                 :font-size 14}))
+
+(declare on-answer)
+
+(defn prompt [game current]                                ;; <1>
+  (let [scene (get game current)                           ;; <2>
+        type (:type scene)]
+    (io/clear term)
+    (when (or (= :win type)                                ;; <3>
+              (= :lose type))
+      (io/print term
+                (if (= :win type)                          ;; <4>
+                    "You've Won! "
+                    "Game Over ")))
+    (io/println term (:title scene))                       ;; <5>
+    (io/println term (:dialog scene))
+    (io/read term #(on-answer game current %))))           ;; <6>
+
+(defn on-answer [game current answer])
+
+(prompt data/game :start)
+#+end_src
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/starbase/src/learn_cljs/starbase.cljs
+** starbase_E
 * project comands
 :PROPERTIES:
 :header-args: :tangle no
