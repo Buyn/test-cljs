@@ -11,8 +11,6 @@
                 {:prompt "=> "
                  :font-size 14}))
 
-
-
 (declare on-answer)
 
 (defn prompt [game current]                                ;; <1>
@@ -29,7 +27,13 @@
     (io/println term (:dialog scene))
     (io/read term #(on-answer game current %))))           ;; <6>
 
-(defn on-answer [game current answer])
+(defn on-answer [game current answer]
+  (let [scene (get game current)
+        next (if (= :skip (:type scene))
+               (:on-continue scene)
+               (if (= "yes" answer)
+                 (get-in scene [:transitions "yes"])
+                 (get-in scene [:transitions "no"])))]
+    (prompt game next)))
 
 (prompt data/game :start)
-

@@ -16,8 +16,8 @@ and then name the block you want to execute automatically:
 (setq org-src-preserve-indentation t)
 (untabify (point-min) (point-max))
 (save-buffer)
-(universal-argument)
-(universal-argument)
+;; (universal-argument)
+;; (universal-argument)
 (org-babel-tangle)
 ;; (find-file-other-frame "~/INI/hydra-cfg.el")
 ;; (load "~/INI/hydra-cfg.el")
@@ -225,7 +225,9 @@ clj -A:fig:build
 **** comannds
 cd starbase
 clj -A:fig:build
-*** 1
+*** add code
+**** cljs
+***** 1
 (defn prompt [game current]                                ;; <1>
   (let [scene (get game current)                           ;; <2>
         type (:type scene)]
@@ -239,6 +241,12 @@ clj -A:fig:build
     (io/println term (:title scene))                       ;; <5>
     (io/println term (:dialog scene))
     (io/read term #(on-answer game current %))))           ;; <6>
+***** 2
+(defn on-answer [game current answer]
+  (let [scene (get game current)
+        next ;; TODO: determine the next state
+        ]
+    (prompt game next)))
 * Sorce files
 ** Sorce files project ferst
 :PROPERTIES:
@@ -297,7 +305,7 @@ clj -A:fig:build
    [goog.dom :as gdom]
    [reagent.dom :as rdom]
    [reagent.core :as r]
-	 [ajax.core :as ajax]))
+   [ajax.core :as ajax]))
 #+end_src
 **** defonce
 #+begin_src clojure
@@ -344,14 +352,14 @@ clj -A:fig:build
 (defn postal-code []
   [:div {:class "postal-code"}
     [:h3 "Enter your postal code"]
-  	[:input {:type "text"
-					:placeholder "api-key"
-					:value (:api-key @app-state)
-					:on-change #(swap! app-state assoc :api-key (-> % .-target .-value))}]
-  	[:input {:type "text"
-					:placeholder "Postal Code"
-					:value (:postal-code @app-state)
-					:on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
+    [:input {:type "text"
+          :placeholder "api-key"
+          :value (:api-key @app-state)
+          :on-change #(swap! app-state assoc :api-key (-> % .-target .-value))}]
+    [:input {:type "text"
+          :placeholder "Postal Code"
+          :value (:postal-code @app-state)
+          :on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
     [:button {:on-click get-forecast!} "Go"]])
 
 (defn app []
@@ -479,6 +487,7 @@ button {
 :header-args: :tangle  starbase/src/learn_cljs/starbase.cljs
 :END:
 [[file:starbase/src/learn_cljs/starbase.cljs::(ns learn-cljs.starbase]]
+**** ns
 #+begin_src clojure
 (ns learn-cljs.starbase
   (:require [bterm.core :as bterm]
@@ -509,8 +518,20 @@ button {
     (io/println term (:dialog scene))
     (io/read term #(on-answer game current %))))           ;; <6>
 
-(defn on-answer [game current answer])
-
+#+end_src
+**** answer
+#+begin_src clojure
+(defn on-answer [game current answer]
+  (let [scene (get game current)
+        next (if (= :skip (:type scene))
+               (:on-continue scene)
+               (if (= "yes" answer)
+                 (get-in scene [:transitions "yes"])
+                 (get-in scene [:transitions "no"])))]
+    (prompt game next)))
+#+end_src
+**** start
+#+begin_src clojure
 (prompt data/game :start)
 #+end_src
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/starbase/src/learn_cljs/starbase.cljs
