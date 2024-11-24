@@ -234,9 +234,9 @@ touch src/hello_seymore/core.cljs
 
 (defn flip [d a]
   (sort (case d
-							\R <
-							\L >)
-				a))
+              \R <
+              \L >)
+        a))
 *** pred
 **** < 
 (< (:balance account) low-balance-threshold)
@@ -262,7 +262,7 @@ touch src/hello_seymore/core.cljs
       (recur (+ sum (first nums))
              (rest nums)))))                               ;; <3>
 
-						 
+             
 (when (not (empty? value)) value)))
 **** contains?
 
@@ -278,7 +278,7 @@ combination of sequence elements:
       elem2 sequence2]                                     ;; <2>
   expr)                                                    ;; <3>
 
-	
+  
 (for [n (range 10)]                                        ;; <1>
   (* n n))                                                 ;; <2>
 
@@ -386,11 +386,11 @@ combination of sequence elements:
 
 #+begin_src clojure
 (let [sides-list (list [4.2 6] [4 4] [3 4] [5.5 3])]
-	(for [sides sides-list
-				:let [a (first sides)
-							b (second sides)
-							c (Math/sqrt (+ (Math/pow a 2) (Math/pow b 2)))]]                           
-		[a b c]))
+  (for [sides sides-list
+        :let [a (first sides)
+              b (second sides)
+              c (Math/sqrt (+ (Math/pow a 2) (Math/pow b 2)))]]                           
+    [a b c]))
 #+end_src
 
 #+RESULTS:
@@ -535,11 +535,11 @@ cljs.user=> (rest '("Tom" "Dick" "Harry"))
   (println "All desserts are great, but I like" favorite-dessert "the best"))
 ***** first second
 (let [sides-list (list [4.2 6] [4 4] [3 4] [5.5 3])]
-	(for [sides sides-list
-				:let [a (first sides)
-							b (second sides)
-							c (Math/sqrt (+ (Math/pow a 2) (Math/pow b 2)))]]                           
-		[a b c]))
+  (for [sides sides-list
+        :let [a (first sides)
+              b (second sides)
+              c (Math/sqrt (+ (Math/pow a 2) (Math/pow b 2)))]]                           
+    [a b c]))
 ***** conj
 ****** 1
 (loop [i 0
@@ -810,7 +810,7 @@ used as a boolean.
                "no" :lost-game}}
 
 (any data typs as keys)
-exampl vectors as key 							 
+exampl vectors as key                
 cljs.user=> {[:b 3] :miss, [:a 7] :hit}
 {[:b 3] :miss, [:a 7] :hit}
 ***** create
@@ -988,7 +988,7 @@ cljs.user=> (rest {:x 10, :y 12, :z 7})
   (let [xs-set (into #{} xs)]                              ;; <3>
     (every? xs-set test-elems)))
 
-		
+    
 cljs.user=> (def my-vec ["Lions" "Tigers" "Bears" "Lions"])
 #'cljs.user/my-vec
 
@@ -1089,7 +1089,7 @@ cljs.user=> (update-in {:num 1} [:num] inc)
     (println "Got data:" data)
     [(get msg-types type) data]))
 
-		
+    
 the names
 that we declare first are available in later bindings. For example, we
 defined msg as the result of evaluating the expression
@@ -1257,22 +1257,22 @@ cljs.user=> (.toFixed total 2)
             {new-event :event
              new-ts :timestamp}]
   ;; (println last-event)
-	;; (when-not (integer? clicks-sum) (def clicks-sum 0))
-	;; (let [clicks-sum 1]
-	;; 	[clicks-sum last-ts new-event last-ts])
-	;; (def clicks-sum 1)
-	(let [clicks-sum
+  ;; (when-not (integer? clicks-sum) (def clicks-sum 0))
+  ;; (let [clicks-sum 1]
+  ;;  [clicks-sum last-ts new-event last-ts])
+  ;; (def clicks-sum 1)
+  (let [clicks-sum
         (if (and (= new-event :click )
                  (> duble-click-max-lag
                  (- new-ts last-ts)))
         (inc un-clicks-sum)
         0)]
         ;; 0]
-					;; (inc clicks-sum))))
-	;; [clicks-sum last-ts new-event last-ts]
-	;; (def clicks-sum (inc clicks-sum))
+          ;; (inc clicks-sum))))
+  ;; [clicks-sum last-ts new-event last-ts]
+  ;; (def clicks-sum (inc clicks-sum))
   ;; (inc clicks-sum)
-	[clicks-sum (- new-ts last-ts)
+  [clicks-sum (- new-ts last-ts)
    (> duble-click-max-lag (- new-ts last-ts))
     (and (= new-event :click )
                             (> duble-click-max-lag
@@ -1306,18 +1306,18 @@ cljs.user=> (.toFixed total 2)
 (defn count-user-duble-clicks [events]
   (:clicks-sum
    (reduce (fn [{;; last-event :event
-								un-clicks-sum :clicks-sum
-								last-ts :timestamp}
-								{new-event :event
-								new-ts :timestamp}]
+                un-clicks-sum :clicks-sum
+                last-ts :timestamp}
+                {new-event :event
+                new-ts :timestamp}]
             (let [clicks-sum (if (integer? un-clicks-sum) un-clicks-sum 0)]
-							(when (= new-event :click )
-								(when (> duble-click-max-lag
-												(- new-ts last-ts)
-											(inc clicks-sum))))
-								{;; :event last-event
-								:clicks-sum clicks-sum 
-								:timestamp last-ts}))
+              (when (= new-event :click )
+                (when (> duble-click-max-lag
+                        (- new-ts last-ts)
+                      (inc clicks-sum))))
+                {;; :event last-event
+                :clicks-sum clicks-sum 
+                :timestamp last-ts}))
           events)))
 
 (count-user-duble-clicks events)
@@ -1372,9 +1372,9 @@ duble-click-max-lag
     contact))
 
 (update state :contacts                            ;; <2>
-				replace-contact idx contact)
+        replace-contact idx contact)
 (update state :contacts
-				add-contact contact)))))
+        add-contact contact)))))
 *** Constract
 **** #
 (some #(= (:name %) "Potion of Wisdom")
@@ -1443,12 +1443,12 @@ duble-click-max-lag
   (println "I can only be called with 1 argument"))
 ****** super call
 (defn page-view
-	([url] (page-view url (.now js/Date) []))    ;; <1>
-	([url loaded] (page-view url loaded []))
-	([url loaded events]
-		{:url url
-			:loaded loaded
-			:events events}))
+  ([url] (page-view url (.now js/Date) []))    ;; <1>
+  ([url loaded] (page-view url loaded []))
+  ([url loaded events]
+    {:url url
+      :loaded loaded
+      :events events}))
 
 ***** Docstrings
 (defn make-inventory
@@ -1613,7 +1613,7 @@ cljs.user=> (conj #{:lions :tigers} :tigers)               ;; <4>
 (defn mount-app-element []                                 ;; <4>
   (rdom/render [app] (gdom/getElement "app")))
 
-	
+  
 (defn app []
   [:div {:class "app"}
    [title]                                                 ;; <2>
@@ -2128,10 +2128,10 @@ clj -A:fig:build                                         # <2>
 (org-cycle)
 (delete-other-windows)
 (let (buffer-name-to-close (buffer-name))
-	(evil-window-split)
-	(eshell)
-				(evil-quit)
-				(switch-to-buffer-other-frame buffer-name-to-close))
+  (evil-window-split)
+  (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
 **** comannds
 cd weather
@@ -2177,10 +2177,10 @@ clj -A:fig:build
 (org-cycle)
 (delete-other-windows)
 (let (buffer-name-to-close (buffer-name))
-	(evil-window-split)
-				(eshell)
-				(evil-quit)
-				(switch-to-buffer-other-frame buffer-name-to-close))
+  (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
 **** comannds
 cd starbase
@@ -2215,10 +2215,10 @@ clj -A:fig:build
 (org-cycle)
 (delete-other-windows)
 (let (buffer-name-to-close (buffer-name))
-	(evil-window-split)
-				(eshell)
-				(evil-quit)
-				(switch-to-buffer-other-frame buffer-name-to-close))
+  (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
 **** comannds
 clj -A:fig:build
@@ -2232,10 +2232,10 @@ clj -A:fig:build
 (org-cycle)
 (delete-other-windows)
 (let (buffer-name-to-close (buffer-name))
-	(evil-window-split)
-				(eshell)
-				(evil-quit)
-				(switch-to-buffer-other-frame buffer-name-to-close))
+  (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
 **** new
 призапуске из корневека путь это что внутренее оно определе путь в сорс проекта к корне будет создан проетс коненым имене. короче запускай из крнят- небзди и не умнячайй,всё будет рокенрол
@@ -2255,10 +2255,10 @@ clj -A:fig:build
 (org-cycle)
 (delete-other-windows)
 (let (buffer-name-to-close (buffer-name))
-	(evil-window-split)
-				(eshell)
-				(evil-quit)
-				(switch-to-buffer-other-frame buffer-name-to-close))
+  (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
 **** comannds
 clj -A:fig:build
@@ -2330,10 +2330,10 @@ clj -A:fig:build                                         # <2>
 (org-cycle)
 (delete-other-windows)
 (let (buffer-name-to-close (buffer-name))
-	(evil-window-split)
-	(eshell)
-				(evil-quit)
-				(switch-to-buffer-other-frame buffer-name-to-close))
+  (evil-window-split)
+  (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
 **** comannds
 clj -A:fig:build
@@ -2705,7 +2705,8 @@ button {
 #+end_src
 **** src
 #+begin_src clojure
-
+(defn make-contact [contact]
+  (select-keys contact [:first-name :last-name :email :postal :address]))
 #+end_src
 
 * project comands
@@ -2717,7 +2718,7 @@ button {
 (use-package burly
  :ensure t
  ;; :config
-	)
+  )
 ;; (burly-bookmark-frames "weather buffers")
 (bookmark-save nil "/home/buyn/temp/bookmarks")
 (burly-bookmark-frames "buffers LAST SAVE")
@@ -2728,7 +2729,7 @@ button {
 (use-package burly
  :ensure t
  ;; :config
-	)
+  )
 ;; (burly-bookmark-frames "weather buffers")
 (bookmark-save nil "/home/buyn/temp/bookmarks")
 (burly-bookmark-frames "buffers clojure")
@@ -2742,19 +2743,19 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 (org-cycle)
 (delete-other-windows)
 (let (buffer-name-to-close (buffer-name))
-				(evil-window-split)
-				(eshell)
-				(evil-quit)
-				(switch-to-buffer-other-frame buffer-name-to-close))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
 
-			;; (execute-kbd-macro "A \C-m")
+      ;; (execute-kbd-macro "A \C-m")
 ** new project
 clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
 $ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
 ** cider
 If you have a Clojure project in your file system and want CIDER to launch an nREPL session for it, simply visit a file that belongs to the project, and type M-x cider-jack-in RET.[1] CIDER will start an nREPL server and automatically connect to it.
-	In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
+  In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
 
 ** run console in org root
 clj -M:dev
