@@ -40,6 +40,11 @@ from
 :header-args: :tangle  "~/INI/hydra-cfg.el"
 * docs
 ** link to turials
+*** stoped
+(eww-of "https://www.learn-clojurescript.com/")
+
+ * Capstone 3 - Contact Book
+(eww-of "https://www.learn-clojurescript.com/section-3/lesson-20-capstone-3-contact-book/")
 *** content
 (eww-of "https://www.learn-clojurescript.com/")
 *** git
@@ -51,10 +56,21 @@ https://github.com/kendru/learn-cljs.git
 https://github.com/kendru/learn-cljs/blob/main/code/lesson-8/weather/resources/public/css/style.css
 *** fers src and new gen
 (eww-of "https://www.learn-clojurescript.com/section-1/lesson-5-bootstrapping-a-clojurescript-project/")
-*** stoped
- * [[https://www.learn-clojurescript.com/section-1/lesson-6-receiving-rapid-feedback-with-figwheel/][Receiving Rapid Feedback With Figwheel]]
-
+*** debt
+сделать таки приложение
+ * Capstone 2 - Temperature Converter
+(eww-of "https://www.learn-clojurescript.com/section-2/lesson-15-capstone-temperature-converter/")
+** docs links
+https://clojuredocs.org/clojure.string/split#examples
+https://cljs.info/cheatsheet/
 ** manuals
+*** seting up
+yay -Sy clojure rlwrap
+
+Optional dependencies for clojure
+    leiningen: automate clojure projects
+    rlwrap: friendly shell with readline support
+
 *** info from new page
 Welcome to the ClojureScript browser REPL.
 
@@ -71,7 +87,16 @@ To provide your own custom page, place an index.html file in the REPL launch dir
     <script src="out/main.js" type="text/javascript"></script>
   </body>
 </html>
+*** cheatsheet
+(eww-of "https://cljs.info/cheatsheet/")
+
+(eww-of "https://kanaka.github.io/clojurescript/web/synonym.html")
+https://cljs.info/cheatsheet/
+
+https://kanaka.github.io/clojurescript/web/synonym.html
+
 *** new project
+призапуске из корневека путь это что внутренее оно определе путь в сорс проекта к корне будет создан проетс коненым имене. короче запускай из крнят- небзди и не умнячайй,всё будет рокенрол. В описании сказно что про неймспейс а не путь папок
 clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
 **** explane
 Since this command includes some unfamiliar syntax, let’s take a
@@ -106,24 +131,12 @@ template to template, but Figwheel uses these to configure
 optional extensions to the base template. In our case, we are
 specifying that we want to use a deps.edn file to manage
 dependencies, and we want to include the Reagent web framework.
-*** --serve flag
-You can test that this file still works by running the built in simple
-web server via the --serve flag:
-
-clj -M -m cljs.main --serve
-
 *** help from fresh figwheel-main project
 Generating fresh figwheel-main project.
   To get started:
   -->  Change into the 'weather' directory
   -->  Start build with 'clojure -M:fig:build'
-*** repl help
-In the cljs.user ns, controls can be called without ns ie. (conns) instead of (figwheel.repl/conns)
-    Docs: (doc function-name-here)
-    Exit: :cljs/quit
- Results: Stored in vars *1, *2, *3, *e holds last exception object
-[Rebel readline] Type :repl/help for online help info
-*** figwheel readme.md 
+*** figwheel readme.md alert
 To get an interactive development environment run:
 
     clojure -A:fig:build
@@ -144,6 +157,34 @@ To create a production build run:
 
   rm -rf target/public
   clojure -A:fig:min
+*** --serve flag
+You can test that this file still works by running the built in simple
+web server via the --serve flag:
+
+clj -M -m cljs.main --serve
+
+*** repl help
+In the cljs.user ns, controls can be called without ns ie. (conns) instead of (figwheel.repl/conns)
+    Docs: (doc function-name-here)
+    Exit: :cljs/quit
+ Results: Stored in vars *1, *2, *3, *e holds last exception object
+[Rebel readline] Type :repl/help for online help info
+*** able to open files in your editor
+ ;; To be able to open files in your editor from the heads up display
+ ;; you will need to put a script on your path. This script will have
+ ;; to take a file path and a line number ie.
+ ;; in ~/bin/myfile-opener:
+ ;;
+ ;; #! /bin/sh
+ ;; emacsclient -n +$2:$3 $1
+ ;;
+ ;; :open-file-command "myfile-opener"
+ 
+ ;; if you are using emacsclient you can just use
+ ;; :open-file-command "emacsclient"
+
+ ;; Logging output gets printed to the REPL, if you want to redirect it to a file:
+ ;; :log-file "figwheel-main.log"
 *** creat project structure
 mkdir hello_seymore
 cd hello_seymore
@@ -152,7 +193,1926 @@ touch index.html
 mkdir -p src/hello_seymore
 touch src/hello_seymore/core.cljs
 
+** clojure
+*** cond
+**** condp
+(condp
+  =                                                        ;; <1>
+  answer                                                   ;; <2>
+  "restart" (prompt game :start)                           ;; <3>
+  "help" (show-help game current)
+  "save" (save-state current)
+  "easter-egg" (rickroll)
+  (next-state game current answer))                        ;; <4>
+[[https://www.learn-clojurescript.com/section-2/lesson-10-making-choices/][Making Choices | Lesson 10 | Learn ClojureScript]]
+**** if
+(if test-expr then-expr else-expr)
+
+(def account-status
+  (if (< (:balance account) low-balance-threshold)         ;; <1>
+    :low-balance                                           ;; <2>
+    :ok))                                                  ;; <3>
+**** if-let
+(defn make-contact [contact]
+  (let [clean-contact (select-keys contact [:first-name :last-name :email])]
+    (if-let [address (:address contact)]
+      (assoc clean-contact :address (make-address address))
+      clean-contact)))
+**** when
+(defn conversion-rate [sessions]                           ;; <1>
+  (let [users (user-count sessions)
+        purchases (purchase-count sessions)]
+    (when (> users 0)                                      ;; <2>
+      (/ purchases users))))
+
+1 Define a function that gets the ratio of purchases to users
+2 Use when to prevent division by zero
+
+(when (< 499 (:status response))
+  (show-error-notification (:body response)))
+**** case
+
+(defn flip [d a]
+  (sort (case d
+							\R <
+							\L >)
+				a))
+*** pred
+**** < 
+(< (:balance account) low-balance-threshold)
+**** some
+;; Does the player have the potion of wisdom in their inventory?
+(some #(= (:name %) "Potion of Wisdom")
+      (get-inventory player))
+**** even?
+(if (even? 10) "Even" "Odd")
+;; "Even"                                                  ;; <2>
+**** every?
+(fn [xs test-elems]                                        ;; <1>
+  (println "Checking whether" xs                           ;; <2>
+           "contains each of" test-elems)
+  (let [xs-set (into #{} xs)]                              ;; <3>
+    (every? xs-set test-elems)))
+**** empty?
+(defn add-all [xs]
+  (loop [sum 0                                             ;; <1>
+         nums xs]
+    (if (empty? nums)                                      ;; <2>
+      sum
+      (recur (+ sum (first nums))
+             (rest nums)))))                               ;; <3>
+
+						 
+(when (not (empty? value)) value)))
+**** contains?
+
+cljs.user=> (contains? badges :night-owl)                  ;; <2>
+*** loop
+**** for
+***** tut
+In its most basic form, for takes any number of sequences and a
+body, and it yields a new sequence by evaluating the body for every
+combination of sequence elements:
+
+(for [elem1 sequence1                                      ;; <1>
+      elem2 sequence2]                                     ;; <2>
+  expr)                                                    ;; <3>
+
+	
+(for [n (range 10)]                                        ;; <1>
+  (* n n))                                                 ;; <2>
+
+(require [clojure.math :as math])
+(require '[clojure.math :as math])
+(require '[clojure.math :as Math])
+(let [sides-list (list [4.2 6] [4 4] [3 4] [5.5 3])]       ;; <1>
+  (for [sides sides-list]                                  ;; <2>
+    (Math/sqrt (+ (Math/pow (first sides) 2)               ;; <3>
+                  (Math/pow (second sides) 2)))))
+                                                           ;; <4>
+;; (7.323933369440222 5.656854249492381 5 6.264982043070834)
+***** forms
+(for [n (range 100)                                        ;; <1>
+      :let [square (* n n)]                                ;; <2>
+      :when (even? n)                                      ;; <3>
+      :while (< n 20)]                                     ;; <4>
+  (str "n is " n " and its square is " square))            ;; <5>
+
+;; ("n is 0 and its square is 0"
+;; "n is 2 and its square is 4"
+;; "n is 4 and its square is 16"
+;; ...
+;; "n is 18 and its square is 324")
+
+***** exp
+#+begin_src clojure
+(for [n (range 10)]                                        ;; <1>
+  (* n n))                                                 ;; <2>
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+
+#+begin_src clojure
+(let [sides-list (list [4.2 6] [4 4] [3 4] [5.5 3])
+      hypo-list (for [sides sides-list]                           
+                  (Math/sqrt (+ (Math/pow (first sides) 2)        
+                                (Math/pow (second sides) 2))))]
+      hypo-list)
+#+end_src
+
+#+begin_src clojure
+(let [sides-list (list [4.2 6] [4 4] [3 4] [5.5 3])
+      hypo-list (for [sides sides-list]                           
+                  (Math/sqrt (+ (Math/pow (first sides) 2)        
+                                (Math/pow (second sides) 2))))]
+  (for [sides sides-list
+        c hypo-list]
+    (let [a (get sides 0)
+          b (get sides 1)]
+      [a b c]
+      ;; [a b]
+      )))
+#+end_src
+
+#+RESULTS:
+| 4.2 | 6 | 7.323933369440222 |
+| 4.2 | 6 | 5.656854249492381 |
+| 4.2 | 6 |               5.0 |
+| 4.2 | 6 | 6.264982043070834 |
+|   4 | 4 | 7.323933369440222 |
+|   4 | 4 | 5.656854249492381 |
+|   4 | 4 |               5.0 |
+|   4 | 4 | 6.264982043070834 |
+|   3 | 4 | 7.323933369440222 |
+|   3 | 4 | 5.656854249492381 |
+|   3 | 4 |               5.0 |
+|   3 | 4 | 6.264982043070834 |
+| 5.5 | 3 | 7.323933369440222 |
+| 5.5 | 3 | 5.656854249492381 |
+| 5.5 | 3 |               5.0 |
+| 5.5 | 3 | 6.264982043070834 |
+
+
+#+begin_src clojure
+(let [sides-list (list [4.2 6] [4 4] [3 4] [5.5 3])
+      hypo-list (for [sides sides-list]                           
+                  (Math/sqrt (+ (Math/pow (first sides) 2)        
+                                (Math/pow (second sides) 2))))]
+  (for [sides sides-list
+        c     hypo-list
+        :let [a (get sides 0)
+              b (get sides 1)]]
+      [a b c]))
+#+end_src
+
+#+RESULTS:
+| 4.2 | 6 | 7.323933369440222 |
+| 4.2 | 6 | 5.656854249492381 |
+| 4.2 | 6 |               5.0 |
+| 4.2 | 6 | 6.264982043070834 |
+|   4 | 4 | 7.323933369440222 |
+|   4 | 4 | 5.656854249492381 |
+|   4 | 4 |               5.0 |
+|   4 | 4 | 6.264982043070834 |
+|   3 | 4 | 7.323933369440222 |
+|   3 | 4 | 5.656854249492381 |
+|   3 | 4 |               5.0 |
+|   3 | 4 | 6.264982043070834 |
+| 5.5 | 3 | 7.323933369440222 |
+| 5.5 | 3 | 5.656854249492381 |
+| 5.5 | 3 |               5.0 |
+| 5.5 | 3 | 6.264982043070834 |
+
+#+begin_src clojure
+(let [sides-list (list [4.2 6] [4 4] [3 4] [5.5 3])]
+	(for [sides sides-list
+				:let [a (first sides)
+							b (second sides)
+							c (Math/sqrt (+ (Math/pow a 2) (Math/pow b 2)))]]                           
+		[a b c]))
+#+end_src
+
+#+RESULTS:
+| 4.2 | 6 | 7.323933369440222 |
+|   4 | 4 | 5.656854249492381 |
+|   3 | 4 |               5.0 |
+| 5.5 | 3 | 6.264982043070834 |
+**** loop recur
+***** gcd
+(defn gcd [x y]                                            ;; <1>
+  (if (= y 0)
+    x
+    (gcd y (mod x y))))                                    ;; <2>
+;; #'cljs.user/gcd
+(gcd 90 60)                                                ;; <3>
+;; 30
+
+(defn gcd-loop [a b]
+  (loop [x a                                               ;; <1>
+         y b]
+    (if (= y 0)
+      x                                                    ;; <2>
+      (recur y (mod x y)))))                               ;; <3>
+;; #'cljs.user/gcd-loop
+(gcd-loop 90 60)
+;; 30
+***** for
+(loop [i 0
+      numbers []]
+ (if (= i 10)
+   numbers
+   (recur (inc i) (conj numbers i))))                      ;; <1>
+;; [0 1 2 3 4 5 6 7 8 9]
+**** dorun
+(do (dorun                                                 ;; <1>
+      (for [i (range 100)]
+        (println i)))
+    (println "Done"))
+;; 0                                                       ;; <2>
+;; 1
+;; ...
+;; 99
+;; Done
+;; nil
+
+Forcing Evaluation of a Lazy Sequence
+
+1 Wrap the for in dorun
+2 All numbers are printed as expected
+**** doseq
+(defn send-to-api [user]                                   ;; <1>
+  (println "Sending to API:" user))
+;; #'cljs.user/send-to-api
+(let [users [{:name "Alice"}
+             {:name "Bob"}
+             {:name "Carlos"}]]
+  (doseq [user users]                                      ;; <2>
+    (send-to-api user))
+  (println "Done!"))
+;; Sending to API: {:name Alice}                           ;; <3>
+;; Sending to API: {:name Bob}
+;; Sending to API: {:name Carlos}
+;; Done!
+;; nil
+
+1 Stub the send-to-api function
+2 Iterate through the users collection
+3 Side effects are performed immediately
+*** vars
+**** def
+(def my-name "Fred")                                       ;; <1>
+;; #'cljs.user/my-name
+
+my-name
+;; "Fred"
+
+(def ten 10)
+;; #'cljs.user/ten
+
+(def twenty (* ten 2))                                     ;; <4>
+;; #'cljs.user/twenty
+
+twenty
+;; 20
+
+ten                                                        ;; <5>
+;; 10
+
+
+(def x 7)                                                  ;; <1>
+;; #'cljs.user/x
+
+x                                                          ;; <2>
+;; 7
+
+'x                                                         ;; <3>
+;; x
+
+(defn doubler [x] (* 2 x))                                 ;; <4>
+;; #'cljs.user/doubler
+
+(doubler 3)
+;; 6
+
+y                                                          ;; <5>
+;; WARNING: Use of undeclared Var cljs.user/y at line 1 <cljs repl>
+;; nil
+**** defn
+(defn mk-global [value]
+  (def i-am-global value))
+;; #'cljs.user/mk-global
+
+mk-global                                                  ;; <2>
+;; #object[ ... ]
+
+(mk-global [4 8 15 16 23 42])
+;; #'cljs.user/i-am-global
+
+i-am-global                                                ;; <3>
+;; [4 8 15 16 23 42]
+**** list
+***** create
+cljs.user=> (list 4 8 15 16 23 42)                         ;; <1>
+(4 8 15 16 23 42)
+
+cljs.user=> '(4 8 15 16 23 42)                             ;; <2>
+(4 8 15 16 23 42)
+
+cljs.user=> (conj '(:west :north :north) :south)           ;; <3>
+(:south :west :north :north)
+
+cljs.user=> (first '("Tom" "Dick" "Harry"))                ;; <4>
+"Tom"
+
+cljs.user=> (rest '("Tom" "Dick" "Harry"))
+("Dick" "Harry")
+**** vectors
+***** get
+(let [desserts ["Apple Pie" "Ice Cream Sandwiches" "Chocolates" "Berry Buckle"]
+      favorite-index 1
+      favorite-dessert (get desserts favorite-index)]
+  (println "All desserts are great, but I like" favorite-dessert "the best"))
+***** first second
+(let [sides-list (list [4.2 6] [4 4] [3 4] [5.5 3])]
+	(for [sides sides-list
+				:let [a (first sides)
+							b (second sides)
+							c (Math/sqrt (+ (Math/pow a 2) (Math/pow b 2)))]]                           
+		[a b c]))
+***** conj
+****** 1
+(loop [i 0
+      numbers []]
+ (if (= i 10)
+   numbers
+   (recur (inc i) (conj numbers i))))                      ;; <1>
+****** 2
+cljs.user=> (conj ["Moe" "Larry"] "Curly")                 ;; <1>
+["Moe" "Larry" "Curly"]
+
+cljs.user=> (first ["Athos" "Porthos" "Aramis"])
+"Athos"
+***** rest->list
+cljs.user=> (rest ["Athos" "Porthos" "Aramis"])            ;; <2>
+("Porthos" "Aramis")
+***** add remove
+(assoc test2 0 "test")
+(merge test2 1 2 3)
+***** slice
+****** subvec
+  (vec                                                     ;; <1>
+    (concat                                                ;; <2>
+      (subvec contact-list 0 idx)                          ;; <3>
+      (subvec contact-list (inc idx)))))
+***** concat
+  (vec                                                     ;; <1>
+    (concat                                                ;; <2>
+      (subvec contact-list 0 idx)                          ;; <3>
+      (subvec contact-list (inc idx)))))
+***** nth
+cljs.user=> (nth ["Athos" "Porthos" "Aramis"] 1)           ;; <3>
+"Porthos"
+***** ([
+cljs.user=> (["Athos" "Porthos" "Aramis"] 1)               ;; <4>
+"Porthos"
+***** cost
+  (vec                                                     ;; <1>
+    (concat                                                ;; <2>
+      (subvec contact-list 0 idx)                          ;; <3>
+      (subvec contact-list (inc idx)))))
+**** ClojureScript Data Literals
+***** tab
+|-----------+------------------------------------------------+----------------------------------------|
+| Data Type | Description                                    | Example                                |
+|-----------+------------------------------------------------+----------------------------------------|
+| Number    | Integer or floating point numbers              | 17.4                                   |
+| String    | Textual data                                   | "Today is the first day..."            |
+| Character | Textual data                                   | \a                                     |
+| Boolean   | Logical true/false                             | true                                   |
+| Keyword   | Lightweight identifiers                        | :role                                  |
+| Symbol    | Identifiers that are extensively used internal | 'cljs-is-awesome                       |
+|           | to ClojureScript                               |                                        |
+| List      | Ordered collection supporting efficient        | '(1 3 5 7 9)                           |
+|           | traversal                                      |                                        |
+| Vector    | Ordered collection supporting efficient access | [0 2 4 6 8]                            |
+|           | by index                                       |                                        |
+| Map       | Unordered collection associating unique keys   | {:name "Kayleigh", :age 29}            |
+|           | to values                                      |                                        |
+| Set       | Unordered collection of unique values          | #{true "ubiquity" 9.2}                 |
+| nil       | The empty value                                | nil                                    |
+| Object    | JavaScript object - used for interop           | #js {"isJs" true, "isImmutable" false} |
+| Array     | JavaScript array - used for interop            | #js ["Lions" "Tigers" "Bears"]         |
+|-----------+------------------------------------------------+----------------------------------------|
+***** Numbers
+****** q
+
+32                                                         ;; <1>
+
+012                                                        ;; <2>
+
+0xbeef                                                     ;; <3>
+
+0.6                                                        ;; <4>
+
+1.719493e3                                                 ;; <5>
+
+-0.12e-4                                                   ;; <6>
+
+1 Decimal integer
+2 Octal integer starts with a leading zero
+3 Hexadecimal integer starts with leading 0x
+4 Float
+5 Float with an exponent
+6 Float with a sign and exponent with a sign
+****** inc  dec
+    (add (inc x) (dec y))))
+***** chars
+\a                                                           ;; <2>
+****** cast
+******* number to char 
+user> (doc char)
+-------------------------
+clojure.core/char
+([x])
+  Coerce to char
+nil
+
+***** Strings
+****** q
+
+"Quick! Brown foxes!"                                        ;; <1>
+
+\a                                                           ;; <2>
+
+"Column 1\tColumn 2"                                         ;; <3>
+
+"foo
+bar"                                                         ;; <4>
+
+1 Simple string
+2 Single character strings can be represented by the character
+ proceeded by a backslash
+3 String with special character
+4 Strings can span multiple lines
+****** str
+    (str greeting ", " name)))                             ;; <3>
+****** split
+(def words (clojure.string/split
+            "it was the best of times it was the worst of times"
+            #" "))
+
+****** join
+  (->> contact                                             ;; <2>
+       ((juxt :first-name :last-name))                     ;; <3>
+       (str/join " ")))
+***** Booleans
+ClojureScript also uses JavaScript booleans. Since the only possible
+options for a boolean are true or false, we will forego an extended
+example.
+***** Keywords
+We now encounter a data type that does not have a JavaScript
+equivalent. A keyword is represented by a name preceded by a
+colon. Keywords evaluate to themselves, and two keywords with the
+same name are considered equal. One interesting property of
+keywords is that they can be used as a function. When used as a
+function, the keyword expects a map as an argument and it will
+return the value in the map for which it is the key. When a keyword
+begins with two colons, the current namespace will be prepended to
+the keyword.
+
+Keywords
+
+:a-keyword                                                  ;; <1>
+
+::namespaced-keyword                                        ;; <2>
+
+:explicit-ns/keyword                                        ;; <3>
+
+{:name "Bill", :type "admin"}                               ;; <4>
+
+(:type user)                                                ;; <5>
+
+1 Simple keyword
+2 With implicit namespace - shorthand for :
+ cljs.user/namespaced-keyword
+3 With explicit namespace
+4 Used as keys in a map
+5 Used as a function to perform a map lookup
+***** Symbols
+
+Symbols are an interesting data type because they are closely linked
+to the Lisp family of programming languages from which
+ClojureScript is derived. Symbols are names that usually evaluate to
+some other object. We have seen symbols in almost every example
+without even thinking about it.
+
+my-function                                                 ;; <1>
+
+first                                                       ;; <2>
+
+1 Symbol referring to a user-defined variable
+2 Symbol referring to a built-in function
+
+Of ClojureScript’s data types, symbols are probably the most difficult
+to comprehend. They have a very meta quality about them, and they
+do not directly correspond to another familiar concept. When
+ClojureScript code is evaluated, it will try to resolve a symbol to the
+thing that it names. Sometimes, we want to refer to a symbol itself
+rather than the thing that it names, in which case we can place a
+single quote in front of the symbol to “quote” it, instructing the
+ClojureScript reader to not evaluate it. Since they are not used very
+commonly in application code, we will not revisit symbols to the
+depth that we will with the other data types.
+***** Lists
+
+(+ 1 2 3 4)                                                 ;; <1>
+
+'(+ 1 2 3 4)                                                ;; <2>
+
+'(some data)                                                ;; <3>
+
+'()                                                         ;; <4>
+
+1 A list that is interpreted as an expression and evaluated
+2 Prevent evaluation of a list by starting it with a single quote
+3 Lists can contain any ClojureScript data type
+4 An empty list
+***** Vectors
+
+Vectors are comprised of a number of expressions contained inside
+square brackets. When ClojureScript encounters a vector, it will
+interpret it as a data structure and will not try to evaluate it as a
+function call. They are used in a similar manner to JavaScript arrays
+and are the most common data structure in ClojureScript. Vectors
+are also used to list the arguments that a function takes.
+
+Vectors
+
+[]                                                          ;; <1>
+
+["Alice" "Bob" "Carol"]                                     ;; <2>
+
+(defn say-hello [name]                                      ;; <3>
+  (println "Hello," name))
+
+1 An empty vector
+2 A vector used to define a collection of strings
+3 A vector used to declare a function’s argument list
+***** Maps
+{}                                                          ;; <1>
+
+{"product" "Self-Sealing Stem Bolt"                         ;; <2>
+ "sku" "DS9-SB09"
+ "stock" 212}
+
+{:name "Jorge", :age 29}                                    ;; <3>
+
+1 An empty map
+2 A map using strings as keys
+3 A map using keywords as keys
+
+
+ :transitions {"yes" :embarked,
+               "no" :lost-game}
+***** Sets
+
+Sets are an unordered collection of unique elements. They are often
+used when we want to avoid duplicates or need to quickly determine
+whether an element is in a collection. Sets are declared with any
+number of elements contained inside curly brackets that are prefixed
+with a pound sign.
+
+Sets
+
+#{}                                                         ;; <1>
+
+#{"admin" "editor" "author" "subscriber"}                   ;; <2>
+
+1 An empty set
+2 A set with several unique strings
+***** Nil
+Nil is the empty value and is always written as nil. It is the
+equivalent of null in JavaScript and acts the same as false when
+used as a boolean.
+***** convert
+****** str->int
+(defn str->int [s] (Integer/parseInt s))
+****** Integer.
+(map #(Integer. %) (str/split game #":"))
+**** maps
+***** stract
+{:type :start
+ :title "Starbase Lambda"
+ :dialog (str "Welcome, bold adventurer! You are about to embark on a dangerous "
+              "quest to find the Tetryon Singularity.\nAre you up to the task?")
+ :transitions {"yes" :embarked,
+               "no" :lost-game}}
+
+(any data typs as keys)
+exampl vectors as key 							 
+cljs.user=> {[:b 3] :miss, [:a 7] :hit}
+{[:b 3] :miss, [:a 7] :hit}
+***** create
+****** {}
+cljs.user=> {:type "talk"                                  ;; <1>
+             :title "Simple Made Easy"
+             :author "Rick Hickey"}
+{:type "talk", :title "Simple Made Easy", :author "Rick Hickey"}
+
+****** hash-map
+cljs.user=> (hash-map :foo "bar", :baz "quux")             ;; <2>
+{:baz "quux", :foo "bar"}
+***** change of add new
+****** assoc
+
+cljs.user=> (defn add-sales-tax [cart-item]                ;; <1>
+              (let [{:keys [price]} cart-item]
+                (assoc cart-item :sales-tax (* price tax-rate))))
+#'cljs.user/add-sales-tax
+
+cljs.user=> (add-sales-tax {:name "Medium T-Shirt"         ;; <2>
+                            :price 10.00})
+{:name "Medium T-Shirt", :price 10, :sales-tax 0.79}
+
+cljs.user=> (assoc trail                                   ;; <2>
+                   :difficulty :moderate
+                   :location "Colorado"
+                   :max-elevation 12800)
+***** remove
+****** by key dissoc
+cljs.user=> (defn untrack [session]
+              (dissoc session :ip :user-agent))
+#'cljs.user/untrack
+
+cljs.user=> (untrack my-session)
+{:start 1464641029299, :is-active? true, :page-views []}
+****** narow dow by select-keys
+cljs.user=> (select-keys my-session [:start :is-active? :page-views])
+{:start 1464641029299,
+ :is-active? true,
+ :page-views []}
+***** merge
+cljs.user=> (defn click [location target]
+              (merge (event :click)
+                     {:location location, :target target}))
+***** get
+  (let [scene (get game current)
+
+cljs.user=> (def fido {:breed "Boxer" :color "brown" :hungry? true})
+#'cljs.user/fido
+
+cljs.user=> (get fido :breed)
+"Boxer"
+***** (:
+cljs.user=> (:color fido)
+"brown"
+***** :?)
+cljs.user=> (fido :hungry?)
+true
+***** get-in
+  (get-in scene [:transitions "yes"])
+***** conj<-[]
+cljs.user=> (conj {:x 10 :y 12} [:z 7])
+{:x 10, :y 12, :z 7}
+***** first ->[]
+cljs.user=> (first {:x 10, :y 12, :z 7})
+[:x 10]
+***** rest->([]...)
+cljs.user=> (rest {:x 10, :y 12, :z 7})
+([:y 12] [:z 7])
+***** repl
+****** 01
+#+begin_src clojure
+
+(def cart [{:name "Silicone Pancake Mold" :price 10.49}
+                       {:name "Small Pour-Over Coffee Maker" :price 18.96}
+                       {:name "Digital Kitchen Scale" :price 24.95}])
+
+(def tax-rate 0.079)
+(defn add-sales-tax [cart-item]                ;; <1>
+              (let [{:keys [price]} cart-item]
+                (assoc cart-item :sales-tax (* price tax-rate))))
+
+(add-sales-tax {:name "Medium T-Shirt"         ;; <2>
+                            :price 10.00})
+
+
+(map add-sales-tax cart)                       ;; <3>
+
+#+end_src
+
+#+RESULTS:
+| #'user/cart                                                                                                                                                                                                               |
+| #'user/tax-rate                                                                                                                                                                                                           |
+| #'user/add-sales-tax                                                                                                                                                                                                      |
+| {:name "Medium T-Shirt", :price 10.0, :sales-tax 0.79}                                                                                                                                                                    |
+| ({:name "Silicone Pancake Mold", :price 10.49, :sales-tax 0.8287100000000001} {:name "Small Pour-Over Coffee Maker", :price 18.96, :sales-tax 1.49784} {:name "Digital Kitchen Scale", :price 24.95, :sales-tax 1.97105}) |
+****** 02
+
+#+begin_src clojure
+(map add-sales-tax cart)                       ;; <3>
+#+end_src
+
+#+RESULTS:
+| :name | Silicone Pancake Mold        | :price | 10.49 | :sales-tax | 0.8287100000000001 |
+| :name | Small Pour-Over Coffee Maker | :price | 18.96 | :sales-tax |            1.49784 |
+| :name | Digital Kitchen Scale        | :price | 24.95 | :sales-tax |            1.97105 |
+
+****** 03
+******* 001
+#+begin_src clojure
+(map #(:name %) cart)                       ;; <3>
+#+end_src
+
+#+RESULTS:
+| Silicone Pancake Mold | Small Pour-Over Coffee Maker | Digital Kitchen Scale |
+
+******* 002
+#+begin_src clojure
+(map (fn [elm] (:name elm)) cart)                       ;; <3>
+#+end_src
+
+#+RESULTS:
+| Silicone Pancake Mold | Small Pour-Over Coffee Maker | Digital Kitchen Scale |
+
+******* 003
+#+begin_src clojure
+(map #(:name %1) cart)                       ;; <3>
+#+end_src
+
+#+RESULTS:
+| Silicone Pancake Mold | Small Pour-Over Coffee Maker | Digital Kitchen Scale |
+
+****** 04 discount
+******* defn
+
+#+begin_src clojure
+(defn discount [products pct-discount]
+  (map (fn [product] (assoc product :price (* pct-discount (:price product)))) products))
+#+end_src
+
+#+RESULTS:
+: #'user/discount
+******* use
+#+begin_src clojure
+(discount cart 1.2)
+#+end_src
+
+1.2
+| :name | Silicone Pancake Mold        | :price |             12.588 |
+| :name | Small Pour-Over Coffee Maker | :price |             22.752 |
+| :name | Digital Kitchen Scale        | :price | 29.939999999999998 |
+
+0.2
+| :name | Silicone Pancake Mold        | :price | 2.0980000000000003 |
+| :name | Small Pour-Over Coffee Maker | :price | 3.7920000000000003 |
+| :name | Digital Kitchen Scale        | :price |               4.99 |
+
+1
+| :name | Silicone Pancake Mold        | :price | 10.49 |
+| :name | Small Pour-Over Coffee Maker | :price | 18.96 |
+| :name | Digital Kitchen Scale        | :price | 24.95 |
+
+0.9
+| :name | Silicone Pancake Mold        | :price |  9.441 |
+| :name | Small Pour-Over Coffee Maker | :price | 17.064 |
+| :name | Digital Kitchen Scale        | :price | 22.455 |
+
+**** actions
+***** costing
+****** into
+(fn [xs test-elems]                                        ;; <1>
+  (println "Checking whether" xs                           ;; <2>
+           "contains each of" test-elems)
+  (let [xs-set (into #{} xs)]                              ;; <3>
+    (every? xs-set test-elems)))
+
+		
+cljs.user=> (def my-vec ["Lions" "Tigers" "Bears" "Lions"])
+#'cljs.user/my-vec
+
+cljs.user=> (defn loud [word]
+              (str word "!"))
+#'cljs.user/loud
+
+cljs.user=> (map loud my-vec)                              ;; <1>
+("Lions!" "Tigers!" "Bears!" "Lions!")
+
+cljs.user=> (into [] (map loud my-vec))                    ;; <2>
+["Lions!" "Tigers!" "Bears!" "Lions!"]
+
+cljs.user=> (into '() (map loud my-vec))                   ;; <3>
+("Lions!" "Bears!" "Tigers!" "Lions!")
+# 3 Putting the seq into a list reverses the elements
+
+cljs.user=> (into #{} (map loud my-vec))                   ;; <4>
+#{"Lions!" "Tigers!" "Bears!"}
+***** filter
+****** by defn
+cljs.user=> (filter even? '(1 2 3 4 5))                    ;; <1>
+(2 4)
+
+cljs.user=> (defn longer-than-4? [s]                       ;; <2>
+              (> (count s) 4))
+#'cljs.user/longer-than-4?
+
+cljs.user=> (filter longer-than-4?                         ;; <3>
+                    ["Life" "Liberty" "Pursuit" "of" "Happiness"])
+("Liberty" "Pursuit" "Happiness")
+****** by key?
+
+cljs.user=> (def cart [{:name "Silicone Pancake Mold" :price 10.49 :taxable? false}
+                       {:name "Small Pour-Over Coffee Maker" :price 18.96 :taxable? true}
+                       {:name "Digital Kitchen Scale" :price 24.95 :taxable? true}])
+
+#'cljs.user/cart
+cljs.user=> (filter :taxable? cart)
+({:name "Small Pour-Over Coffee Maker", :price 18.96, :taxable? true}
+ {:name "Digital Kitchen Scale", :price 24.95, :taxable? true})
+
+--------------------------------------- 
+(reduce +                                                  ;; <1>
+        (map :price                                        ;; <2>
+             (filter :taxable? cart)))                     ;; <3>
+***** set
+cljs.user=> (set! js/testScores (clj->js updated-scores))  ;; <4>
+***** get
+****** set default value
+(get contact :address {})
+***** nested
+****** get-in
+(get-in user [:sessions 0 :page-views 0])
+
+(get
+  (get
+    (get
+      (get user :sessions)                                 ;; <1>
+     0)                                                    ;; <2>
+   :page-views)                                            ;; <3>
+  0)                                                       ;; <4>
+****** assoc-in
+(assoc-in user
+          [:sessions 0 :page-views]                        ;; <1>
+          [(page-view "www.learn-cljs.com" 123456 [])])    ;; <2>
+
+(assoc-in {} [:foo :bar :baz] "quux")
+=> {:foo {:bar {:baz "quux"}}}
+****** update-in
+cljs.user=> (update-in {:num 1} [:num] inc)
+{:num 2}
+***** sort
+(defn flip [d a]
+  (sort (case d \R < \L >) a))
+
+(sort a) = <
+***** loop
+****** doseq
+(def numbers [4, 8, 15, 16, 23, 42])
+
+(doseq [n numbers]
+  (println "The number is" n))
+***** let
+****** bind
+(let [bindings]
+  expr1
+  expr2
+  ...
+  expr-n)
+(defn parse-msg [msg-raw]
+  (let [msg-types {:c ::control
+                   :e ::event
+                   :x ::error}
+        msg (reader/read-string msg-raw)
+        type (:t msg)
+        data (:d msg)]
+    (println "Got data:" data)
+    [(get msg-types type) data]))
+
+		
+the names
+that we declare first are available in later bindings. For example, we
+defined msg as the result of evaluating the expression
+****** vector bind
+******* def
+(let [[id name rank extra] [420 "Pepper" "Sgt."]]
+  (println "Hello," rank name "- you have ID =" id "and extra =" extra))
+
+;; Hello, Sgt. Pepper - you have ID = 420 and extra = nil
+******* _
+(let [[_ name rank] [420 "Pepper" "Sgt."]]
+  (println "Hello," rank name))
+
+;; Hello, Sgt. Pepper
+
+******* &
+(let [[eat-now & eat-later] ["nachos" "salad" "apples" "yogurt"]]
+  (println "Please pass the" eat-now)
+  (println "I'm saving these for later:" eat-later))
+
+;; Please pass the nachos
+;; I'm saving these for later: (salad apples yogurt)
+
+******* 
+****** map bind
+******* def
+(let [{x :x
+       y :y} {:x 534 :y 497 :z -73}]
+  (println "Inspecting coordinates:" x "," y))
+
+;; Inspecting coordinates: 534 , 497
+******* :strs instead of :keys
+(let [{:keys [x y z]} {:x 534 :y 497 :z -73}]
+  (println "x = " x "| y = " y "| z = " z))
+
+;; x =  534 | y =  497 | z =  -73
+******** exampl
+cljs.user=> (defn add-sales-tax [cart-item]                ;; <1>
+              (let [{:keys [price]} cart-item]
+                (assoc cart-item :sales-tax (* price tax-rate))))
+#'cljs.user/add-sales-tax
+
+cljs.user=> (add-sales-tax {:name "Medium T-Shirt"         ;; <2>
+                            :price 10.00})
+{:name "Medium T-Shirt", :price 10, :sales-tax 0.79}
+******* :keys :or
+(let [{:keys [fname lname profession]
+       :or {profession "professional"}} {:fname "Sasha" :lname "Simonova"}]
+  (println fname lname "is a" profession))
+
+;; Sasha Simonova is a professional
+***** map
+***** reduce
+****** example
+cljs.user=> (def cart                                      ;; <1>
+              [{:name "Tachyon Emitter Array" :price 1099.45}
+               {:name "Dilithium Matrix" :price 2442.00}
+               {:name "Antimatter Chamber Sealant Rings (4)" :price 19.45}
+               {:name "Toothbrushes (2-pack)" :price 8.50}])
+#'cljs.user/cart
+
+cljs.user=> (defn add-price [total item]                   ;; <2>
+              (+ total (:price item)))
+#'cljs.user/add-price
+
+cljs.user=> (def total (reduce add-price 0 cart))          ;; <3>
+#'cljs.user/total
+
+cljs.user=> (.toFixed total 2)
+"3569.40"
+****** repl
+#+begin_src clojure
+(def events [{:event :click, :timestamp 1463889739}
+             {:event :typing, :timestamp 1463889745}
+             {:event :click, :timestamp 1463889746}
+             {:event :click, :timestamp 1463889753}])
+#+end_src
+
+#+RESULTS:
+: #'user/events
+
+#+begin_src clojure
+(defn longest-idle-time [events]
+  (:max-idle                                               ;; <1>
+    (reduce (fn [{:keys [max-idle last-ts]} event]         ;; <2>
+              (let [ts (:timestamp event)
+                    idle-time (- ts last-ts)]
+                {:max-idle (max max-idle idle-time)        ;; <3>
+                 :last-ts ts}))
+            {:max-idle 0
+             :last-ts (:timestamp (first events))}         ;; <4>
+            events)))
+#+end_src
+
+#+RESULTS:
+: #'user/longest-idle-time
+
+#+begin_src clojure
+(longest-idle-time events)
+#+end_src
+
+#+RESULTS:
+: 7
+
+#+begin_src clojure
+(defn count-user-clicks [events]
+  (reduce #(if (= :click (:event %2))
+                 (inc %1)
+                 %1)
+          0 events))
+#+end_src
+
+#+begin_src clojure
+(defn count-user-clicks [events]
+  (reduce (fn [clicks-sum event]
+            (if (= (:event event) :click )
+                 (inc clicks-sum)
+                 clicks-sum))
+          0 events))
+
+(count-user-clicks events)
+#+end_src
+
+#+begin_src clojure
+(defn count-user-clicks [events]
+  (reduce (fn [clicks-sum event]
+            (or (= (:event event) :click )
+                 (inc clicks-sum)
+                 clicks-sum))
+          0 events))
+
+(count-user-clicks events)
+#+end_src
+#+RESULTS:
+| #'user/count-user-clicks |
+|                        3 |
+
+#+begin_src clojure
+(count-user-clicks events)
+#+end_src
+
+#+RESULTS:
+: 3
+
+#+begin_src clojure
+(def duble-click-max-lag 1)
+(defn count-user-duble-clicks [events]
+  (reduce (fn [last-event new-event]
+            (unless (:clicks-sum last-event)
+                      (assoc last-event :clicks-sum 0))
+            (when (= (:event new-event) :click )
+              (when (last-event new-event)
+              (assoc last-event :clicks-sum (inc clicks-sum))
+                 clicks-sum))
+                  )
+          0 events))
+
+(count-user-duble-clicks events)
+#+end_src
+
+#+begin_src clojure
+;; (defn test [{clicks-sum :clicks-sum
+(defn test [{un-clicks-sum :clicks-sum
+             last-ts :timestamp}
+            {new-event :event
+             new-ts :timestamp}]
+  ;; (println last-event)
+	;; (when-not (integer? clicks-sum) (def clicks-sum 0))
+	;; (let [clicks-sum 1]
+	;; 	[clicks-sum last-ts new-event last-ts])
+	;; (def clicks-sum 1)
+	(let [clicks-sum
+        (if (and (= new-event :click )
+                 (> duble-click-max-lag
+                 (- new-ts last-ts)))
+        (inc un-clicks-sum)
+        0)]
+        ;; 0]
+					;; (inc clicks-sum))))
+	;; [clicks-sum last-ts new-event last-ts]
+	;; (def clicks-sum (inc clicks-sum))
+  ;; (inc clicks-sum)
+	[clicks-sum (- new-ts last-ts)
+   (> duble-click-max-lag (- new-ts last-ts))
+    (and (= new-event :click )
+                            (> duble-click-max-lag
+                               (- new-ts last-ts)))])
+  ;; (println clicks-sum)
+  ;; (println last-ts)
+  ;; (println "test ok")
+  )
+
+;; (test (first events) (second events))
+;; (events 3)
+(test (events 2) (events 3))
+#+end_src
+
+#+RESULTS:
+| #'user/test                          |
+| class java.lang.NullPointerException |
+
+#+begin_src clojure
+(test (first events) (second events))
+#+end_src
+
+#+RESULTS:
+: 1463889745
+
+#+begin_src clojure
+(def duble-click-max-lag 1)
+#+end_src
+
+#+begin_src clojure
+(defn count-user-duble-clicks [events]
+  (:clicks-sum
+   (reduce (fn [{;; last-event :event
+								un-clicks-sum :clicks-sum
+								last-ts :timestamp}
+								{new-event :event
+								new-ts :timestamp}]
+            (let [clicks-sum (if (integer? un-clicks-sum) un-clicks-sum 0)]
+							(when (= new-event :click )
+								(when (> duble-click-max-lag
+												(- new-ts last-ts)
+											(inc clicks-sum))))
+								{;; :event last-event
+								:clicks-sum clicks-sum 
+								:timestamp last-ts}))
+          events)))
+
+(count-user-duble-clicks events)
+#+end_src
+
+#+RESULTS:
+| #'user/count-user-duble-clicks |
+|                              0 |
+
+#+begin_src clojure
+(def duble-click-max-lag 10000000000000000)
+(count-user-duble-clicks events)
+#+end_src
+
+#+begin_src clojure
+(def duble-click-max-lag 10000000000000000)
+(inc duble-click-max-lag)
+duble-click-max-lag
+#+end_src
+
+#+RESULTS:
+| #'user/duble-click-max-lag |
+|                          0 |
+
+#+begin_src clojure
+(defn its-biger? [old new]
+  (let [delta (- (:timestamp new) (:timestamp old))]
+    (if (< (:bigest old) delta)
+      {:bigest delta, :timestamp (:timestamp new)}
+      {:bigest (:bigest old), :timestamp (:timestamp new)})
+    ))
+
+(reduce #() {:bigest 0, :timestamp (:timestamp (ferst events))} events)
+
+#+end_src
+***** juxt
+****** x01
+(def minmax
+  (juxt #(reduce Math/min %)
+        #(reduce Math/max %)))
+
+(minmax [48 393 12 14 -2 207])
+;; [-2 393]
+****** x02
+  (->> contact                                             ;; <2>
+       ((juxt :first-name :last-name))                     ;; <3>
+       (str/join " ")))
+***** update
+(defn maybe-set-address [contact]                          ;; <1>
+  (if (:address contact)
+    (update contact :address make-address)
+    contact))
+
+(update state :contacts                            ;; <2>
+				replace-contact idx contact)
+(update state :contacts
+				add-contact contact)))))
+*** Constract
+**** #
+(some #(= (:name %) "Potion of Wisdom")
+      (get-inventory player))
+**** range
+***** take
+(take 5 (range))                                           ;; <5>
+;; (0 1 2 3 4)
+***** map
+(map inc (take 5 (range)))
+;; (1 2 3 4 5)
+***** doseq
+(doseq [i (range 5)]
+  (println "Looping!"))
+;; Looping!
+;; Looping!
+;; Looping!
+;; Looping!
+;; Looping!
+;; nil                                                     ;; <3>
+**** lambda
+***** fn
+(def remove-by                                             ;; <1>
+  (fn [pred]
+    (fn [list]                                             ;; <2>
+      (reduce (fn [acc elem]
+                (if (pred elem) acc (conj acc elem)))
+              []
+              list))))
+
+(def remove-reds                                           ;; <3>
+  (remove-by (fn [product] (= "Red" (:color product)))))
+
+(remove-reds
+  [{:sku "99734N" :color "Blue"}
+   {:sku "99294N" :color "Red"}
+   {:sku "11420Z" :color "Green"}])
+***** #( %1 %2)
+#(let [xs-set (into #{} %1)]
+   (every? xs-set %2)))
+***** (# %)
+
+(#(str "Hello " %) "world")
+;; => "Hello world"
+**** defn
+***** def fn
+(def contains-every?                                       ;; <1>
+  (fn [xs test-elems]
+    ;; function body...
+    ))
+
+(defn contains-every? [xs test-elems]                      ;; <2>
+  ;; function body...
+)
+***** (defn ([1] ()) ([2]())
+****** q
+(defn my-multi-arity-fn
+ ([a] (println "Called with 1 argument" a))                ;; <1>
+ (                                                         ;; <2>
+  [a b]                                                    ;; <3>
+  (println "Called with 2 arguments" a b)                  ;; <4>
+ )
+ ([a b c] (println "Called with 3 arguments" a b c)))
+
+(defn my-single-arity-fn [a]                               ;; <5>
+  (println "I can only be called with 1 argument"))
+****** super call
+(defn page-view
+	([url] (page-view url (.now js/Date) []))    ;; <1>
+	([url loaded] (page-view url loaded []))
+	([url loaded events]
+		{:url url
+			:loaded loaded
+			:events events}))
+
+***** Docstrings
+(defn make-inventory
+  "Creates a new inventory that initially contains no items.
+  Example:
+  (assert
+    (== 0 (count (:items (make-inventory)))))"
+  []
+  {:items []})
+***** (doc
+dev:cljs.user=> (doc make-inventory)
+-------------------------
+cljs.user/make-inventory
+([])
+  Creates a new inventory that initially contains no items.
+  Example:
+  (assert
+    (== 0 (count (:items (make-inventory)))))
+nil
+***** :pre :post
+(defn fractional-rate [num denom]
+  {:pre [(not= 0 denom)]                                   ;; <1>
+   :post [(pos? %) (<= % 1)]}                              ;; <2>
+  (/ num denom))
+
+(fractional-rate 1 4)
+;; 0.25
+
+(fractional-rate 3 0)
+;; Throws:
+;; #object[Error Error: Assert failed: (not= 0 denom)]
+***** recur
+
+#+begin_src clojure
+(defn factorial
+ ([n] (factorial n 1 []))
+ ([n result result-list]
+  (if (<= n 1)
+    result-list
+    (recur (dec n) (* result n) (conj result-list (* result n))))))
+
+(factorial 5)
+#+end_src
+
+#+RESULTS:
+| #'user/factorial |
+| [5 20 60 120]    |
+***** bindin params
+(fn [{:keys [max-idle last-ts]} event]         ;; <2>
+              (let [ts (:timestamp event)
+                    idle-time (- ts last-ts)]
+                {:max-idle (max max-idle idle-time)        ;; <3>
+                 :last-ts ts}))
+**** Thread
+***** Thread-First Transformation
+(-> val                                                    ;; <1>
+    (fn-1 :foo)                                            ;; <2>
+    (fn-2 :bar :baz)                                       ;; <3>
+    (fn-3))
+
+(fn-3                                                      ;; <4>
+  (fn-2
+    (fn-1 val :foo)
+    :bar :baz))
+***** thread last
+  (->> contact                                             ;; <2>
+       ((juxt :first-name :last-name))                     ;; <3>
+       (str/join " ")))
+*** colections
+**** conj
+
+cljs.user=> (conj '(:lions :tigers) :bears)                ;; <1>
+(:bears :lions :tigers)
+
+cljs.user=> (conj [:lions :tigers] :bears)                 ;; <2>
+[:lions :tigers :bears]
+
+cljs.user=> (conj #{:lions :tigers} :bears)                ;; <3>
+#{:lions :tigers :bears}
+
+cljs.user=> (conj #{:lions :tigers} :tigers)               ;; <4>
+#{:lions :tigers}
+**** first
+**** rest
+**** repl
+***** Sequence
+#+begin_src clojure
+
+(def samples [[8 12 4]
+              [9 3 3 6]
+              [11 4]])
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+
+** reagent
+*** js/alert
+(fn [message]
+  (js/alert (.toUpperCase (str message "!!!!!!!!!!!!!!!!"))))
+
+(ns my-cljs-project.core)                                  ;; <1>
+(js/alert "Hello World")                                   ;; <2>
+*** innerHTML
+(set! (.-innerHTML someElem)
+      (count
+        (filter missing-phone? users)))
+*** console
+*** add input
+(in-ns 'learn-cljs.weather)                                ;; <1>
+;; nil
+
+(def input (.createElement js/document "input"))           ;; <2>
+;; #'learn-cljs.weather/input                              ;; <3>
+
+(.appendChild (.-body js/document) input)
+;; #object[HTMLInputElement [object HTMLInputElement]]
+
+(set! (.-placeholder input) "Enter something")             ;; <4>
+;; "Enter something"
+
+(defn handle-input [e]                                     ;; <5>
+  (swap! app-state assoc :text (-> e .-target .-value)))
+;; #'learn-cljs.weather/handle-input
+
+(set! (.-onkeyup input) handle-input)
+;; #object[learn_cljs$weather$handle_input ...]
+
+-----------------------------------------
+
+(defn event-value [e] (-> e .-target .-value))
+;; #'learn-cljs.weather/event-value
+
+(defn update-text [value]
+  (swap! app-state assoc :text value))
+;; #'learn-cljs.weather/update-text
+
+(defn handle-input [e]
+  (update-text (event-value e)))
+;; #'learn-cljs.weather/handle-input
+------------------
+
+[:input {:type "text"
+         :placeholder "Postal Code"
+         :value (:postal-code @app-state)
+         :on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
+*** button
+[:button {:on-click get-forecast!} "Go"]
+*** change in map
+**** whith swap! and assoc
+         (swap! app-state assoc :postal-code (-> % .-target .-value))}]
+**** swap! and update-in
+(defn handle-response [resp]
+  (let [today (get-in resp ["list" 0 "main" "temp"])       ;; <1>
+        tomorrow (get-in resp ["list" 8 "main" "temp"])]
+    (swap! app-state                                       ;; <2>
+        update-in [:temperatures :today :value] (constantly today))
+    (swap! app-state
+        update-in [:temperatures :tomorrow :value] (constantly tomorrow))))
+*** render
+(defn mount-app-element []                                 ;; <4>
+  (rdom/render [app] (gdom/getElement "app")))
+
+	
+(defn app []
+  [:div {:class "app"}
+   [title]                                                 ;; <2>
+   [:div {:class "temperatures"}
+    (for [temp (vals (:temperatures @app-state))]          ;; <3>
+      [temperature temp])]
+   [postal-code]])
+
+(defn title []
+  [:h1 (:title @app-state)])
+
+
+(defonce app-state (r/atom {:title "WhichWeather"
+                            :postal-code ""
+                            :temperatures {:today {:label "Today"
+                                                   :value nil}
+                                           :tomorrow {:label "Tomorrow"
+                                                      :value nil}}}))
+
+(defn temperature [temp]                                   ;; <1>
+  [:div {:class "temperature"}
+   [:div {:class "value"}
+    (:value temp)]
+   [:h2 (:label temp)]])
+
+(mount-app-element)
+
+
+  <body>
+    <div id="app">
+    </div> <!-- end of app div -->
+    <script src="cljs-out/dev-main.js" type="text/javascript"></script>
+
+** JavaScript
+*** acces
+js/document
+js/window
+*** js->clj
+*** clj->js
+#+begin_src clojure
+cljs.user=> (def characters #{"Lucy" "Ricky" "Fred" "Ethel"})
+#'cljs.user/characters
+cljs.user=> (def js-characters (clj->js characters))
+#'cljs.user/js-characters
+cljs.user=> js-characters
+#js ["Ricky" "Fred" "Lucy" "Ethel"]
+cljs.user=> (js->clj js-characters)
+["Ricky" "Fred" "Lucy" "Ethel"]
+cljs.user=> (= characters (js->clj js-characters))
+false
+#+end_src
+*** testScores
+#+begin_src js
+var testScores = [                                         // <1>
+  { id: 1, score: 86, gradeLetter: "B" },                  // <2>
+  { id: 2, score: 93, gradeLetter: "A" },
+  { id: 3, score: 78, gradeLetter: "C" },
+];
+#+end_src
+
+
+
+#+begin_src clojure
+cljs.user=> (def cljs-scores (js->clj js/testScores))      ;; <1>
+#'cljs.user/cljs-scores
+
+cljs.user=> cljs-scores
+[{"id" 1, "score" 86, "gradeLetter" "B"}
+{"id" 2, "score" 93, "gradeLetter" "A"}
+{"id" 3, "score" 78, "gradeLetter" "C"}]
+
+cljs.user=> (conj cljs-scores                              ;; <2>
+                  {"id" 4, "score" 87, "gradeLetter" "B"})
+[{"id" 1, "score" 86, "gradeLetter" "B"}
+{"id" 2, "score" 93, "gradeLetter" "A"}
+{"id" 3, "score" 78, "gradeLetter" "C"}
+{"id" 4, "score" 87, "gradeLetter" "B"}]
+
+cljs.user=> cljs-scores
+[{"id" 1, "score" 86, "gradeLetter" "B"}
+{"id" 2, "score" 93, "gradeLetter" "A"}
+{"id" 3, "score" 78, "gradeLetter" "C"}]
+
+cljs.user=> (def updated-scores                            ;; <3>
+              (conj cljs-scores {"id" 4, "score" 87, "gradeLetter" "B"}))
+#'cljs.user/updated-scores
+
+cljs.user=> (set! js/testScores (clj->js updated-scores))  ;; <4>
+#js [#js {:id 1, :score 86, :gradeLetter "B"}
+#js {:id 2, :score 93, :gradeLetter "A"}
+#js {:id 3, :score 78, :gradeLetter "C"}
+#js {:id 4, :score 87, :gradeLetter "B"}]
+#+end_src
+
+Converting between JavaScript and ClojureScript data
+
+1 Convert testScores to a ClojureScript value
+2 Create a modified value by appending a new score and verify that
+ the value in the var cljs-scores was not changed
+3 Bind the updated scores to the updated-scores var
+4 Convert the updated scores back to a JavaScript object and update
+ testScores to the new value
+*** Objects
+**** created
+cljs.user=> (js-obj "isJavaScript" true, "type" "object")  ;; <1>
+#js {:isJavaScript true, :type "object"}
+
+cljs.user=> #js {"isJavaScript" true, "type" "object"}     ;; <2>
+#js {:isJavaScript true, :type "object"}
+**** Prop
+***** (.-
+cljs.user=> (def js-hobbit #js {"name" "Bilbo Baggins", "age" 111})
+#'cljs.user/js-hobbit
+cljs.user=> (.-age js-hobbit)
+111
+***** (..
+#+begin_src js
+// JavaScript nested lookup
+var settings = {                                           // <1>
+  personal: {
+    address: {
+      street: "123 Rolling Hills Dr",
+    },
+  },
+};
+
+// Prints "123 Rolling Hills Dr"
+console.log(settings.personal.address.street);             // <2>
+#+end_src
+
+
+The syntax is slightly different from a normal property access: (..
+obj -propOne -propTwo).
+
+(println
+  (.. settings -personal -address -street))
+; Prints "123 Rolling Hills Dr"
+***** set!
+
+cljs.user=> (set! (.-name js-hobbit) "Frodo")              ;; <1>
+"Frodo"
+
+cljs.user=> (set! (.-age js-hobbit) 33)
+33
+
+cljs.user=> js-hobbit                                      ;; <2>
+#js {:name "Frodo", :age 33}
+**** use metod
+cljs.user=> (.indexOf primes 11)                           ;; <1>
+4
+
+cljs.user=> (.pop primes)                                  ;; <2>
+13
+
+cljs.user=> primes
+#js [1 3 5 7 11]
+
+Using JavaScript Array Methods
+
+1 Call the indexOf method on primes - equivalent to
+ primes.indexOf(11) in JavaScript
+2 Call the pop method - equivalent to primes.pop() in JavaScript
+*** vector
+**** create
+cljs.user=> (array "foo" "bar" "baz")
+#js ["foo" "bar" "baz"]
+
+cljs.user=> #js [1 3 5 7 11]
+#js [1 3 5 7 11]
+**** aget and aset
+cljs.user=> (def primes #js [1 3 5 7 11])                  ;; <1>
+#'cljs.user/primes
+
+cljs.user=> (aget primes 2)                                ;; <2>
+5
+
+cljs.user=> (aset primes 5 13)                             ;; <3>
+13
+
+cljs.user=> primes                                         ;; <4>
+#js [1 3 5 7 11 13]
+**** use metod
+cljs.user=> (.indexOf primes 11)                           ;; <1>
+4
+
+cljs.user=> (.pop primes)                                  ;; <2>
+13
+
+cljs.user=> primes
+#js [1 3 5 7 11]
+
+Using JavaScript Array Methods
+
+1 Call the indexOf method on primes - equivalent to
+ primes.indexOf(11) in JavaScript
+2 Call the pop method - equivalent to primes.pop() in JavaScript
+**** array-seq
+  (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
+    (gevents/listen elem "click"
+      (fn [e] (on-open-contact e state)))))
+*** exampl
+**** input
+(in-ns 'learn-cljs.weather)                                ;; <1>
+;; nil
+
+(def input (.createElement js/document "input"))           ;; <2>
+;; #'learn-cljs.weather/input                              ;; <3>
+
+(.appendChild (.-body js/document) input)
+;; #object[HTMLInputElement [object HTMLInputElement]]
+
+(set! (.-placeholder input) "Enter something")             ;; <4>
+;; "Enter something"
+
+(defn handle-input [e]                                     ;; <5>
+  (swap! app-state assoc :text (-> e .-target .-value)))
+;; #'learn-cljs.weather/handle-input
+
+(set! (.-onkeyup input) handle-input)
+;; #object[learn_cljs$weather$handle_input ...]
+
+
+(defn event-value [e] (-> e .-target .-value))
+;; #'learn-cljs.weather/event-value
+
+(defn update-text [value]
+  (swap! app-state assoc :text value))
+;; #'learn-cljs.weather/update-text
+
+(defn handle-input [e]
+  (update-text (event-value e)))
+;; #'learn-cljs.weather/handle-input
+**** repls
+#+begin_src clojure
+js/testScores
+
+(def cljs-scores (js->clj js/testScores))
+
+cljs-scores
+
+(conj cljs-scores                              ;; <2>
+                  {"id" 4, "score" 87, "gradeLetter" "B"})
+(set! js/testScores (clj->js (conj cljs-scores {"id" 4, "score" 87, "gradeLetter" "B"})))
+
+(def js-hobbit #js {"name" "Bilbo Baggins", "age" 111})
+
+(def js/hobbit #js {"name" "Bilbo Baggins", "age" 111})
+
+(.-name js-hobbit)
+(.-age js-hobbit)
+
+(set! (.-age js-hobbit) 113)
+
+(set! js/hobbit js-hobbit)
+
+js/js-hobbit
+js/hobbit
+
+
+
+;; var settings = {                                           // <1>
+;;   personal: {
+;;     address: {
+;;       street: "123 Rolling Hills Dr",
+;;     },
+;;   },
+;; };
+
+js/settings
+
+(.-personal js/settings)
+(.. js/settings -personal -address -street)
+
+
+(println (.. js/settings -personal -address -street))
+
+
+(def student #js {"locker" 212
+                  "grades" #js{"Math" "A",
+                              "Physics" "B",
+                              "English" "A+"}})
+
+student
+
+(.. student -locker)
+
+(.. student -grades )
+(.. student -grades -Physics)
+
+(set! js/student student)
+
+
+(set! (.. student -grades -Physics) "A")
+
+(def primes #js [1 3 5 7 11])
+
+primes
+
+(.pop primes)
+(.indexOf primes 5)
+(.indexOf primes 7)
+
+;; var books = [
+;;   {
+;;     title: "A History of LISP",
+;;     subjects: ["Common Lisp", "Scheme", "Clojure"],
+;;   },
+;;   {
+;;     title: "All About Animals",
+;;     subjects: ["Piranhas", "Tigers", "Butterflies"],
+;;   },
+;; ];
+
+js/books
+
+(.-title (aget js/books 0))
+(aget (.-subjects (aget js/books 0)) 1)
+
+(set! (.-title (aget js/books 1)) "Dangerous Creatures")
+
+(def books (js->clj js/books))
+
+books
+
+(get books 0)
+(get  (get books 0) "title")
+(get  (get books 0) "subjects")
+(get (get  (get books 0) "subjects") 1)
+
+js/books
+
+;; Dangerous Creatures
+(get books 1)
+(get  (get books 1) "title")
+(set! (get  (get books 1) "title") "Dangerous Creatures")
+
+(let [js-book (clj->js js/books)]
+    (.push js/books js-book)
+    (.-length js/books))
+#+end_src
+*** date time
+**** microsec
+***** (.now js/Date)
+cljs.user=> (defn with-duration [session end-time]
+              (let [duration-in-ms (- end-time (:start session))
+                    duration-in-s (.floor Math (/ duration-in-ms 1000))]
+                (assoc session :duration duration-in-s)))
+
+cljs.user=> (def my-session
+              (session (.now js/Date) true "127.0.0.1" "Some UA"))
+#'cljs.user/my-session
+
+;; Wait a few seconds
+
+cljs.user=> (with-duration my-session (.now js/Date))
+{:start 1464641029299,
+ :is-active? true,
+ :ip "127.0.0.1",
+ :user-agent "Some UA",
+ :page-views [],
+ :duration 14}
+** Google Closure’s
+*** .querySelector
+cljs.user=> (def body (.querySelector js/document "body")) ;; <2>
+(def body (.querySelector js/document "body"))
+#'cljs.user/body
+*** gdom
+**** require
+cljs.user=> (require '[goog.dom :as gdom])                 ;; <1>
+(require '[goog.dom :as gdom])
+nil
+**** createElement
+cljs.user=> (def heading (gdom/createElement "h1"))        ;; <3>
+(def heading (gdom/createElement "h1"))
+#'cljs.user/heading
+**** setTextContent
+cljs.user=> (gdom/setTextContent heading "I am new")
+(gdom/setTextContent heading "I am new")
+nil
+**** appendChild
+cljs.user=> (gdom/appendChild body heading)                ;; <4>
+(gdom/appendChild body heading)
+nil
+**** removeNode
+
+Use the goog.dom.removeNode() function to remove both the h1
+(gdom/removeNode heading)
+
+**** setProperties
+cljs.user=> (gdom/setProperties heading #js {"style" "color:red;"
+                                             "class" "big-title"})
+
+(gdom/setProperties heading #js {"style" "color:red;"
+                                             "class" "big-title"})
+**** gdom/getElement
+****** get by id
+(.-value (gdom/getElement id))
+****** get and set value
+(def input (gdom/getElement "user-input"))
+#'cljs.user/input
+
+(def target (gdom/getElement "copy-target"))
+#'cljs.user/target
+
+(.-value input)                                ;; <1>
+"ClojureScript is fun"
+
+(set! (.-value input) "ClojureScript is fun")
+
+
+(gdom/setTextContent target (.-value input))
+nil
+
+*** goog.events
+**** q
+(require '[goog.events :as gevents])
+nil
+
+(defn update-target [evt]                      ;; <1>
+              (gdom/setTextContent target
+                (.. evt -currentTarget -value)))
+#'cljs.user/update-target
+
+(gevents/listen input                          ;; <2>
+                            "keyup"
+                            update-target)
+#object[Object [object Object]]
+**** example
+#+begin_src clojure
+(ns passwords.core
+  (:require [goog.dom :as gdom]
+            [goog.events :as gevents]))
+
+(defn values-same? [field-1 field-2]
+  (= (aget field-1 "value")
+     (aget field-2 "value")))
+
+(defn handle-change [password confirmation status]
+  (gdom/setTextContent status
+                       (if (values-same? password confirmation)
+                         "Matches"
+                         "Do not match")))
+
+(let [password (gdom/createElement "input")
+      confirmation (gdom/createElement "input")
+      status (gdom/createElement "p")
+      app (gdom/getElement "app")]
+  (gdom/setProperties password #js {"type" "password"})
+  (gdom/setProperties confirmation #js {"type" "password"})
+
+  (gevents/listen password "keyup"
+                  #(handle-change password confirmation status))
+  (gevents/listen confirmation "keyup"
+                  #(handle-change password confirmation status))
+
+  (gdom/setTextContent app "")
+  (gdom/appendChild app password)
+  (gdom/appendChild app confirmation)
+  (gdom/appendChild app status))
+#+end_src
+*** repl
+#+begin_src clojure
+(require '[goog.dom :as gdom])
+(require '[goog.events :as gevents])
+
+(def status (gdom/createElement "h1"))
+(gdom/setTextContent status "Enter password")
+
+(def pass-one (gdom/createElement "input"))
+(def pass-tow (gdom/createElement "input"))
+(gdom/setProperties pass-one #js {"type" "password"})
+(gdom/setProperties pass-tow #js {"type" "password"})
+
+(gdom/appendChild target status)
+(gdom/appendChild target pass-one)
+(gdom/appendChild target pass-tow)
+
+(defn pass-checker-one[event]
+  (if (= (.-value pass-one) (.-value pass-tow))
+    (gdom/setTextContent status "match")
+    (gdom/setTextContent status "not match")))
+                       
+
+              ;; (gdom/setTextContent target
+              ;;   (.. evt -currentTarget -value)))
+
+(gevents/listen pass-one                          ;; <2>
+                            "keyup"
+                            pass-checker-one)
+
+
+(gevents/listen pass-tow                          ;; <2>
+                            "keyup"
+                            pass-checker-one)
+#+end_src
 * Log
+:PROPERTIES:
+:header-args: :tangle no
+:END:
 ** weather
 *** new project
 clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
@@ -169,7 +2129,7 @@ clj -A:fig:build                                         # <2>
 (delete-other-windows)
 (let (buffer-name-to-close (buffer-name))
 	(evil-window-split)
-				(eshell)
+	(eshell)
 				(evil-quit)
 				(switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
@@ -247,6 +2207,137 @@ clj -A:fig:build
         next ;; TODO: determine the next state
         ]
     (prompt game next)))
+** starbase_E
+*** run in eshell
+**** run eshell
+#+begin_src elisp :results output silent :dir starbase_E
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+	(evil-window-split)
+				(eshell)
+				(evil-quit)
+				(switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** comannds
+clj -A:fig:build
+*** add code
+**** cljs
+** doing-io
+*** new
+**** run eshell
+#+begin_src elisp :results output silent
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+	(evil-window-split)
+				(eshell)
+				(evil-quit)
+				(switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** new
+призапуске из корневека путь это что внутренее оно определе путь в сорс проекта к корне будет создан проетс коненым имене. короче запускай из крнят- небзди и не умнячайй,всё будет рокенрол
+clj -X:new :template figwheel-main :name learn-cljs/doing-io :args '["+deps"]'
+cd doing-io
+clj -A:fig:build
+**** comannds
+clj -A:fig:build
+
+(js/alert "Am I connected?")
+**** file
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing-io.cljs
+*** change
+**** run eshell
+#+begin_src elisp :results output silent :dir doing-io
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+	(evil-window-split)
+				(eshell)
+				(evil-quit)
+				(switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** comannds
+clj -A:fig:build
+
+(js/alert "Am I connected?")
+**** cljs
+*** files
+**** cljs
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing-io.cljs
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing_io.cljs")
+**** 
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/resources/public/index.html")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/resources/public/index.html
+*** repl
+**** tax card
+#+begin_src clojure
+(ns shopping-cart.core
+  (:require [goog.dom :as gdom]))
+
+(def tax-rate 0.079)
+(def cart [{:name "Silicone Pancake Mold" :price 10.49 :taxable? false}
+           {:name "Small Pour-Over Coffee Maker" :price 18.96 :taxable? true}
+           {:name "Digital Kitchen Scale" :price 24.95 :taxable? true}])
+
+(defn add-sales-tax [cart-item]
+  (assoc cart-item
+         :sales-tax (* (:price cart-item) tax-rate)))
+
+(def taxable-cart
+  (map add-sales-tax
+       (filter :taxable? cart)))
+
+(def item-list (gdom/createDom "ul" nil ""))
+
+;; Helper function to generate the display text for a product
+(defn display-item [item]
+  (str (:name item)
+       ": "
+       (:price item)
+       " (tax: "
+       (.toFixed (:sales-tax item) 2)
+       ")"))
+
+;; Create the list of products
+(doseq [item taxable-cart]
+  (gdom/appendChild
+   item-list
+   (gdom/createDom "li" #js {} (display-item item))))
+
+;; Clear the entire document and append the list
+(gdom/removeChildren (.-body js/document))
+(gdom/appendChild (.-body js/document) item-list)
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+** contacts
+*** new project
+clj -X:new :template figwheel-main :name learn-cljs/contacts :args '["+deps"]'
+cd contacts
+clj -A:fig:build
+*** bilde
+cd contacts
+clj -A:fig:build                                         # <2>
+*** run in eshell
+**** run  eshell
+#+begin_src elisp :results output silent :dir contacts
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+	(evil-window-split)
+	(eshell)
+				(evil-quit)
+				(switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** comannds
+clj -A:fig:build
+(js/alert "Am I connected?")
 * Sorce files
 ** Sorce files project ferst
 :PROPERTIES:
@@ -536,6 +2627,87 @@ button {
 #+end_src
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/starbase/src/learn_cljs/starbase.cljs
 ** starbase_E
+[[file:starbase_E/src/learn_cljs/starbase.cljs::(ns learn-cljs.starbase][starbase.cljs]]
+** doing-io
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** doing-io.cljs
+:PROPERTIES:
+:header-args: :tangle  doing-io/src/learn_cljs/doing-io.cljs
+:END:
+**** file
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing_io.cljs")
+
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing-io.cljs
+**** all
+#+begin_src clojure
+(ns ^:figwheel-hooks learn-cljs.doing-io
+  (:require
+   [goog.dom :as gdom]))
+
+(println "This text is printed from src/learn_cljs/doing_io.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+#+end_src
+***** 
+** contacts
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** contacts.cljs
+:PROPERTIES:
+:header-args: :tangle  contacts/src/learn_cljs/contacts.cljs
+:END:
+**** file
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
+
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing-io.cljs
+**** origin comented
+#+begin_src clojure :tangle no
+(ns ^:figwheel-hooks learn-cljs.contacts
+  (:require
+   [goog.dom :as gdom]))
+
+(println "This text is printed from src/learn_cljs/contacts.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+#+end_src
+**** src
+#+begin_src clojure
+
+#+end_src
+
 * project comands
 :PROPERTIES:
 :header-args: :tangle no
@@ -546,9 +2718,21 @@ button {
  :ensure t
  ;; :config
 	)
-(burly-bookmark-frames "weather buffers")
+;; (burly-bookmark-frames "weather buffers")
+(bookmark-save nil "/home/buyn/temp/bookmarks")
 (burly-bookmark-frames "buffers LAST SAVE")
-(bookmark-save)
+(bookmark-save nil "/home/buyn/temp/bookmarks")
+#+end_src
+** save буфер фреймы clojure
+#+begin_src emacs-lisp  :results output silent
+(use-package burly
+ :ensure t
+ ;; :config
+	)
+;; (burly-bookmark-frames "weather buffers")
+(bookmark-save nil "/home/buyn/temp/bookmarks")
+(burly-bookmark-frames "buffers clojure")
+(bookmark-save nil "/home/buyn/temp/bookmarks")
 #+end_src
 ** run eshell in org root
 clj -M:dev
