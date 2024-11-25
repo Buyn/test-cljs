@@ -54,6 +54,9 @@ https://github.com/kendru/learn-cljs
 https://github.com/kendru/learn-cljs.git
 
 https://github.com/kendru/learn-cljs/blob/main/code/lesson-8/weather/resources/public/css/style.css
+
+
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs
 *** fers src and new gen
 (eww-of "https://www.learn-clojurescript.com/section-1/lesson-5-bootstrapping-a-clojurescript-project/")
 *** debt
@@ -2706,11 +2709,13 @@ button {
 **** src
 ***** ns
 # (ns ^:figwheel-hooks learn-cljs.contacts
+# (require '[clojure.string :as str])
 #+begin_src clojure
 (ns learn-cljs.contacts                 ;
   (:require
     [goog.dom :as gdom]
-    [hiccups.runtime])
+    [hiccups.runtime]
+		[clojure.string :as str])
   (:require-macros [hiccups.core :as hiccups]))
 
 #+end_src
@@ -2756,8 +2761,61 @@ button {
 (defn replace-contact [contact-list idx input]
   (assoc contact-list idx (make-contact input)))
 #+end_src
-***** after-load
+***** initial-state
 #+begin_src clojure
+(def initial-state
+  {:contacts contact-list
+   :selected nil
+   :editing? false})
+#+end_src
+***** refresh!
+#+begin_src clojure :tangle no
+(def app-container (gdom/getElement "app"))
+
+(defn attach-event-handlers! [state])                      ;; <1>
+
+(defn set-app-html! [html-str]
+  (set! (.-innerHTML app-container) html-str))
+
+(defn render-app! [state]
+  (set-app-html!
+    (hiccups/html
+      [:div])))                                            ;; <2>
+
+(defn refresh! [state]                                     ;; <3>
+  (render-app! state)
+  (attach-event-handlers! state))
+
+(refresh! initial-state)                                   ;; <4>
+#+end_src
+***** Rendering Contacts
+#+begin_src clojure
+(defn format-name [contact]                                ;; <1>
+  (->> contact                                             ;; <2>
+       ((juxt :first-name :last-name))                     ;; <3>
+       (str/join " ")))
+
+(defn delete-icon [idx]
+  [:span {:class "delete-icon"
+          :data-idx idx}
+    [:span {:class "mu mu-delete"}]])
+
+(defn render-contact-list-item [idx contact selected?]
+  [:div {:class (str "card contact-summary" (when selected? " selected"))
+         :data-idx idx}                                    ;; <4>
+    [:div {:class "card-content"}
+      [:div {:class "level"}
+        [:div {:class "level-left"}
+          [:div {:class "level-item"}
+            (delete-icon idx)
+            (format-name contact)]]
+        [:div {:class "level-right"}
+          [:span {:class "mu mu-right"}]]]]])
+
+#+end_src
+
+***** after-load not use
+#+begin_src clojure 
 (defn ^:after-load on-reload []
   ;; optionally touch your app-state to force rerendering depending on
   ;; your application
