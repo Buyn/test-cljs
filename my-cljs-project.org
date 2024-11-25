@@ -1145,6 +1145,13 @@ cljs.user=> (add-sales-tax {:name "Medium T-Shirt"         ;; <2>
 
 ;; Sasha Simonova is a professional
 ***** map
+****** map
+****** map-indexed
+it calls the mapping function with the index of the element in
+the sequence as well as the element itself
+      (map-indexed (fn [idx contact]
+                     (render-contact-list-item idx contact (= idx selected)))
+                   contacts)]))
 ***** reduce
 ****** example
 cljs.user=> (def cart                                      ;; <1>
@@ -1368,6 +1375,15 @@ duble-click-max-lag
   (->> contact                                             ;; <2>
        ((juxt :first-name :last-name))                     ;; <3>
        (str/join " ")))
+
+((juxt :first-name :last-name )
+  (contact-list 0))
+ 
+["Phillip" "Jordan"]
+
+((juxt :first-name :last-name) {:first-name "Bob" :last-name "Jones"})
+;; ["Bob" "Jones"]
+****** 3
 ***** update
 (defn maybe-set-address [contact]                          ;; <1>
   (if (:address contact)
@@ -2710,11 +2726,13 @@ button {
 ***** ns
 # (ns ^:figwheel-hooks learn-cljs.contacts
 # (require '[clojure.string :as str])
+# (require '[goog.events :as gevents])
 #+begin_src clojure
 (ns learn-cljs.contacts                 ;
   (:require
     [goog.dom :as gdom]
     [hiccups.runtime]
+    [goog.events :as gevents]
     [clojure.string :as str])
   (:require-macros [hiccups.core :as hiccups]))
 
@@ -2772,15 +2790,8 @@ button {
 #+begin_src clojure :tangle no
 (def app-container (gdom/getElement "app"))
 
-(defn attach-event-handlers! [state])                      ;; <1>
-
 (defn set-app-html! [html-str]
   (set! (.-innerHTML app-container) html-str))
-
-(defn render-app! [state]
-  (set-app-html!
-    (hiccups/html
-      [:div])))                                            ;; <2>
 
 (defn refresh! [state]                                     ;; <3>
   (render-app! state)
@@ -2788,7 +2799,60 @@ button {
 
 (refresh! initial-state)                                   ;; <4>
 #+end_src
-***** Rendering Contacts
+***** render-app!
+****** render-contact-details
+#+begin_src clojure
+(defn form-field                                           ;; <1>
+  ([id value label] (form-field id value label "text"))
+  ([id value label type]
+   [:div {:class "field"}
+     [:label {:class "label"} label]
+     [:div {:class "control"}
+       [:input {:id id
+                :value value
+                :type type
+                :class "input"}]]]))
+
+(defn render-contact-details [contact]
+  (let [address (get contact :address {})]                 ;; <2>
+    [:div {:id "contact-form" :class "contact-form"}
+      (form-field "input-first-name" (:first-name contact) "First Name")
+      (form-field "input-last-name" (:last-name contact) "Last Name")
+      (form-field "input-email" (:email contact) "Email" "email")
+      [:fieldset
+        [:legend "Address"]
+        (form-field "input-street" (:street address) "Street")
+        (form-field "input-city" (:city address) "City")
+        (form-field "input-state" (:state address) "State")
+        (form-field "input-postal" (:postal address) "Postal Code")
+        (form-field "input-country" (:country address) "Country")]]))
+#+end_src
+****** section-header
+#+begin_src clojure
+(defn action-button [id text icon-class]
+  [:button {:id id
+            :class "button is-primary is-light"}
+    [:span {:class (str "mu " icon-class)}]
+    (str " " text)])
+
+(def save-button (action-button "save-contact" "Save" "mu-file"))
+(def cancel-button (action-button "cancel-edit" "Cancel" "mu-cancel"))
+(def add-button (action-button "add-contact" "Add" "mu-plus"))
+
+(defn section-header [editing?]
+  [:div {:class "section-header"}
+    [:div {:class "level"}
+      [:div {:class "level-left"}
+        [:div {:class "level-item"}
+          [:h1 {:class "subtitle"}
+            [:span {:class "mu mu-user"}]
+            "Edit Contact"]]]
+      [:div {:class "level-right"}
+        (if editing?
+          [:div {:class "buttons"} cancel-button save-button]
+          add-button)]]])
+#+end_src
+****** Rendering Contacts
 #+begin_src clojure
 (defn format-name [contact]                                ;; <1>
   (->> contact                                             ;; <2>
@@ -2811,6 +2875,50 @@ button {
             (format-name contact)]]
         [:div {:class "level-right"}
           [:span {:class "mu mu-right"}]]]]])
+
+(defn render-contact-list [state]
+  (let [{:keys [:contacts :selected]} state]
+    [:div {:class "contact-list column is-4 hero is-fullheight"}
+      (map-indexed (fn [idx contact]
+                     (render-contact-list-item idx contact (= idx selected)))
+                   contacts)]))
+
+#+end_src
+****** render-app!
+#+begin_src clojure
+(defn render-app! [state]
+  (set-app-html!
+    (hiccups/html
+      [:div {:class "app-main"}
+        [:div {:class "navbar has-shadow"}
+          [:div {:class "container"}
+            [:div {:class "navbar-brand"}
+              [:span {:class "navbar-item"}
+                "ClojureScript Contacts"]]]]
+        [:div {:class "columns"}
+          (render-contact-list state)
+          [:div {:class "contact-details column is-8"}
+            (section-header (:editing? state))
+            [:div {:class "hero is-fullheight"}
+              (if (:editing? state)
+                (render-contact-details (get-in state [:contacts (:selected state)] {}))
+                [:p {:class "notice"} "No contact selected"])]]]])))
+
+#+end_src
+
+***** Adding Interactions
+#+begin_src clojure
+(defn on-open-contact [e state]
+  (refresh!
+    (let [idx (int (.. e -currentTarget -dataset -idx))]
+      (assoc state :selected idx
+                   :editing? true))))
+
+(defn attach-event-handlers! [state]
+  (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
+    (gevents/listen elem "click"
+      (fn [e] (on-open-contact e state)))))
+
 
 #+end_src
 
