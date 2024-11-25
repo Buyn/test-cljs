@@ -2715,7 +2715,7 @@ button {
   (:require
     [goog.dom :as gdom]
     [hiccups.runtime]
-		[clojure.string :as str])
+    [clojure.string :as str])
   (:require-macros [hiccups.core :as hiccups]))
 
 #+end_src

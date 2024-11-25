@@ -1,7 +1,8 @@
 (ns learn-cljs.contacts                 ;
   (:require
     [goog.dom :as gdom]
-    [hiccups.runtime])
+    [hiccups.runtime]
+    [clojure.string :as str])
   (:require-macros [hiccups.core :as hiccups]))
 
 (def contact-list [
@@ -39,6 +40,33 @@
 
 (defn replace-contact [contact-list idx input]
   (assoc contact-list idx (make-contact input)))
+
+(def initial-state
+  {:contacts contact-list
+   :selected nil
+   :editing? false})
+
+(defn format-name [contact]                                ;; <1>
+  (->> contact                                             ;; <2>
+       ((juxt :first-name :last-name))                     ;; <3>
+       (str/join " ")))
+
+(defn delete-icon [idx]
+  [:span {:class "delete-icon"
+          :data-idx idx}
+    [:span {:class "mu mu-delete"}]])
+
+(defn render-contact-list-item [idx contact selected?]
+  [:div {:class (str "card contact-summary" (when selected? " selected"))
+         :data-idx idx}                                    ;; <4>
+    [:div {:class "card-content"}
+      [:div {:class "level"}
+        [:div {:class "level-left"}
+          [:div {:class "level-item"}
+            (delete-icon idx)
+            (format-name contact)]]
+        [:div {:class "level-right"}
+          [:span {:class "mu mu-right"}]]]]])
 
 (defn ^:after-load on-reload []
 
