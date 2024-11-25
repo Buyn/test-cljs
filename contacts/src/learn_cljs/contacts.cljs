@@ -153,8 +153,27 @@
     (gevents/listen elem "click"
       (fn [e] (on-open-contact e state)))))
 
-(defn ^:after-load on-reload []
+(defn get-field-value [id]
+  (let [value (.-value (gdom/getElement id))]
+    (when (not (empty? value)) value)))
 
+(defn get-contact-form-data []
+  {:first-name (get-field-value "input-first-name")
+   :last-name (get-field-value "input-last-name")
+   :email (get-field-value "input-email")
+   :address {:street (get-field-value "input-street")
+             :city (get-field-value "input-city")
+             :state (get-field-value "input-state")
+             :postal (get-field-value "input-postal")
+             :country (get-field-value "input-country")}})
 
-
-)
+(defn on-save-contact [state]
+  (refresh!
+    (let [contact (get-contact-form-data)
+          idx (:selected state)
+          state (dissoc state :selected :editing?)]        ;; <1>
+      (if idx
+        (update state :contacts                            ;; <2>
+                replace-contact idx contact)
+        (update state :contacts
+                add-contact contact)))))
