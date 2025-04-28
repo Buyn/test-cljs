@@ -6,6 +6,8 @@
     [clojure.string :as str])
   (:require-macros [hiccups.core :as hiccups]))
 
+(declare refresh! Set-app-html!)
+
 (def contact-list [
                    {:first-name "Phillip"
                     :last-name "Jordan"
@@ -46,6 +48,15 @@
   {:contacts contact-list
    :selected nil
    :editing? false})
+
+(def app-container (gdom/getElement "app"))
+
+(def top-bar
+  [:div {:class "navbar has-shadow"}
+   [:div {:class "container"}
+    [:div {:class "navbar-brand"}
+     [:span {:class "navbar-item"}
+      "ClojureScript Contacts"]]]])
 
 (defn form-field                                           ;; <1>
   ([id value label] (form-field id value label "text"))
@@ -128,11 +139,7 @@
   (set-app-html!
     (hiccups/html
       [:div {:class "app-main"}
-        [:div {:class "navbar has-shadow"}
-          [:div {:class "container"}
-            [:div {:class "navbar-brand"}
-              [:span {:class "navbar-item"}
-                "ClojureScript Contacts"]]]]
+        top-bar
         [:div {:class "columns"}
           (render-contact-list state)
           [:div {:class "contact-details column is-8"}
@@ -140,7 +147,7 @@
             [:div {:class "hero is-fullheight"}
               (if (:editing? state)
                 (render-contact-details (get-in state [:contacts (:selected state)] {}))
-                [:p {:class "notice"} "No contact selected"])]]]])))
+                no-contact-details)]]]])))
 
 (defn on-open-contact [e state]
   (refresh!
@@ -148,10 +155,7 @@
       (assoc state :selected idx
                    :editing? true))))
 
-(defn attach-event-handlers! [state]
-  (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
-    (gevents/listen elem "click"
-      (fn [e] (on-open-contact e state)))))
+(def no-contact-details   [:p {:class "notice"}    "No contact selected"])
 
 (defn get-field-value [id]
   (let [value (.-value (gdom/getElement id))]
@@ -177,3 +181,61 @@
                 replace-contact idx contact)
         (update state :contacts
                 add-contact contact)))))
+
+(defn on-add-contact [state]
+  (refresh! (-> state
+                (assoc :editing? true)
+                (dissoc :selected))))
+
+(defn replace-contact [contact-list idx input]
+  (assoc contact-list idx (make-contact input)))
+
+(defn on-save-contact [state]
+  (refresh!
+    (let [contact (get-contact-form-data)
+          idx (:selected state)
+          state (dissoc state :selected :editing?)]
+      (if idx
+        (update state :contacts replace-contact idx contact)
+        (update state :contacts add-contact contact)))))
+
+(defn on-cancel-edit [state]
+  (refresh! (dissoc state :selected :editing?)))
+
+(defn on-delete-contact [e state]
+  (.stopPropagation e)
+  (let [idx (int (.. e -currentTarget -dataset -idx))]
+    (refresh! (-> state
+                  (update :contacts remove-contact idx)
+                  (cond-> (= idx (:selected state))
+                    (dissoc :selected :editing?))))))
+
+(defn attach-event-handlers! [state]
+  (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
+    (gevents/listen elem "click"
+      (fn [e] (on-open-contact e state))))
+
+  (doseq [elem (array-seq (gdom/getElementsByClass "delete-icon"))]
+    (gevents/listen elem "click"
+      (fn [e] (on-delete-contact e state))))
+
+  (when-let [add-button (gdom/getElement "add-contact")]
+    (gevents/listen add-button "click"
+      (fn [_] (on-add-contact state))))
+
+  (when-let [save-button (gdom/getElement "save-contact")]
+    (gevents/listen save-button "click"
+      (fn [_] (on-save-contact state))))
+
+  (when-let [cancel-button (gdom/getElement "cancel-edit")]
+    (gevents/listen cancel-button "click"
+      (fn [_] (on-cancel-edit state)))))
+
+(defn set-app-html! [html-str]
+  (set! (.-innerHTML app-container) html-str))
+
+(defn refresh! [state]                                     ;; <3>
+  (render-app! state)
+  (attach-event-handlers! state))
+
+(refresh! initial-state)                                   ;; <4>

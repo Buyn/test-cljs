@@ -38,7 +38,11 @@ from
 #+PROPERTY:    tangle ~/INI/hydra-cfg.el
 
 :header-args: :tangle  "~/INI/hydra-cfg.el"
-* docs
+* docs all in brain
+** all in brain
+[[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
+[[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
+
 ** link to turials
 *** stoped
 (eww-of "https://www.learn-clojurescript.com/")
@@ -60,15 +64,22 @@ https://github.com/kendru/learn-cljs/blob/main/code/lesson-8/weather/resources/p
 *** fers src and new gen
 (eww-of "https://www.learn-clojurescript.com/section-1/lesson-5-bootstrapping-a-clojurescript-project/")
 *** debt
-сделать таки приложение
+**** сделать таки приложение
  * Capstone 2 - Temperature Converter
 (eww-of "https://www.learn-clojurescript.com/section-2/lesson-15-capstone-temperature-converter/")
+**** Fix: error in contact app
+https://www.learn-clojurescript.com/section-3/lesson-20-capstone-3-contact-book/
+[[*contacts][contacts]]
 ** docs links
 https://clojuredocs.org/clojure.string/split#examples
 https://cljs.info/cheatsheet/
 ** manuals
 *** seting up
-yay -Sy clojure rlwrap
+yay -Sy clojure rlwrap leiningen
+
+yay -S clojure rlwrap leiningen
+
+
 
 Optional dependencies for clojure
     leiningen: automate clojure projects
@@ -197,6 +208,99 @@ mkdir -p src/hello_seymore
 touch src/hello_seymore/core.cljs
 
 ** clojure
+*** ns
+**** exampls
+(ns learn-cljs.import-fns
+    (:require learn-cljs.import-fns.ui                     ;; <1>
+              [learn-cljs.import-fns.format                ;; <2>
+               :refer [pluralize]]
+              [learn-cljs.import-fns.inventory             ;; <3>
+               :as inventory]
+              [goog.dom :refer [getElement]                ;; <4>
+                        :rename {getElement get-element}]))
+
+1 Require the entire learn-cljs.import-fns.ui namespace
+2 Require a single function from the
+ learn-cljs.import-fns.format namespace
+3 Require the learn-cljs.import-fns.inventory namespace with
+ the alias inventory
+4 Require a single function from the Google Closure Library
+ namespace, renaming that function
+**** Form 2: Refer
+
+In the second case, we follow the namespace by :refer
+[pluralize]. :refer will make every var that is listed in the vector
+that follows available without any prefix. Thus, we can write
+(pluralize item) instead of
+(learn-cljs.import-fns.format/pluralize item). Any function
+in the learn-cljs.import-fns.format namespace can still be
+called using the fully-qualified syntax.
+**** Form 3: Aliased Namespace
+
+In the third case, we alias the namespace that we require using :as.
+This works similar to the first case in that we are able to refer to any
+public var in the namespace. However, we can use the symbol that
+we specified after :as instead of the full namespace. Thus,
+learn-cljs.import-fns.inventory/make-inventory becomes
+inventory/make-inventory. The use of :as can be very useful when
+requiring from namespaces with very verbose names. In general, we
+should also prefer :as to :refer, since it makes it clear where a var
+that we reference comes from without needing to look back at the
+namespace declaration.
+**** Form 4: Aliased Vars
+
+Finally, in the fourth case, we rename a specific var that we referred.
+Here, we alias the getElement function from the Google Closure
+Library’s goog.dom module in order to give it a more idiomatic
+kebab-case name. In practice, renaming is used more often to
+prevent a name collision. For example, we may want to import
+functions called mark-inactive from both my-app.users and
+my-app.customers namespaces. We can use :rename to import them
+as mark-user-inactive and mark-customer-inactive.
+**** table
+  Require Form  Description  Function Usage    
+  my.namespace  require entire  my.namespace/compute    
+    namespace      
+  my.namespace  require specific  compute    
+  :refer [compute  functions and refer to      
+  other-fn]  them unqualified      
+  my.namespace :as  require namespace  mine/compute    
+  mine  with alias      
+  my.namespace  require namespace  calculate    
+  :refer [compute]  with specific vars      
+  :rename {compute  aliased      
+  calculate}        
+**** Importing Google Closure Library Classes
+(ns my-ns
+  (:import [goog.math Coordinate Rect]))
+
+(.contains (Rect. 10 50 5 5)
+           (Coordinate. 12 50))
+
+The thing to remember about :import is that it is only used for
+requiring classes (including enums) from Google Closure modules -
+never for including a ClojureScript namespace or a
+(non-constructor) function from a Google Closure module.
+**** Requiring Macros
+(:require-macros [macro-ns :as macros])
+**** private function
+(defn- add-quantity [inventory-item qty]                   ;; <3>
+  (update-in inventory-item [:qty]
+    (fn [current-qty] (+ current-qty qty))))
+
+3 Use defn- to declare a private function
+**** Namespaces and the REPL
+***** :reload
+dev:cljs.user=> (require '[learn-cljs.import-fns.format :as fmt] :reload)
+nil
+dev:cljs.user=> (fmt/pluralize "burrito")
+"burritos"
+***** in-ns
+dev:cljs.user=> (in-ns 'import-fns.format)
+
+dev:import-fns.format=> (replace-suffix "programmer" "er" "ing")
+"programming"
+
 *** cond
 **** condp
 (condp
@@ -411,6 +515,8 @@ combination of sequence elements:
 (gcd 90 60)                                                ;; <3>
 ;; 30
 
+
+
 (defn gcd-loop [a b]
   (loop [x a                                               ;; <1>
          y b]
@@ -420,6 +526,19 @@ combination of sequence elements:
 ;; #'cljs.user/gcd-loop
 (gcd-loop 90 60)
 ;; 30
+***** loop Dissected
+(loop [name-1 init-value-1                                 ;; <1>
+       name-2 init-value-2]
+  body-exprs                                               ;; <2>
+  (recur next-value-1 next-value-2))                       ;; <3>
+
+
+1 Pass in any number of bindings along with their value for the first
+ pass of the loop
+2 Any number of body expressions
+3 Optionally recur to the beginning of the loop, supplying the values
+ for each binding during the next iteration
+
 ***** for
 (loop [i 0
       numbers []]
@@ -462,6 +581,21 @@ Forcing Evaluation of a Lazy Sequence
 1 Stub the send-to-api function
 2 Iterate through the users collection
 3 Side effects are performed immediately
+**** do
+(do
+    (gevents/listen (gdom/getElement "app") "click"
+      (fn [e]
+        (condp = (aget e "target" "id")
+          "up"   (swap! app-state inc)
+          "down" (swap! app-state dec))))
+
+    (add-watch app-state :counter-observer                 ;; <3>
+      (fn [key atom old-val new-val]
+        (render new-val)))
+
+    (render @app-state)
+
+    true)
 *** vars
 **** def
 (def my-name "Fred")                                       ;; <1>
@@ -669,6 +803,13 @@ bar"                                                         ;; <4>
   (->> contact                                             ;; <2>
        ((juxt :first-name :last-name))                     ;; <3>
        (str/join " ")))
+****** string/replace
+(defn disemvowel
+  [string]
+  (clojure.string/replace string #"(?i)[aeiou]" ""))
+****** format
+ (format "%d %d" (apply max xs) (apply min xs))))
+
 ***** Booleans
 ClojureScript also uses JavaScript booleans. Since the only possible
 options for a boolean are true or false, we will forego an extended
@@ -798,10 +939,10 @@ Sets
 Nil is the empty value and is always written as nil. It is the
 equivalent of null in JavaScript and acts the same as false when
 used as a boolean.
-***** convert
-****** str->int
+**** convert
+***** str->int
 (defn str->int [s] (Integer/parseInt s))
-****** Integer.
+***** Integer.
 (map #(Integer. %) (str/split game #":"))
 **** maps
 ***** stract
@@ -981,7 +1122,140 @@ cljs.user=> (rest {:x 10, :y 12, :z 7})
 | :name | Silicone Pancake Mold        | :price |  9.441 |
 | :name | Small Pour-Over Coffee Maker | :price | 17.064 |
 | :name | Digital Kitchen Scale        | :price | 22.455 |
+**** atoms
+***** def
+(def counter (atom 0))
+***** get
+****** deref
+Since an atom provides a reference to some value at any point in
+time, we can dereference it - that is, get the immutable value to which
+it refers - by using the deref macro or its shorthand form, @.
 
+counter                                                    ;; <1>
+;; => #object[cljs.core.Atom {:val 0}]
+(deref counter)                                            ;; <2>
+;; => 0
+
+@counter                                                   ;; <3>
+;; => 0
+***** set
+****** swap!
+******* counter
+(swap! counter inc)
+
+@counter
+;; => 1
+
+(swap! counter + 9)
+
+@counter
+;; => 10
+
+(swap! counter (constantly 0))
+
+******* creature and base-creature
+(def creature
+  (atom {:type "water"
+         :life 50
+         :abilities ["swimming" "speed"]}))
+
+(def base-creature @creature)                              ;; <1>
+
+(swap! creature update :abilities conj "night vision")
+
+@creature                                                  ;; <2>
+;; => {:type "water"
+;;     :life 50
+;;     :abilities ["swimming" "speed" "night vision"]}
+
+base-creature                                              ;; <3>
+;; => {:type "water"
+;;     :life 50
+;;     :abilities ["swimming", "speed"]}
+****** reset!
+(reset! counter 0)
+
+@counter
+;; => 0
+***** set-validator!
+(set-validator! creature
+  (fn [c] (>= (:life c) 0)))
+
+(swap! creature assoc :life 10) ;; Ok
+
+(swap! creature assoc :life -1) ;; Throws error
+
+(:life @creature) ;; 10
+***** watch
+****** add-watch
+
+(defonce app-state (atom 0))                               ;; <1>
+
+(def app-container (gdom/getElement "app"))
+
+(defn render [state]                                       ;; <2>
+  (set! (.-innerHTML app-container)
+        (hiccups/html
+          [:div
+            [:p "Counter: " [:strong state]]
+            [:button {:id "up"} "+"]
+            [:button {:id "down"} "-"]])))
+
+(defonce is-initialized?
+  (do
+    (gevents/listen (gdom/getElement "app") "click"
+      (fn [e]
+        (condp = (aget e "target" "id")
+          "up"   (swap! app-state inc)
+          "down" (swap! app-state dec))))
+
+    (add-watch app-state :counter-observer                 ;; <3>
+      (fn [key atom old-val new-val]
+        (render new-val)))
+
+    (render @app-state)
+
+    true))
+****** remove-watch
+(remove-watch app-state :counter-observer)
+***** patterns
+****** Guideline #1: Pass atoms explicitly
+
+In order to keep a function testable and easy to reason about, we
+should always explicitly pass in any atom(s) on which it operates as
+arguments rather than operating on a global atom from its scope:
+
+;; Don't do this
+(def state (atom {:counter 0}))                            ;; <1>
+(defn increment-counter []
+  (swap! state update :counter inc))
+
+;; OK
+(defn increment-counter [state]                            ;; <2>
+  (swap! state update :counter inc))
+****** Guideline #2: Prefer fewer atoms
+In general, an application should have fewer atoms with more data
+rather than a separate atom for every piece of state. It is simpler to
+think about transitioning our entire app state one step at a time
+rather than synchronizing separate pieces of state:
+
+;; Don't do this
+(def account-a (atom 100))                                 ;; <1>
+(def account-b (atom 100))
+(swap! account-a - 25)
+(swap! account-b + 25)
+
+;; OK
+(def accounts (atom {:a 100                                ;; <2>
+                     :b 100}))
+(swap! accounts
+  (fn [accounts]
+    (-> accounts
+        (update :a - 25)
+        (update :b + 25))))
+
+1 Represent each piece of state as a separate atom
+2 Represent our “world” as an atom
 **** actions
 ***** costing
 ****** into
@@ -1363,6 +1637,83 @@ duble-click-max-lag
 (reduce #() {:bigest 0, :timestamp (:timestamp (ferst events))} events)
 
 #+end_src
+***** update
+(defn maybe-set-address [contact]                          ;; <1>
+  (if (:address contact)
+    (update contact :address make-address)
+    contact))
+
+(update state :contacts                            ;; <2>
+        replace-contact idx contact)
+(update state :contacts
+        add-contact contact)))))
+***** update-in
+      (update-in [:tags] conj "immutability")
+      (update-in [:rating] inc)
+      (update-in [:title] #(str % " for fun and profit"))
+***** transient
+(transient {})
+;; #object[cljs.core.TransientArrayMap]
+
+The API for working with transients is similar to the standard
+collection API, but the transformation functions all have a !
+appended, e.g. assoc!, conj!. The read API, however, is identical to
+that of immutable collections. A transient collection may be
+converted back to its persistent counterpart using the persistent!
+function:
+
+(-> {}
+    transient                                              ;; <1>
+    (assoc! :speed 12.3)
+    (assoc! :position [44, 29])
+    persistent!)                                           ;; <2>
+1 Convert map to a transient
+2 Convert transient map back to a persistent (immutable) structure
+
+*** Constract
+**** #
+(some #(= (:name %) "Potion of Wisdom")
+      (get-inventory player))
+**** on functin operatins
+***** comp
+****** q
+1 comp creates a new function that composes others together
+the -> macro applied in reverse
+тоесть берёт функции и последовательно применяет кним аргумент
+(= ((comp f g) x)
+   (f (g x)))
+****** x1
+(defn user-status [user]
+  [:div {:class "user-status"}
+    ((juxt
+      (comp bold nickname)                                 ;; <1>
+      (partial with-status                                 ;; <2>
+               [:span {:class "status-indicator"}]))
+     user)])
+***** partial
+****** q
+2 partial creates a function that already has some arguments
+ supplied
+
+(defn add [x y]                                            ;; <1>
+  (+ x y))
+
+(def add-5 (partial add 5))                                ;; <2>
+
+(add-5 10)
+;; 15
+
+(def add-5
+  (fn [y]
+    (add 5 y)))
+****** x1
+(defn user-status [user]
+  [:div {:class "user-status"}
+    ((juxt
+      (comp bold nickname)                                 ;; <1>
+      (partial with-status                                 ;; <2>
+               [:span {:class "status-indicator"}]))
+     user)])
 ***** juxt
 ****** x01
 (def minmax
@@ -1384,20 +1735,6 @@ duble-click-max-lag
 ((juxt :first-name :last-name) {:first-name "Bob" :last-name "Jones"})
 ;; ["Bob" "Jones"]
 ****** 3
-***** update
-(defn maybe-set-address [contact]                          ;; <1>
-  (if (:address contact)
-    (update contact :address make-address)
-    contact))
-
-(update state :contacts                            ;; <2>
-        replace-contact idx contact)
-(update state :contacts
-        add-contact contact)))))
-*** Constract
-**** #
-(some #(= (:name %) "Potion of Wisdom")
-      (get-inventory player))
 **** range
 ***** take
 (take 5 (range))                                           ;; <5>
@@ -1438,6 +1775,15 @@ duble-click-max-lag
 
 (#(str "Hello " %) "world")
 ;; => "Hello world"
+***** closure
+(defn make-adder [x]
+  (fn [y]
+    (add x y)))
+
+((make-adder 1) 5)  ;; 6
+((make-adder 2) 5)  ;; 7
+((make-adder 10) 5) ;; 15
+
 **** defn
 ***** def fn
 (def contains-every?                                       ;; <1>
@@ -1536,6 +1882,115 @@ nil
   (->> contact                                             ;; <2>
        ((juxt :first-name :last-name))                     ;; <3>
        (str/join " ")))
+**** try
+***** base
+
+(try
+  (do-stuff 42)
+  (call-api {:id 17})                                      ;; <1>
+  true                                                     ;; <2>
+  (catch js/Error e                                        ;; <3>
+    (println "An error occurred:" e)
+    false)
+  (finally
+    (do-cleanup)))                                         ;; <4>
+
+1 Multiple expressions can occur inside the body of try
+2 try is an expression and returns a value
+3 catch is always used with the class of the value that should be
+ caught
+4 If a finally clause is present, it is called for side effects
+***** throw
+dev:cljs.user=> (try
+           #_=>   (throw {:type :custom-error
+           #_=>           :message "Something unpleasant occurred"})
+           #_=>   (catch :default e
+           #_=>     (println "Caught value:" e)))
+Caught value: {:type :custom-error, :message Something unpleasant occurred}
+nil
+***** ex-info
+****** def
+(ex-info "A parse error occurred"                          ;; <1>
+         {:line 17 :char 8 :last-token "for"}              ;; <2>
+         :unexpected-end-of-string)                        ;; <3>
+
+Creating an ExceptionInfo error
+
+1 Error message
+2 Metadata
+3 Cause (optional)
+****** long
+(def required-attrs [:id :email])
+(def allowed-attrs [:id :email :first-name :last-name])
+
+(defn make-user [user-data]
+  (cond
+    (not (every? #(contains? user-data %) required-attrs))
+    (throw (ex-info "Missing required attributes"
+                    {:required required-attrs
+                     :found (keys user-data)}
+                    :validation-failed))
+    (not (every? #(some (set allowed-attrs) %) (keys user-data)))
+    (throw (ex-info "Found disallowed attributes"
+                    {:allowed allowed-attrs
+                     :found (keys user-data)}
+                    :validation-failed))
+    :else (assoc user-data :type :user)))
+
+(defn hydrate-user []
+  (let [serialized-user (try
+                          (.getItem js/localStorage "current-user")
+                          (catch js/Error _
+                            (throw (ex-info "Could not load data from localStorage"
+                                            {}
+                                            :local-storage-unsupported))))
+        user-data (try
+                    (.parse js/JSON serialized-user)
+                    (catch js/Error _
+                      (throw (ex-info "Could not parse user data"
+                                      {:string serialized-user}
+                                      :parse-failed))))]
+    (-> user-data
+        (js->clj :keywordize-keys true)
+        make-user)))
+
+(try
+  (hydrate-user)
+  (catch ExceptionInfo e
+    (case (ex-cause e)
+      :local-storage-unsupported
+      (display-error (str "Local storage not supported: "
+                                                     (ex-message e)))
+      :parse-failed
+      (do (display-error "Could not load user data from browser")
+          (log-error {:type :user-parse-failed
+                      :source (:string (ex-data e))}))
+      :validation-failed
+      (do (display-error "There was an error in your submission. Please correct it before continuing.")
+          (update-field-errors (ex-data e)))
+      ;; Re-throw an unknown error
+      (throw e))))
+
+***** repl
+#+begin_src clojure
+(try
+  :success
+  (catch :default _
+    :failure))
+
+#+end_src
+
+#+begin_src clojure
+(try
+		(throw {:type :custom-error
+						:message "Something unpleasant occurred"})
+		(catch :default e
+			(println "Caught value:" e)))
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+
 *** colections
 **** conj
 
@@ -1552,6 +2007,24 @@ cljs.user=> (conj #{:lions :tigers} :tigers)               ;; <4>
 #{:lions :tigers}
 **** first
 **** rest
+**** remove
+***** pred
+(remove pos? [1 -2 2 -1 3 7 0])
+;;=> (-2 -1 0)
+
+(remove nil? [1 nil 2 nil 3 nil])
+;;=> (1 2 3)
+
+;; remove items that are evenly divisible by 3
+(remove #(zero? (mod % 3)) (range 1 21))
+;;=> (1 2 4 5 7 8 10 11 13 14 16 17 19 20)
+***** codewars
+
+(defn disemvowel [string]
+  (->> string
+       (remove (set "aeiouAEIOU"))
+       (apply str)))
+
 **** repl
 ***** Sequence
 #+begin_src clojure
@@ -1616,7 +2089,28 @@ cljs.user=> (conj #{:lions :tigers} :tigers)               ;; <4>
          :value (:postal-code @app-state)
          :on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
 *** button
+**** on-click
 [:button {:on-click get-forecast!} "Go"]
+**** gevents/listen
+(defn render [state]                                       ;; <2>
+  (set! (.-innerHTML app-container)
+        (hiccups/html
+          [:div
+            [:p "Counter: " [:strong state]]
+            [:button {:id "up"} "+"]
+            [:button {:id "down"} "-"]])))
+
+(defonce is-initialized?
+  (do
+    (gevents/listen (gdom/getElement "app") "click"
+      (fn [e]
+        (condp = (aget e "target" "id")
+          "up"   (swap! app-state inc)
+          "down" (swap! app-state dec))))
+
+    (add-watch app-state :counter-observer                 ;; <3>
+      (fn [key atom old-val new-val]
+        (render new-val)))
 *** change in map
 **** whith swap! and assoc
          (swap! app-state assoc :postal-code (-> % .-target .-value))}]
@@ -1994,6 +2488,30 @@ cljs.user=> (with-duration my-session (.now js/Date))
  :user-agent "Some UA",
  :page-views [],
  :duration 14}
+**** getHours
+(defn get-current-hour []                                  ;; <1>
+  (.getHours (js/Date.)))
+
+(defn get-time-of-day-greeting [hour]                      ;; <2>
+  (condp >= hour
+    11 "Good morning"
+    15 "Good day"
+    "Good evening"))
+
+(get-time-of-day-greeting (get-current-hour))
+;; "Good day"
+**** Date 
+(defn get-current-hour []                                  ;; <1>
+  (.getHours (js/Date.)))
+
+(defn get-time-of-day-greeting [hour]                      ;; <2>
+  (condp >= hour
+    11 "Good morning"
+    15 "Good day"
+    "Good evening"))
+
+(get-time-of-day-greeting (get-current-hour))
+;; "Good day"
 ** Google Closure’s
 *** .querySelector
 cljs.user=> (def body (.querySelector js/document "body")) ;; <2>
@@ -2736,8 +3254,10 @@ button {
     [clojure.string :as str])
   (:require-macros [hiccups.core :as hiccups]))
 
+(declare refresh! Set-app-html!)
 #+end_src
-***** contact-list
+***** Models and State
+****** contact-list
 #+begin_src clojure
 (def contact-list [
                    {:first-name "Phillip"
@@ -2751,7 +3271,7 @@ button {
 
 
 #+end_src
-***** make-contact
+****** make-contact
 #+begin_src clojure
 (defn make-address [address]
   (select-keys address [:street :city :state :country]))
@@ -2779,27 +3299,31 @@ button {
 (defn replace-contact [contact-list idx input]
   (assoc contact-list idx (make-contact input)))
 #+end_src
-***** initial-state
+****** initial-state
 #+begin_src clojure
 (def initial-state
   {:contacts contact-list
    :selected nil
    :editing? false})
 #+end_src
-***** refresh!
-#+begin_src clojure :tangle no
+****** declare refresh!
+#+begin_src clojure
 (def app-container (gdom/getElement "app"))
-
-(defn set-app-html! [html-str]
-  (set! (.-innerHTML app-container) html-str))
-
-(defn refresh! [state]                                     ;; <3>
-  (render-app! state)
-  (attach-event-handlers! state))
-
-(refresh! initial-state)                                   ;; <4>
 #+end_src
-***** render-app!
+
+***** UI
+****** top-bar
+#+begin_src clojure
+(def top-bar
+  [:div {:class "navbar has-shadow"}
+   [:div {:class "container"}
+    [:div {:class "navbar-brand"}
+     [:span {:class "navbar-item"}
+      "ClojureScript Contacts"]]]])
+
+        
+#+end_src
+
 ****** render-contact-details
 #+begin_src clojure
 (defn form-field                                           ;; <1>
@@ -2890,11 +3414,7 @@ button {
   (set-app-html!
     (hiccups/html
       [:div {:class "app-main"}
-        [:div {:class "navbar has-shadow"}
-          [:div {:class "container"}
-            [:div {:class "navbar-brand"}
-              [:span {:class "navbar-item"}
-                "ClojureScript Contacts"]]]]
+        top-bar
         [:div {:class "columns"}
           (render-contact-list state)
           [:div {:class "contact-details column is-8"}
@@ -2902,11 +3422,12 @@ button {
             [:div {:class "hero is-fullheight"}
               (if (:editing? state)
                 (render-contact-details (get-in state [:contacts (:selected state)] {}))
-                [:p {:class "notice"} "No contact selected"])]]]])))
+                no-contact-details)]]]])))
 
 #+end_src
 
 ***** Adding Interactions
+****** on-open-contact
 #+begin_src clojure
 (defn on-open-contact [e state]
   (refresh!
@@ -2914,16 +3435,9 @@ button {
       (assoc state :selected idx
                    :editing? true))))
 
-(defn attach-event-handlers! [state]
-  (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
-    (gevents/listen elem "click"
-      (fn [e] (on-open-contact e state)))))
-
-
+(def no-contact-details   [:p {:class "notice"}    "No contact selected"])
 #+end_src
-
-***** adding or updating a contact
-
+****** adding or updating a contact
 #+begin_src clojure
 (defn get-field-value [id]
   (let [value (.-value (gdom/getElement id))]
@@ -2949,6 +3463,72 @@ button {
                 replace-contact idx contact)
         (update state :contacts
                 add-contact contact)))))
+
+(defn on-add-contact [state]
+  (refresh! (-> state
+                (assoc :editing? true)
+                (dissoc :selected))))
+
+(defn replace-contact [contact-list idx input]
+  (assoc contact-list idx (make-contact input)))
+
+(defn on-save-contact [state]
+  (refresh!
+    (let [contact (get-contact-form-data)
+          idx (:selected state)
+          state (dissoc state :selected :editing?)]
+      (if idx
+        (update state :contacts replace-contact idx contact)
+        (update state :contacts add-contact contact)))))
+
+(defn on-cancel-edit [state]
+  (refresh! (dissoc state :selected :editing?)))
+
+(defn on-delete-contact [e state]
+  (.stopPropagation e)
+  (let [idx (int (.. e -currentTarget -dataset -idx))]
+    (refresh! (-> state
+                  (update :contacts remove-contact idx)
+                  (cond-> (= idx (:selected state))
+                    (dissoc :selected :editing?))))))
+
+#+end_src
+****** attach-event-handlers!
+#+begin_src clojure
+(defn attach-event-handlers! [state]
+  (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
+    (gevents/listen elem "click"
+      (fn [e] (on-open-contact e state))))
+
+  (doseq [elem (array-seq (gdom/getElementsByClass "delete-icon"))]
+    (gevents/listen elem "click"
+      (fn [e] (on-delete-contact e state))))
+
+  (when-let [add-button (gdom/getElement "add-contact")]
+    (gevents/listen add-button "click"
+      (fn [_] (on-add-contact state))))
+
+  (when-let [save-button (gdom/getElement "save-contact")]
+    (gevents/listen save-button "click"
+      (fn [_] (on-save-contact state))))
+
+  (when-let [cancel-button (gdom/getElement "cancel-edit")]
+    (gevents/listen cancel-button "click"
+      (fn [_] (on-cancel-edit state)))))
+
+
+#+end_src
+
+***** refresh!
+#+begin_src clojure 
+(defn set-app-html! [html-str]
+  (set! (.-innerHTML app-container) html-str))
+
+(defn refresh! [state]                                     ;; <3>
+  (render-app! state)
+  (attach-event-handlers! state))
+
+(refresh! initial-state)                                   ;; <4>
 #+end_src
 ***** # after-load not use
 #+begin_src clojure :tangle no 
@@ -2980,6 +3560,7 @@ button {
            :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
 #+end_src
 *** contacts_test.cljs
+** 
 * project comands
 :PROPERTIES:
 :header-args: :tangle no
