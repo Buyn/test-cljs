@@ -2875,6 +2875,9 @@ clj -A:fig:build                                         # <2>
 **** comannds
 clj -A:fig:build
 (js/alert "Am I connected?")
+** reagent-test
+$ clj -X:new :template figwheel-main :name learn-cljs/reagent-test :args '["+deps"]'
+$ cd reagent-test
 * Sorce files
 ** Sorce files project ferst
 :PROPERTIES:
@@ -3214,7 +3217,6 @@ button {
 **** file
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
 
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing-io.cljs
 **** # origin comented
 #+begin_src clojure :tangle no
 (ns ^:figwheel-hooks learn-cljs.contacts
@@ -3560,7 +3562,9 @@ button {
            :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
 #+end_src
 *** contacts_test.cljs
-** 
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
+** Group Chat
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat-cljs-project.org")
 * project comands
 :PROPERTIES:
 :header-args: :tangle no
@@ -3999,3 +4003,5 @@ Please install rlwrap for command editing or use "clojure" instead.
 #+begin_src emacs-lisp  :results output silent tangle: no
 (find-file-other-frame "~/Dropbox/orgs/capture/Necroteuch.org")
     #+end_src
+** my-cljs-project.org
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/my-cljs-project.org")
