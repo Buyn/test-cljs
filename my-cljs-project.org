@@ -2861,7 +2861,7 @@ clj -A:fig:build
 cd contacts
 clj -A:fig:build                                         # <2>
 *** run in eshell
-**** run  eshell
+**** run eshell
 #+begin_src elisp :results output silent :dir contacts
 (evil-previous-line)
 (org-cycle)
@@ -2876,8 +2876,252 @@ clj -A:fig:build                                         # <2>
 clj -A:fig:build
 (js/alert "Am I connected?")
 ** reagent-test
-$ clj -X:new :template figwheel-main :name learn-cljs/reagent-test :args '["+deps"]'
-$ cd reagent-test
+*** new project
+clj -X:new :template figwheel-main :name learn-cljs/reagent-test :args '["+deps"]'
+cd reagent-test
+*** build
+clj -A:fig:build
+
+(js/alert "Am I connected?")
+
+  To get started:
+  -->  Change into the 'reagent-test' directory
+  -->  Start build with 'clojure -M:fig:build'
+*** run in eshell
+**** run  eshell
+#+begin_src elisp :results output silent :dir reagent-test
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+  (evil-window-split)
+  (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** comannds
+clj -A:fig:build
+(js/alert "Am I connected?")
+*** files
+**** deps.edn
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/deps.edn")
+
+:deps {;; Other deps...
+       reagent/reagent {:mvn/version "1.0.0"}}
+
+        org.clojure/data.json {:mvn/version "2.5.1"}
+**** index.html
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/resources/public/index.html")
+**** src/reagent_test/core.cljs
+***** file
+(find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/src/learn_cljs/
+***** src/reagent_test/core.cljs
+:PROPERTIES:
+:header-args: :tangle reagent-test/src/learn_cljs/reagent_test.cljs
+:END:
+****** +original+
+#+begin_src clojure :tangle no
+(ns ^:figwheel-hooks learn-cljs.reagent-test
+  (:require
+   [goog.dom :as gdom]))
+
+(println "This text is printed from src/learn_cljs/reagent_test.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+
+#+end_src
+****** ns
+#+begin_src clojure 
+(ns learn-cljs.reagent-test
+    (:require [reagent.core :as r]                         ;; <1>
+              [reagent.ratom :as ratom]                    ;; <2>
+              [reagent.dom :as rdom]
+              [goog.dom :as gdom]
+              [goog.events :as gevents]))
+#+end_src
+****** cells
+#+begin_src clojure
+(def a-cell (r/atom 0))                                    ;; <3>
+(def b-cell (r/atom 0))
+(def c-cell
+  (ratom/make-reaction                                     ;; <4>
+    #(+ @a-cell @b-cell)))
+
+(def a (gdom/getElement "cell-a"))
+(def b (gdom/getElement "cell-b"))
+(def c (gdom/getElement "cell-c"))
+(def test-text (gdom/getElement "test-text"))
+
+(defn update-cell [cell]
+  (fn [e]
+    (let [num (js/parseInt (.. e -target -value))]
+      (reset! cell num))))
+
+
+(gevents/listen a "change" (update-cell a-cell))           ;; <5>
+(gevents/listen b "change" (update-cell b-cell))
+
+(ratom/run!                                                ;; <6>
+  (set! (.-value c) @c-cell)
+  )
+#+end_src
+****** form
+(defn date-input []
+  [:div.input-wrapper                                      ;; <1>
+    [:label "Day"]
+    [:input {:type "date"}]])                              ;; <2>
+
+#+begin_src clojure
+
+(defn hello []
+  [:p "Hello World"])
+
+(defn time-input []
+  [:div.input-wrapper
+    [:label "Time (minutes)"]
+    [:input {:type "number" :min 0 :step 1}]])
+
+(defn submit-button []
+  [:div.actions
+    [:button {:type "submit"} "Submit"]])
+
+(defn form []
+  [:form.input-form
+    [date-input]                                           ;; <3>
+    [time-input]
+    [submit-button]])
+#+end_src
+
+****** state
+#+begin_src clojure 
+(defn- current-date-string [d]
+  (let [pad-zero #(.padStart (.toString %) 2 "0")
+        y (.getFullYear d)
+        m (-> (.getMonth d) inc pad-zero)
+        d (pad-zero (.getDate d))]
+    (str y "-" m "-" d)))
+
+(defonce state
+  ;; (r/atom {:inputs {:date (date-string (js/Date.))
+  (r/atom {:inputs {:date (current-date-string (js/Date.))
+                    :minutes "0"}}))
+
+(defn date-input []
+  [:div.input-wrapper
+    [:label "Day"]
+    [:input {:type "date"
+             :value (get-in @state [:inputs :date])
+             :on-change #(swap! state assoc-in [:inputs :date]
+                           (.. % -target -value))}]])
+#+end_src
+(defn date-input []
+  [:div.input-wrapper
+    [:label "Day"]
+    [:input {:type "date"
+             :value (get-in @state [:inputs :date])}]])
+****** chart
+#+begin_src clojure
+(defn- random-point []
+  (js/Math.floor (* (js/Math.random) 100)))
+
+(defonce chart-data
+  (let [points (map random-point (range 30))]              ;; <1>
+    (r/atom {:points points
+             :chart-max (reduce max 1 points)})))
+
+(def chart-width 400)
+(def chart-height 200)
+(def bar-spacing 2)
+
+(defn chart []
+  (let [{:keys [points chart-max]} @chart-data             ;; <2>
+        bar-width (- (/ chart-width (count points))
+                     bar-spacing)]
+    [:svg.chart {:x 0 :y 0
+                 :width chart-width :height chart-height}
+      (for [[i point] (map-indexed vector points)          ;; <3>
+            :let [x (* i (+ bar-width bar-spacing))        ;; <4>
+                  pct (- 1 (/ point chart-max))
+                  bar-height (- chart-height (* chart-height pct))
+                  y (- chart-height bar-height)]]
+        [:rect {:key i                                     ;; <5>
+                :x x :y y
+                :width bar-width
+                :height bar-height}])]))
+#+end_src
+
+****** app
+(defn app []
+  [form])
+#+begin_src clojure
+(defn app []
+  [:div.app
+    [chart]
+    [form]])
+
+(rdom/render
+  [app]
+  (gdom/getElement "app"))
+#+end_src
+
+(set! test-text (hello))
+(js/alert "Am I connected?")
+****** repl to send
+[reagent.dom :as rdom]
+(require '[reagent.dom :as rdom] :reload)
+(require '[reagent.dom :as rdom] )
+(require '[reagent.dom :as rdom] )
+(:require [reagent.core :as r]                         
+              [reagent.ratom :as ratom]               
+              [reagent.dom :as rdom]
+              [goog.dom :as gdom]
+              [goog.events :as gevents])
+
+(ns learn-cljs.reagent-test
+(in-ns 'learn-cljs.reagent-test)
+
+(rdom/render
+  hello
+  (gdom/getElement "app"))
+
+(rdom/render hello)
+
+
+(rdom/render
+  (hello)
+  (gdom/getElement "app"))
+*** run
+(buyn-shell-start "konsole -e 'cd ~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/'")
+#+begin_src elisp :results output silent :dir reagent-test
+(buyn-shell-start "konsole -e 'clj -A:fig:build'")
+;; (evil-previous-line)
+;; (org-cycle)
+(delete-other-windows)
+#+end_src
+*** repl
+clj -A:fig:build
+
+(in-ns 'learn-cljs.reagent-test)
+#+begin_src elisp :results output silent :dir reagent-test
+clj -A:fig:build
+#+end_src
+
 * Sorce files
 ** Sorce files project ferst
 :PROPERTIES:
@@ -3591,7 +3835,21 @@ button {
 (burly-bookmark-frames "buffers clojure")
 (bookmark-save nil "/home/buyn/temp/bookmarks")
 #+end_src
-** run eshell in org root
+** new project
+clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
+$ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
+** run console in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
+
+** repl
+*** run eshell in org root
 clj -M:dev
 clojure -m cljs.main --compile my-cljs-project.core --repl
 #+begin_src elisp :results output silent
@@ -3606,25 +3864,11 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 #+end_src
 
       ;; (execute-kbd-macro "A \C-m")
-** new project
-clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
-$ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
-** cider
-If you have a Clojure project in your file system and want CIDER to launch an nREPL session for it, simply visit a file that belongs to the project, and type M-x cider-jack-in RET.[1] CIDER will start an nREPL server and automatically connect to it.
-  In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
-
-** run console in org root
+*** run repl
 clj -M:dev
 clojure -m cljs.main --compile my-cljs-project.core --repl
-#+begin_src elisp :results output silent
-(buyn-shell-start "konsole")
-(evil-previous-line)
-(org-cycle)
-(delete-other-windows)
-#+end_src
-
-** run repl
-clojure -m cljs.main --compile my-cljs-project.core --repl
+:cljs/quit
+:cljs/restart
 #+begin_src eshell
 clj -m cljs.main --compile my-cljs-project.core --repl
 
@@ -3632,6 +3876,13 @@ clj -m cljs.main --compile my-cljs-project.core --repl
 #+end_src
 
 #+RESULTS:
+*** repl commands
+:cljs/quit
+
+** cider
+If you have a Clojure project in your file system and want CIDER to launch an nREPL session for it, simply visit a file that belongs to the project, and type M-x cider-jack-in RET.[1] CIDER will start an nREPL server and automatically connect to it.
+  In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
+
 ** run console with command
 #+begin_src elisp :results output silent
 (buyn-shell-start "konsole -e /bin/bash --rcfile <(clj -M:dev)")
@@ -3988,11 +4239,20 @@ tree -a ../..
 #+end_src
 
 * todo
+** понять в чём разница
+открыть в двух rangers
+** DONE запустить програму из книги
+CLOSED: [2025-05-01 Thu 19:05]
+тоесть мз папкм книгии
+** DONE как запустить репл
+CLOSED: [2025-05-01 Thu 19:05]
 ** DONE add line for open console
 CLOSED: [2024-08-14 Wed 09:18]
 to projet root
-** eshell package for send rigeon to eshell
-** auto save bookmarks
+** DONE eshell package for send rigeon to eshell
+CLOSED: [2025-04-30 Wed 21:31]
+** DONE auto save bookmarks
+CLOSED: [2025-04-30 Wed 21:31]
 ** DONE geting error
 CLOSED: [2024-08-18 Sun 11:11]
 ~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
