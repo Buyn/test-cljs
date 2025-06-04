@@ -29,40 +29,12 @@
   (set! (.-value c) @c-cell)
   )
 
-(defn hello []
-  [:p "Hello World"])
-
-(defn time-input []
-  [:div.input-wrapper
-    [:label "Time (minutes)"]
-    [:input {:type "number" :min 0 :step 1}]])
-
-(defn submit-button []
-  [:div.actions
-    [:button {:type "submit"} "Submit"]])
-
-(defn form []
-  [:form.input-form {:on-submit (fn [e]
-                                    (.preventDefault e)
-                                    (swap! state submit-form))}
-    [date-input]                                           ;; <3>
-    [time-input]
-    [submit-button]])
-
-(defn initial-inputs []
-
-  {:date (current-date-string (js/Date.))
-   :minutes "0"})
-
-(defonce state
-  (r/atom {:inputs (initial-inputs)
-           :entries {}}))
-
-(defn submit-form [state]
-  (let [{:keys [date minutes]} (:inputs state)]
-    (-> state
-        (assoc-in [:entries date] (js/parseInt minutes))
-        (assoc :inputs (initial-inputs)))))
+(defn- date-string [d]
+  (let [pad-zero #(.padStart (.toString %) 2 "0")
+        y (.getFullYear d)
+        m (-> (.getMonth d) inc pad-zero)
+        d (pad-zero (.getDate d))]
+    (str y "-" m "-" d)))
 
 (defn- current-date-string [d]
   (let [pad-zero #(.padStart (.toString %) 2 "0")
@@ -71,6 +43,14 @@
         d (pad-zero (.getDate d))]
     (str y "-" m "-" d)))
 
+(defn initial-inputs []
+  {:date (date-string (js/Date.))
+
+   :minutes "0"})
+
+(defonce state
+  (r/atom {:inputs (initial-inputs)
+           :entries {}}))
 
 (defn date-input []
   (let [val (r/cursor state [:inputs :date])]              ;; <1>
@@ -81,6 +61,35 @@
                  :value @val                               ;; <2>
                  :on-change #(reset! val                   ;; <3>
                                (.. % -target -value))}]])))
+
+(defn time-input []
+  (let [val (r/cursor state [:inputs :minutes])]
+    (fn []
+      [:div.input-wrapper
+       [:label "Time (minutes)"]
+       [:input {:type "number" :min 0 :step 1
+                :value @val
+                :on-change #(reset! val (.. % -target -value))}]])))
+
+(defn submit-button []
+  [:div.actions
+   [:button {:type "submit"} "Submit"]])
+
+(defn submit-form [state]
+  (let [{:keys [date minutes]} (:inputs state)]
+    (-> state
+        (assoc-in [:entries date] (js/parseInt minutes))
+        (assoc :inputs (initial-inputs)))))
+
+(defn get-points [entries]
+  (let [ms-in-day 86400000
+        chart-days 30
+        now (js/Date.now)]
+    (map (fn [i]
+           (let [days-ago (- chart-days (inc i))
+                 date (date-string (js/Date. (- now (* ms-in-day days-ago))))]
+             (get entries date 0)))
+         (range chart-days))))
 
 (defn- random-point []
   (js/Math.floor (* (js/Math.random) 100)))
@@ -95,14 +104,11 @@
 (def bar-spacing 2)
 
 (defn chart []
-
-  (let [entries (r/cursor state [:entries])                ;; <1>
-        chart-data (ratom/make-reaction                    ;; <2>
-          #(let [points (get-points @entries)]
-                { :points points
-                  :chart-max (reduce max 1 points)})
-              bar-width (- (/ chart-width (count points))
-                          bar-spacing))]
+  (let [entries (r/cursor state [:entries])
+        chart-data (ratom/make-reaction
+                    #(let [points (get-points @entries)]
+                       {:points points
+                        :chart-max (reduce max 1 points)}))]
     (fn []
       (let [{:keys [points chart-max]} @chart-data
             bar-width (- (/ chart-width (count points))
@@ -119,15 +125,13 @@
                    :width bar-width
                    :height bar-height}])]))))
 
-(defn get-points [entries]
-  (let [ms-in-day 86400000
-        chart-days 30
-        now (js/Date.now)]
-    (map (fn [i]
-           (let [days-ago (- chart-days (inc i))
-                 date (date-string (js/Date. (- now (* ms-in-day days-ago))))]
-             (get entries date 0)))
-         (range chart-days))))
+(defn form []
+  [:form.input-form {:on-submit (fn [e]
+                                    (.preventDefault e)
+                                    (swap! state submit-form))}
+    [date-input]                                           ;; <3>
+    [time-input]
+    [submit-button]])
 
 (defn app []
   [:div.app
