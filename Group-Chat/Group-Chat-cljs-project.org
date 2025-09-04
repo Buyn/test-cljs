@@ -12,28 +12,6 @@
 :PROPERTIES:
 :header-args: :tangle no
 :END:
-** save буфер фреймы проекта
-#+begin_src emacs-lisp  :results output silent
-(use-package burly
- :ensure t
- ;; :config
-  )
-;; (burly-bookmark-frames "weather buffers")
-(bookmark-save nil "/home/buyn/temp/bookmarks")
-(burly-bookmark-frames "buffers LAST SAVE")
-(bookmark-save nil "/home/buyn/temp/bookmarks")
-#+end_src
-** save буфер фреймы clojure
-#+begin_src emacs-lisp  :results output silent
-(use-package burly
- :ensure t
- ;; :config
-  )
-;; (burly-bookmark-frames "weather buffers")
-(bookmark-save nil "/home/buyn/temp/bookmarks")
-(burly-bookmark-frames "buffers clojure")
-(bookmark-save nil "/home/buyn/temp/bookmarks")
-#+end_src
 ** run eshell in org root
 clj -M:dev
 clojure -m cljs.main --compile my-cljs-project.core --repl
@@ -433,7 +411,7 @@ tree -a ../..
 * todo
 * 2025-04-28
 ** Group Chat
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat-cljs-project.org")
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat/Group-Chat-cljs-project.org")
 
-** my-cljs-project.org
+** from my-cljs-project.org
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/my-cljs-project.org")

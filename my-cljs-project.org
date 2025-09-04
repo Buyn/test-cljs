@@ -19,6 +19,7 @@ and then name the block you want to execute automatically:
 ;; (universal-argument)
 ;; (universal-argument)
 (org-babel-tangle)
+(find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
 ;; (find-file-other-frame "~/INI/hydra-cfg.el")
 ;; (load "~/INI/hydra-cfg.el")
 ;; (load "~/ELs/BuYn/reader.el")
@@ -1982,10 +1983,10 @@ Creating an ExceptionInfo error
 
 #+begin_src clojure
 (try
-		(throw {:type :custom-error
-						:message "Something unpleasant occurred"})
-		(catch :default e
-			(println "Caught value:" e)))
+                (throw {:type :custom-error
+                                                :message "Something unpleasant occurred"})
+                (catch :default e
+                        (println "Caught value:" e)))
 #+end_src
 
 #+RESULTS:
@@ -2648,8 +2649,447 @@ nil
 #+end_src
 * NEXT Log
 :PROPERTIES:
-:header-args: :tangle no
+:header-args: :tangle no 
 :END:
+** NEXT reagent-test
+*** new project
+clj -X:new :template figwheel-main :name learn-cljs/reagent-test :args '["+deps"]'
+cd reagent-test
+*** build
+clj -A:fig:build
+
+(js/alert "Am I connected?")
+
+  To get started:
+  -->  Change into the 'reagent-test' directory
+  -->  Start build with 'clojure -M:fig:build'
+*** run in eshell
+**** run  eshell
+#+begin_src elisp :results output silent :dir reagent-test
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+  (evil-window-split)
+  (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** comannds
+clj -A:fig:build
+(js/alert "Am I connected?")
+  Exit: :cljs/quit
+cljs/quit
+(cljs/quit)
+*** files
+**** deps.edn
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/deps.edn")
+
+:deps {;; Other deps...
+       reagent/reagent {:mvn/version "1.0.0"}}
+
+        org.clojure/data.json {:mvn/version "2.5.1"}
+**** index.html
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/resources/public/index.html")
+**** src/reagent_test/core.cljs
+***** file
+(find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/src/learn_cljs/
+***** src/reagent_test/core.cljs
+:PROPERTIES:
+:header-args: :tangle reagent-test/src/learn_cljs/reagent_test.cljs
+:END:
+****** +original+
+#+begin_src clojure :tangle no
+(ns ^:figwheel-hooks learn-cljs.reagent-test
+  (:require
+   [goog.dom :as gdom]))
+
+(println "This text is printed from src/learn_cljs/reagent_test.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+
+#+end_src
+****** ns
+org sorce blok tag :backend nil
+(setq org-babel-clojure-backend nil)
+(setq org-babel-clojure-backend 'clojure-cli)
+
+#+begin_src clojure 
+(ns learn-cljs.reagent-test
+    (:require [reagent.core :as r]                         ;; <1>
+              [reagent.ratom :as ratom]                    ;; <2>
+              [reagent.dom :as rdom]
+              [goog.dom :as gdom]
+              [goog.events :as gevents]))
+#+end_src
+
+****** cells
+#+begin_src clojure
+(def a-cell (r/atom 0))                                    ;; <3>
+(def b-cell (r/atom 0))
+(def c-cell
+  (ratom/make-reaction                                     ;; <4>
+    #(+ @a-cell @b-cell)))
+
+(def a (gdom/getElement "cell-a"))
+(def b (gdom/getElement "cell-b"))
+(def c (gdom/getElement "cell-c"))
+(def test-text (gdom/getElement "test-text"))
+
+(defn update-cell [cell]
+  (fn [e]
+    (let [num (js/parseInt (.. e -target -value))]
+      (reset! cell num))))
+
+
+(gevents/listen a "change" (update-cell a-cell))           ;; <5>
+(gevents/listen b "change" (update-cell b-cell))
+
+(ratom/run!                                                ;; <6>
+  (set! (.-value c) @c-cell)
+  )
+#+end_src
+****** state
+#+begin_src clojure 
+
+
+(defn- date-string [d]
+  (let [pad-zero #(.padStart (.toString %) 2 "0")
+        y (.getFullYear d)
+        m (-> (.getMonth d) inc pad-zero)
+        d (pad-zero (.getDate d))]
+    (str y "-" m "-" d)))
+
+(defn- current-date-string [d]
+  (let [pad-zero #(.padStart (.toString %) 2 "0")
+        y (.getFullYear d)
+        m (-> (.getMonth d) inc pad-zero)
+        d (pad-zero (.getDate d))]
+    (str y "-" m "-" d)))
+
+(defn initial-inputs []
+  {:date (date-string (js/Date.))
+  ;; {:date (current-date-string (js/Date.))
+   :minutes "0"})
+
+(defonce state
+  (r/atom {:inputs (initial-inputs)
+           :entries {}}))
+
+(defn date-input []
+  (let [val (r/cursor state [:inputs :date])]              ;; <1>
+    (fn []
+      [:div.input-wrapper
+        [:label "Day"]
+        [:input {:type "date"
+                 :value @val                               ;; <2>
+                 :on-change #(reset! val                   ;; <3>
+                               (.. % -target -value))}]])))
+
+(defn time-input []
+  (let [val (r/cursor state [:inputs :minutes])]
+    (fn []
+      [:div.input-wrapper
+       [:label "Time (minutes)"]
+       [:input {:type "number" :min 0 :step 1
+                :value @val
+                :on-change #(reset! val (.. % -target -value))}]])))
+
+#+end_src
+(defn time-input []
+  [:div.input-wrapper
+    [:label "Time (minutes)"]
+    [:input {:type "number" :min 0 :step 1}]])
+    
+(defn date-input []
+  [:div.input-wrapper
+    [:label "Day"]
+    [:input {:type "date"
+             :value (get-in @state [:inputs :date])
+             :on-change #(swap! state assoc-in [:inputs :date]
+                           (.. % -target -value))}]])
+(defn date-input []
+  [:div.input-wrapper
+    [:label "Day"]
+    [:input {:type "date"
+             :value (get-in @state [:inputs :date])}]])
+****** submit
+#+begin_src clojure 
+(defn submit-button []
+  [:div.actions
+   [:button {:type "submit"} "Submit"]])
+
+(defn submit-form [state]
+  (let [{:keys [date minutes]} (:inputs state)]
+    (-> state
+        (assoc-in [:entries date] (js/parseInt minutes))
+        (assoc :inputs (initial-inputs)))))
+
+#+end_src
+
+(defn form []
+  [:form.input-form {:on-submit (fn [e]
+                                  (.preventDefault e)
+                                  (swap! state submit-form))}
+    ;; ...
+  ])
+(defonce state
+  ;; (r/atom {:inputs {:date (date-string (js/Date.))
+  (r/atom {:inputs {:date (current-date-string (js/Date.))
+                    :minutes "0"}}))
+****** chart recton
+#+begin_src clojure 
+(defn get-points [entries]
+  (let [ms-in-day 86400000
+        chart-days 30
+        now (js/Date.now)]
+    (map (fn [i]
+           (let [days-ago (- chart-days (inc i))
+                 date (date-string (js/Date. (- now (* ms-in-day days-ago))))]
+             (get entries date 0)))
+         (range chart-days))))
+
+
+#+end_src
+****** chart
+#+begin_src clojure
+(defn- random-point []
+  (js/Math.floor (* (js/Math.random) 100)))
+
+(defonce chart-data
+  (let [points (map random-point (range 30))]              ;; <1>
+    (r/atom {:points points
+             :chart-max (reduce max 1 points)})))
+
+(def chart-width 400)
+(def chart-height 200)
+(def bar-spacing 2)
+
+(defn chart []
+  (let [entries (r/cursor state [:entries])
+        chart-data (ratom/make-reaction
+                    #(let [points (get-points @entries)]
+                       {:points points
+                        :chart-max (reduce max 1 points)}))]
+    (fn []
+      (let [{:keys [points chart-max]} @chart-data
+            bar-width (- (/ chart-width (count points))
+                         bar-spacing)]
+        [:svg.chart {:x 0 :y 0
+                     :width chart-width :height chart-height}
+         (for [[i point] (map-indexed vector points)
+               :let [x (* i (+ bar-width bar-spacing))
+                     pct (- 1 (/ point chart-max))
+                     bar-height (- chart-height (* chart-height pct))
+                     y (- chart-height bar-height)]]
+           [:rect {:key i
+                   :x x :y y
+                   :width bar-width
+                   :height bar-height}])]))))
+
+#+end_src
+****** aditional functions
+#+begin_src clojure
+
+#+end_src
+****** CANCELED hello world
+CLOSED: [2025-05-22 Thu 00:45]
+
+(ns learn-cljs.exercise-tracker
+  (:require [reagent.dom :as rdom]
+            [goog.dom :as gdom]))
+#+begin_src clojure :tangle no
+
+(defn hello []
+  [:p "Hello World"])
+
+(rdom/render
+  hello                                                    ;; <1>
+  (gdom/getElement "app"))                                 ;; <2>
+#+end_src
+****** form
+(defn date-input []
+  [:div.input-wrapper                                      ;; <1>
+    [:label "Day"]
+    [:input {:type "date"}]])                              ;; <2>
+
+#+begin_src clojure
+(defn form []
+  [:form.input-form {:on-submit (fn [e]
+                                    (.preventDefault e)
+                                    (swap! state submit-form))}
+    [date-input]                                           ;; <3>
+    [time-input]
+    [submit-button]])
+#+end_src
+  [:form.input-form
+
+****** render app
+(defn app []
+  [form])
+#+begin_src clojure
+(defn app []
+  [:div.app
+    [chart]
+    [form]])
+
+(rdom/render
+  [app]
+  (gdom/getElement "app"))
+#+end_src
+
+(set! test-text (hello))
+(js/alert "Am I connected?")
+***** repl to send
+[reagent.dom :as rdom]
+(require '[reagent.dom :as rdom] :reload)
+(require '[reagent.dom :as rdom] )
+(require '[reagent.dom :as rdom] )
+(:require [reagent.core :as r]                         
+              [reagent.ratom :as ratom]               
+              [reagent.dom :as rdom]
+              [goog.dom :as gdom]
+              [goog.events :as gevents])
+
+# (ns learn-cljs.reagent-test
+(in-ns 'learn-cljs.reagent-test)
+
+(rdom/render
+  hello
+  (gdom/getElement "app"))
+
+(rdom/render hello)
+
+
+(rdom/render
+  (hello)
+  (gdom/getElement "app"))
+*** run
+(buyn-shell-start "konsole -e 'cd ~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/'")
+#+begin_src elisp :results output silent :dir reagent-test
+(buyn-shell-start "konsole -e 'clj -M:fig:build'")
+;; (evil-previous-line)
+;; (org-cycle)
+(delete-other-windows)
+#+end_src
+*** repl
+**** open eshell
+#+begin_src elisp :results output silent :dir reagent-test
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+**** command
+cd reagent-test
+clj -A:fig:build
+
+(in-ns 'learn-cljs.reagent-test)
+#+begin_src elisp :results output silent :dir reagent-test
+clj -A:fig:build
+#+end_src
+*** NEXT todo
+**** разобратся с танглом
+какого чёрта оно отвалилос
+(prn (binding [*out* (java.io.StringWriter.)
+**** DONE открыть книжну версию
+CLOSED: [2025-05-21 Wed 21:24]
+**** DONE перенести измения 
+CLOSED: [2025-05-21 Wed 21:24]
+сделать похожим
+**** CANCELED убирать пока не запустится
+CLOSED: [2025-05-22 Thu 00:34]
+**** CANCELED установить функцию ошибки
+CLOSED: [2025-05-22 Thu 00:34]
+**** CANCELED посторатся понять что конкретно мешает
+CLOSED: [2025-05-22 Thu 00:34]
+**** DONE запусить хоть что-то
+CLOSED: [2025-06-05 Thu 00:42]
+похоже проблема в кложуре а не в прграме
+удивительно но нет в браузере!!! но скрипт блочил локалхост
+**** DONE пообшать гпт
+CLOSED: [2025-06-05 Thu 00:42]
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/dev.cljs.edn
+
+^{:watch-dirs ["src"]
+  :css-dirs ["resources/public/css"]
+  :auto-testing true
+   }
+{:main learn-cljs.reagent-test}
+
+tree src/
+
+src/
+`-- learn_cljs
+    `-- reagent_test.cljs
+
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/resources/public/index.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="https://clojurescript.org/images/cljs-logo-icon-32.png">
+  </head>
+  <body>
+    <h1>Reactive Cells</h1>
+    <div>
+      <label id="test-text">empty </label>
+    </div>
+    <div>
+      <label for="cell-a">A: </label>
+      <input id="cell-a" type="number" value="0" />
+    </div>
+    <div>
+      <label for="cell-b">B: </label>
+      <input id="cell-b" type="number" value="0" />
+    </div>
+    <div>
+      <label for="cell-c">C: </label>
+      <input id="cell-c" readonly type="number" />
+    </div>
+    <div id="app"></div>    
+    <!-- KEEP THIS SCRIPT TAG : IT LOADS YOUR APPLICATION CODE -->
+    <script src="cljs-out/dev-main.js" type="text/javascript"></script>
+  </body>
+</html>
+
+browser console log
+Content-Security-Policy: The page’s settings blocked an inline script (script-src-elem) from being executed because it violates the following directive: “script-src-elem 'none'” 3 sandbox eval code:17:34
+Content-Security-Policy: The page’s settings blocked the loading of a resource (media-src) at data: because it violates the following directive: “media-src http: file:” 3 localhost:9500
+Content-Security-Policy: The page’s settings blocked a JavaScript eval (script-src) from being executed because it violates the following directive: “script-src 'none'” (Missing 'unsafe-eval')
+Source: HTMLElement.prototype.focus = ((realFocu… 3 localhost:9500
+Adding a listener for beforescriptexecute events is deprecated and will be removed soon. DocumentCSP.js:33:28
+Loading failed for the <script> with source “http://localhost:9500/cljs-out/dev-main.js”. localhost:9500:28:63
+Content-Security-Policy: The page’s settings blocked a script (script-src-elem) at http://localhost:9500/cljs-out/dev-main.js from being executed because it violates the following directive: “script-src-elem 'none'” 4 localhost:9500
+Error processing sheet 
+CSSStyleSheet 
+ DOMException: CSSStyleSheet.cssRules getter: Not allowed to access cross-origin stylesheet
+    process moz-extension://5cffb2dc-415f-4314-8066-808e7d149831/nscl/content/prefetchCSSResources.js:165
+    checkNode moz-extension://5cffb2dc-415f-4314-8066-808e7d149831/nscl/content/prefetchCSSResources.js:245
+    observer moz-extension://5cffb2dc-415f-4314-8066-808e7d149831/nscl/content/prefetchCSSResources.js:287
+prefetchCSSResources.js:175:17
 ** weather
 *** new project
 clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
@@ -2875,331 +3315,6 @@ clj -A:fig:build                                         # <2>
 **** comannds
 clj -A:fig:build
 (js/alert "Am I connected?")
-** NEXT reagent-test
-*** new project
-clj -X:new :template figwheel-main :name learn-cljs/reagent-test :args '["+deps"]'
-cd reagent-test
-*** build
-clj -A:fig:build
-
-(js/alert "Am I connected?")
-
-  To get started:
-  -->  Change into the 'reagent-test' directory
-  -->  Start build with 'clojure -M:fig:build'
-*** run in eshell
-**** run  eshell
-#+begin_src elisp :results output silent :dir reagent-test
-(evil-previous-line)
-(org-cycle)
-(delete-other-windows)
-(let (buffer-name-to-close (buffer-name))
-  (evil-window-split)
-  (eshell)
-        (evil-quit)
-        (switch-to-buffer-other-frame buffer-name-to-close))
-#+end_src
-**** comannds
-clj -A:fig:build
-(js/alert "Am I connected?")
-*** files
-**** deps.edn
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/deps.edn")
-
-:deps {;; Other deps...
-       reagent/reagent {:mvn/version "1.0.0"}}
-
-        org.clojure/data.json {:mvn/version "2.5.1"}
-**** index.html
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/resources/public/index.html")
-**** src/reagent_test/core.cljs
-***** file
-(find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/src/learn_cljs/
-***** src/reagent_test/core.cljs
-:PROPERTIES:
-:header-args: :tangle reagent-test/src/learn_cljs/reagent_test.cljs
-:END:
-****** +original+
-#+begin_src clojure :tangle no
-(ns ^:figwheel-hooks learn-cljs.reagent-test
-  (:require
-   [goog.dom :as gdom]))
-
-(println "This text is printed from src/learn_cljs/reagent_test.cljs. Go ahead and edit it and see reloading in action.")
-
-(defn multiply [a b] (* a b))
-
-;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:text "Hello world!"}))
-
-(defn get-app-element []
-  (gdom/getElement "app"))
-
-
-
-;; specify reload hook with ^:after-load metadata
-(defn ^:after-load on-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
-
-#+end_src
-****** ns
-#+begin_src clojure 
-(ns learn-cljs.reagent-test
-    (:require [reagent.core :as r]                         ;; <1>
-              [reagent.ratom :as ratom]                    ;; <2>
-              [reagent.dom :as rdom]
-              [goog.dom :as gdom]
-              [goog.events :as gevents]))
-#+end_src
-****** cells
-#+begin_src clojure
-(def a-cell (r/atom 0))                                    ;; <3>
-(def b-cell (r/atom 0))
-(def c-cell
-  (ratom/make-reaction                                     ;; <4>
-    #(+ @a-cell @b-cell)))
-
-(def a (gdom/getElement "cell-a"))
-(def b (gdom/getElement "cell-b"))
-(def c (gdom/getElement "cell-c"))
-(def test-text (gdom/getElement "test-text"))
-
-(defn update-cell [cell]
-  (fn [e]
-    (let [num (js/parseInt (.. e -target -value))]
-      (reset! cell num))))
-
-
-(gevents/listen a "change" (update-cell a-cell))           ;; <5>
-(gevents/listen b "change" (update-cell b-cell))
-
-(ratom/run!                                                ;; <6>
-  (set! (.-value c) @c-cell)
-  )
-#+end_src
-****** form
-(defn date-input []
-  [:div.input-wrapper                                      ;; <1>
-    [:label "Day"]
-    [:input {:type "date"}]])                              ;; <2>
-
-#+begin_src clojure
-
-(defn hello []
-  [:p "Hello World"])
-
-(defn time-input []
-  [:div.input-wrapper
-    [:label "Time (minutes)"]
-    [:input {:type "number" :min 0 :step 1}]])
-
-(defn submit-button []
-  [:div.actions
-    [:button {:type "submit"} "Submit"]])
-
-(defn form []
-  [:form.input-form {:on-submit (fn [e]
-                                    (.preventDefault e)
-                                    (swap! state submit-form))}
-    [date-input]                                           ;; <3>
-    [time-input]
-    [submit-button]])
-#+end_src
-  [:form.input-form
-
-****** submit
-#+begin_src clojure 
-
-(defn initial-inputs []
-  ;; {:date (date-string (js/Date.))
-  {:date (current-date-string (js/Date.))
-   :minutes "0"})
-
-(defonce state
-  (r/atom {:inputs (initial-inputs)
-           :entries {}}))
-
-(defn submit-form [state]
-  (let [{:keys [date minutes]} (:inputs state)]
-    (-> state
-        (assoc-in [:entries date] (js/parseInt minutes))
-        (assoc :inputs (initial-inputs)))))
-
-#+end_src
-
-(defn form []
-  [:form.input-form {:on-submit (fn [e]
-                                  (.preventDefault e)
-                                  (swap! state submit-form))}
-    ;; ...
-  ])
-(defonce state
-  ;; (r/atom {:inputs {:date (date-string (js/Date.))
-  (r/atom {:inputs {:date (current-date-string (js/Date.))
-                    :minutes "0"}}))
-****** state
-#+begin_src clojure 
-(defn- current-date-string [d]
-  (let [pad-zero #(.padStart (.toString %) 2 "0")
-        y (.getFullYear d)
-        m (-> (.getMonth d) inc pad-zero)
-        d (pad-zero (.getDate d))]
-    (str y "-" m "-" d)))
-
-
-(defn date-input []
-  (let [val (r/cursor state [:inputs :date])]              ;; <1>
-    (fn []
-      [:div.input-wrapper
-        [:label "Day"]
-        [:input {:type "date"
-                 :value @val                               ;; <2>
-                 :on-change #(reset! val                   ;; <3>
-                               (.. % -target -value))}]])))
-
-#+end_src
-(defn date-input []
-  [:div.input-wrapper
-    [:label "Day"]
-    [:input {:type "date"
-             :value (get-in @state [:inputs :date])
-             :on-change #(swap! state assoc-in [:inputs :date]
-                           (.. % -target -value))}]])
-(defn date-input []
-  [:div.input-wrapper
-    [:label "Day"]
-    [:input {:type "date"
-             :value (get-in @state [:inputs :date])}]])
-****** chart
-#+begin_src clojure
-(defn- random-point []
-  (js/Math.floor (* (js/Math.random) 100)))
-
-(defonce chart-data
-  (let [points (map random-point (range 30))]              ;; <1>
-    (r/atom {:points points
-             :chart-max (reduce max 1 points)})))
-
-(def chart-width 400)
-(def chart-height 200)
-(def bar-spacing 2)
-
-(defn chart []
-  ;; (let [{:keys [points chart-max]} @chart-data             ;; <2>
-  (let [entries (r/cursor state [:entries])                ;; <1>
-        chart-data (ratom/make-reaction                    ;; <2>
-          #(let [points (get-points @entries)]
-                { :points points
-                  :chart-max (reduce max 1 points)})
-              bar-width (- (/ chart-width (count points))
-                          bar-spacing))]
-    (fn []
-      (let [{:keys [points chart-max]} @chart-data
-            bar-width (- (/ chart-width (count points))
-                         bar-spacing)]
-        [:svg.chart {:x 0 :y 0
-                     :width chart-width :height chart-height}
-         (for [[i point] (map-indexed vector points)
-               :let [x (* i (+ bar-width bar-spacing))
-                     pct (- 1 (/ point chart-max))
-                     bar-height (- chart-height (* chart-height pct))
-                     y (- chart-height bar-height)]]
-           [:rect {:key i
-                   :x x :y y
-                   :width bar-width
-                   :height bar-height}])]))))
-#+end_src
-****** chart recton
-#+begin_src clojure 
-(defn get-points [entries]
-  (let [ms-in-day 86400000
-        chart-days 30
-        now (js/Date.now)]
-    (map (fn [i]
-           (let [days-ago (- chart-days (inc i))
-                 date (date-string (js/Date. (- now (* ms-in-day days-ago))))]
-             (get entries date 0)))
-         (range chart-days))))
-
-
-#+end_src
-****** app
-(defn app []
-  [form])
-#+begin_src clojure
-(defn app []
-  [:div.app
-    [chart]
-    [form]])
-
-(rdom/render
-  [app]
-  (gdom/getElement "app"))
-#+end_src
-
-(set! test-text (hello))
-(js/alert "Am I connected?")
-***** repl to send
-[reagent.dom :as rdom]
-(require '[reagent.dom :as rdom] :reload)
-(require '[reagent.dom :as rdom] )
-(require '[reagent.dom :as rdom] )
-(:require [reagent.core :as r]                         
-              [reagent.ratom :as ratom]               
-              [reagent.dom :as rdom]
-              [goog.dom :as gdom]
-              [goog.events :as gevents])
-
-(ns learn-cljs.reagent-test
-(in-ns 'learn-cljs.reagent-test)
-
-(rdom/render
-  hello
-  (gdom/getElement "app"))
-
-(rdom/render hello)
-
-
-(rdom/render
-  (hello)
-  (gdom/getElement "app"))
-*** run
-(buyn-shell-start "konsole -e 'cd ~/Dev/ClojureScript/tutorials/my-cljs-project/reagent-test/'")
-#+begin_src elisp :results output silent :dir reagent-test
-(buyn-shell-start "konsole -e 'clj -A:fig:build'")
-;; (evil-previous-line)
-;; (org-cycle)
-(delete-other-windows)
-#+end_src
-*** repl
-**** open eshell
-
-#+begin_src elisp :results output silent :dir reagent-test
-(evil-previous-line)
-(org-cycle)
-(delete-other-windows)
-(let (buffer-name-to-close (buffer-name))
-        (evil-window-split)
-        (eshell)
-        (evil-quit)
-        (switch-to-buffer-other-frame buffer-name-to-close))
-#+end_src
-**** command
-cd reagent-test
-clj -A:fig:build
-
-(in-ns 'learn-cljs.reagent-test)
-#+begin_src elisp :results output silent :dir reagent-test
-clj -A:fig:build
-#+end_src
-*** NEXT todo
-**** NEXT открыть книжну версию
-**** перенести измения 
-сделать похожим
 * Sorce files
 ** Sorce files project ferst
 :PROPERTIES:
@@ -3886,7 +4001,7 @@ button {
 *** contacts_test.cljs
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
 ** Group Chat
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat-cljs-project.org")
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat/Group-Chat-cljs-project.org")
 * project comands
 :PROPERTIES:
 :header-args: :tangle no
@@ -4317,7 +4432,24 @@ tree -a ../..
 #+end_src
 
 * todo
-** понять в чём разница
+** Осмотрет проект на котором остановился
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat-cljs-project.org")
+[[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
+** сделать папку
+** нету нечего кроме орга
+** сделать новый проект
+[[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*new project][new project]]
+
+clj -X:new :template figwheel-main :name learn-cljs/group-chat :args '["+deps" "--reagent"]'
+из папки за пределам груп чата
+возможно будет ошибка что папка уже существует
+** сделать структуру
+** попровать запустить
+если его пока нет сделать новый
+** внести первые измение
+** сделать рабочую версию
+** сделать оканчательную версию
+** DONE понять в чём разница
 открыть в двух rangers
 ** DONE запустить програму из книги
 CLOSED: [2025-05-01 Thu 19:05]

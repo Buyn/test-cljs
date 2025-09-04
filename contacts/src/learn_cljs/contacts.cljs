@@ -1,4 +1,4 @@
-(ns learn-cljs.contacts                 ;
+(prn (binding [*out* (java.io.StringWriter.)](ns learn-cljs.contacts                 ;
   (:require
     [goog.dom :as gdom]
     [hiccups.runtime]
@@ -6,9 +6,9 @@
     [clojure.string :as str])
   (:require-macros [hiccups.core :as hiccups]))
 
-(declare refresh! Set-app-html!)
+(declare refresh! Set-app-html!)))
 
-(def contact-list [
+(prn (binding [*out* (java.io.StringWriter.)](def contact-list [
                    {:first-name "Phillip"
                     :last-name "Jordan"
                     :email "phil.j@hotmail.com"
@@ -16,9 +16,9 @@
                               :city "Springfield"
                               :state "MI"
                               :postal "11111"
-                              :country "USA"}}])
+                              :country "USA"}}])))
 
-(defn make-address [address]
+(prn (binding [*out* (java.io.StringWriter.)](defn make-address [address]
   (select-keys address [:street :city :state :country]))
 
 (defn maybe-set-address [contact]                          ;; <1>
@@ -42,23 +42,23 @@
       (subvec contact-list (inc idx)))))
 
 (defn replace-contact [contact-list idx input]
-  (assoc contact-list idx (make-contact input)))
+  (assoc contact-list idx (make-contact input)))))
 
-(def initial-state
+(prn (binding [*out* (java.io.StringWriter.)](def initial-state
   {:contacts contact-list
    :selected nil
-   :editing? false})
+   :editing? false})))
 
-(def app-container (gdom/getElement "app"))
+(prn (binding [*out* (java.io.StringWriter.)](def app-container (gdom/getElement "app"))))
 
-(def top-bar
+(prn (binding [*out* (java.io.StringWriter.)](def top-bar
   [:div {:class "navbar has-shadow"}
    [:div {:class "container"}
     [:div {:class "navbar-brand"}
      [:span {:class "navbar-item"}
-      "ClojureScript Contacts"]]]])
+      "ClojureScript Contacts"]]]])))
 
-(defn form-field                                           ;; <1>
+(prn (binding [*out* (java.io.StringWriter.)](defn form-field                                           ;; <1>
   ([id value label] (form-field id value label "text"))
   ([id value label type]
    [:div {:class "field"}
@@ -81,9 +81,9 @@
         (form-field "input-city" (:city address) "City")
         (form-field "input-state" (:state address) "State")
         (form-field "input-postal" (:postal address) "Postal Code")
-        (form-field "input-country" (:country address) "Country")]]))
+        (form-field "input-country" (:country address) "Country")]]))))
 
-(defn action-button [id text icon-class]
+(prn (binding [*out* (java.io.StringWriter.)](defn action-button [id text icon-class]
   [:button {:id id
             :class "button is-primary is-light"}
     [:span {:class (str "mu " icon-class)}]
@@ -104,9 +104,9 @@
       [:div {:class "level-right"}
         (if editing?
           [:div {:class "buttons"} cancel-button save-button]
-          add-button)]]])
+          add-button)]]])))
 
-(defn format-name [contact]                                ;; <1>
+(prn (binding [*out* (java.io.StringWriter.)](defn format-name [contact]                                ;; <1>
   (->> contact                                             ;; <2>
        ((juxt :first-name :last-name))                     ;; <3>
        (str/join " ")))
@@ -133,9 +133,9 @@
     [:div {:class "contact-list column is-4 hero is-fullheight"}
       (map-indexed (fn [idx contact]
                      (render-contact-list-item idx contact (= idx selected)))
-                   contacts)]))
+                   contacts)]))))
 
-(defn render-app! [state]
+(prn (binding [*out* (java.io.StringWriter.)](defn render-app! [state]
   (set-app-html!
     (hiccups/html
       [:div {:class "app-main"}
@@ -147,17 +147,17 @@
             [:div {:class "hero is-fullheight"}
               (if (:editing? state)
                 (render-contact-details (get-in state [:contacts (:selected state)] {}))
-                no-contact-details)]]]])))
+                no-contact-details)]]]])))))
 
-(defn on-open-contact [e state]
+(prn (binding [*out* (java.io.StringWriter.)](defn on-open-contact [e state]
   (refresh!
     (let [idx (int (.. e -currentTarget -dataset -idx))]
       (assoc state :selected idx
                    :editing? true))))
 
-(def no-contact-details   [:p {:class "notice"}    "No contact selected"])
+(def no-contact-details   [:p {:class "notice"}    "No contact selected"])))
 
-(defn get-field-value [id]
+(prn (binding [*out* (java.io.StringWriter.)](defn get-field-value [id]
   (let [value (.-value (gdom/getElement id))]
     (when (not (empty? value)) value)))
 
@@ -208,9 +208,9 @@
     (refresh! (-> state
                   (update :contacts remove-contact idx)
                   (cond-> (= idx (:selected state))
-                    (dissoc :selected :editing?))))))
+                    (dissoc :selected :editing?))))))))
 
-(defn attach-event-handlers! [state]
+(prn (binding [*out* (java.io.StringWriter.)](defn attach-event-handlers! [state]
   (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
     (gevents/listen elem "click"
       (fn [e] (on-open-contact e state))))
@@ -229,13 +229,13 @@
 
   (when-let [cancel-button (gdom/getElement "cancel-edit")]
     (gevents/listen cancel-button "click"
-      (fn [_] (on-cancel-edit state)))))
+      (fn [_] (on-cancel-edit state)))))))
 
-(defn set-app-html! [html-str]
+(prn (binding [*out* (java.io.StringWriter.)](defn set-app-html! [html-str]
   (set! (.-innerHTML app-container) html-str))
 
 (defn refresh! [state]                                     ;; <3>
   (render-app! state)
   (attach-event-handlers! state))
 
-(refresh! initial-state)                                   ;; <4>
+(refresh! initial-state)                                   ;; <4>))

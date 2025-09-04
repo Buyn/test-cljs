@@ -1,11 +1,11 @@
-(ns learn-cljs.reagent-test
+(prn (binding [*out* (java.io.StringWriter.)](ns learn-cljs.reagent-test
     (:require [reagent.core :as r]                         ;; <1>
               [reagent.ratom :as ratom]                    ;; <2>
               [reagent.dom :as rdom]
               [goog.dom :as gdom]
-              [goog.events :as gevents]))
+              [goog.events :as gevents]))))
 
-(def a-cell (r/atom 0))                                    ;; <3>
+(prn (binding [*out* (java.io.StringWriter.)](def a-cell (r/atom 0))                                    ;; <3>
 (def b-cell (r/atom 0))
 (def c-cell
   (ratom/make-reaction                                     ;; <4>
@@ -27,9 +27,9 @@
 
 (ratom/run!                                                ;; <6>
   (set! (.-value c) @c-cell)
-  )
+  )))
 
-(defn- date-string [d]
+(prn (binding [*out* (java.io.StringWriter.)](defn- date-string [d]
   (let [pad-zero #(.padStart (.toString %) 2 "0")
         y (.getFullYear d)
         m (-> (.getMonth d) inc pad-zero)
@@ -69,9 +69,9 @@
        [:label "Time (minutes)"]
        [:input {:type "number" :min 0 :step 1
                 :value @val
-                :on-change #(reset! val (.. % -target -value))}]])))
+                :on-change #(reset! val (.. % -target -value))}]])))))
 
-(defn submit-button []
+(prn (binding [*out* (java.io.StringWriter.)](defn submit-button []
   [:div.actions
    [:button {:type "submit"} "Submit"]])
 
@@ -79,9 +79,9 @@
   (let [{:keys [date minutes]} (:inputs state)]
     (-> state
         (assoc-in [:entries date] (js/parseInt minutes))
-        (assoc :inputs (initial-inputs)))))
+        (assoc :inputs (initial-inputs)))))))
 
-(defn get-points [entries]
+(prn (binding [*out* (java.io.StringWriter.)](defn get-points [entries]
   (let [ms-in-day 86400000
         chart-days 30
         now (js/Date.now)]
@@ -89,9 +89,9 @@
            (let [days-ago (- chart-days (inc i))
                  date (date-string (js/Date. (- now (* ms-in-day days-ago))))]
              (get entries date 0)))
-         (range chart-days))))
+         (range chart-days))))))
 
-(defn- random-point []
+(prn (binding [*out* (java.io.StringWriter.)](defn- random-point []
   (js/Math.floor (* (js/Math.random) 100)))
 
 (defonce chart-data
@@ -123,21 +123,23 @@
            [:rect {:key i
                    :x x :y y
                    :width bar-width
-                   :height bar-height}])]))))
+                   :height bar-height}])]))))))
 
-(defn form []
+(prn (binding [*out* (java.io.StringWriter.)]))
+
+(prn (binding [*out* (java.io.StringWriter.)](defn form []
   [:form.input-form {:on-submit (fn [e]
                                     (.preventDefault e)
                                     (swap! state submit-form))}
     [date-input]                                           ;; <3>
     [time-input]
-    [submit-button]])
+    [submit-button]])))
 
-(defn app []
+(prn (binding [*out* (java.io.StringWriter.)](defn app []
   [:div.app
     [chart]
     [form]])
 
 (rdom/render
   [app]
-  (gdom/getElement "app"))
+  (gdom/getElement "app"))))

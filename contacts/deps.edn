@@ -1,4 +1,4 @@
-{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
+(prn (binding [*out* (java.io.StringWriter.)]{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
         org.clojure/clojurescript {:mvn/version "1.11.4"}
         hiccups/hiccups {:mvn/version "0.3.0"}}
  :paths ["src" "resources"]
@@ -9,4 +9,4 @@
                  :extra-paths ["target" "test"]}
            :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
            :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
-           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}))

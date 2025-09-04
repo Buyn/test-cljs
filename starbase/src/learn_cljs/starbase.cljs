@@ -1,4 +1,4 @@
-(ns learn-cljs.starbase
+(prn (binding [*out* (java.io.StringWriter.)](ns learn-cljs.starbase
   (:require [bterm.core :as bterm]
             [bterm.io :as io]
             [learn-cljs.starbase.data :as data]
@@ -25,15 +25,15 @@
                     "Game Over ")))
     (io/println term (:title scene))                       ;; <5>
     (io/println term (:dialog scene))
-    (io/read term #(on-answer game current %))))           ;; <6>
+    (io/read term #(on-answer game current %))))           ;; <6>))
 
-(defn on-answer [game current answer]
+(prn (binding [*out* (java.io.StringWriter.)](defn on-answer [game current answer]
   (let [scene (get game current)
         next (if (= :skip (:type scene))
                (:on-continue scene)
                (if (= "yes" answer)
                  (get-in scene [:transitions "yes"])
                  (get-in scene [:transitions "no"])))]
-    (prompt game next)))
+    (prompt game next)))))
 
-(prompt data/game :start)
+(prn (binding [*out* (java.io.StringWriter.)](prompt data/game :start)))

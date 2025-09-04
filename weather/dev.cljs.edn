@@ -1,5 +1,5 @@
-^{:watch-dirs ["src"]
+(prn (binding [*out* (java.io.StringWriter.)]^{:watch-dirs ["src"]
   :css-dirs ["resources/public/css"]
   :auto-testing true
    }
-{:main learn-cljs.weather}
+{:main learn-cljs.weather}))

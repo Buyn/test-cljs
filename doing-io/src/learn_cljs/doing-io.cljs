@@ -1,4 +1,4 @@
-(ns ^:figwheel-hooks learn-cljs.doing-io
+(prn (binding [*out* (java.io.StringWriter.)](ns ^:figwheel-hooks learn-cljs.doing-io
   (:require
    [goog.dom :as gdom]))
 
@@ -19,4 +19,4 @@
 
 
 
-)
+)))
