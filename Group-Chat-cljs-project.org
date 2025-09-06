@@ -1,0 +1,1210 @@
+:PROPERTIES:
+:header-args: :tangle no :mkdirp yes :results output silent :no-expand t
+:END:
+* Sorce files
+** group_chat.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/group_chat.cljs
+:END:
+*** file
+(find-file-other-frame "./group-chat/src/learn_cljs/group_chat.cljs")
+
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/src/learn_cljs/group_chat.cljs
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/src/learn_cljs/
+*** src core.cljs
+**** ns
+#+begin_src clojure :results output silent
+(ns ^:figwheel-hooks learn-cljs.group-chat
+  (:require
+    [goog.dom :as gdom]
+    [reagent.core :as reagent :refer [atom]]
+    [reagent.dom :as rdom]))
+#+end_src
+**** println
+
+(println "Test text")
+
+#+begin_src clojure :results output silent
+
+(println "This text is printed from src/learn_cljs/group_chat.cljs. Go ahead and edit it and see reloading in action.")
+#+end_src
+**** test
+#+begin_src clojure :results output silent
+
+(defn multiply [a b] (* a b))
+#+end_src
+
+**** defonce
+#+begin_src clojure :results output silent
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+#+end_src
+
+**** render
+#+begin_src clojure :results output silent
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+(defn hello-world []
+  [:div
+   [:h1 (:text @app-state)]
+   [:h3 "Edit this in src/learn_cljs/group_chat.cljs and watch it change!"]])
+
+(defn mount [el]
+  (rdom/render [hello-world] el))
+
+(defn mount-app-element []
+  (when-let [el (get-app-element)]
+    (mount el)))
+
+;; conditionally start your application based on the presence of an "app" element
+;; this is particularly helpful for testing this ns without launching the app
+(mount-app-element)
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  (mount-app-element)
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+  )
+#+end_src
+*** CANCELED src core.cljs orig
+#+begin_src clojure :tangle no
+(ns ^:figwheel-hooks learn-cljs.group-chat
+  (:require
+   [goog.dom :as gdom]
+   [reagent.core :as reagent :refer [atom]]
+   [reagent.dom :as rdom]))
+
+(println "This text is printed from src/learn_cljs/group_chat.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+(defn hello-world []
+  [:div
+   [:h1 (:text @app-state)]
+   [:h3 "Edit this in src/learn_cljs/group_chat.cljs and watch it change!"]])
+
+(defn mount [el]
+  (rdom/render [hello-world] el))
+
+(defn mount-app-element []
+  (when-let [el (get-app-element)]
+    (mount el)))
+
+;; conditionally start your application based on the presence of an "app" element
+;; this is particularly helpful for testing this ns without launching the app
+(mount-app-element)
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  (mount-app-element)
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+
+#+end_src
+*** repl
+(ns ^:figwheel-hooks learn-cljs.group-chat
+
+(in-ns 'import-fns.format)
+(in-ns 'learn-cljs.group-chat)
+** chat
+*** state.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/chat/state.cljs
+:END:
+**** file
+(find-file-other-frame "group-chat/src/learn_cljs/chat/state.cljs")
+**** src
+***** ns
+#+begin_src clojure :no-expand t
+(ns learn-cljs.chat.state)
+#+end_src
+***** defonce
+#+begin_src clojure :no-expand t
+(def initial-state
+  {:rooms []
+   :people []
+   :messages []
+   :current-user nil
+   :current-view nil
+   :auth-modal :sign-in
+   :create-room-input-open? false})
+
+(defonce app-state (atom initial-state))                   ;; <2>
+#+end_src
+***** Application data queries
+#+begin_src clojure :no-expand t
+(defn room-by-id [state id]
+  (->> state
+       :rooms
+       (filter #(= id (:id %)))
+       first))
+
+(defn person-by-username [state username]
+  (->> state
+       :people
+       (filter #(= username (:username %)))
+       first))
+#+end_src
+***** UI state queries
+#+begin_src clojure :no-expand t
+(defn is-current-view-room? [state]
+  (= ::room (get-in state [:current-view :type])))
+
+(defn current-room-id [state]
+  (get-in state [:current-view :id]))
+
+(defn is-current-view-conversation? [state]
+  (= ::conversation (get-in state [:current-view :type])))
+
+(defn current-conversation-recipient [state]
+  (get-in state [:current-view :username]))
+
+(defn room-list [state]
+  (let [current-room (when (is-current-view-room? state)
+                       (get-in state [:current-view :id]))]
+    (map (fn [room]
+           (assoc room
+                  :active? (= current-room (:id room))))
+         (:rooms state))))
+
+(defn people-list [app]
+  (let [current-username (when (is-current-view-conversation? app)
+                           (get-in app [:current-view :username]))]
+    (map (fn [person]
+           (assoc person
+                  :active? (= current-username (:username person))))
+         (:people app))))
+#+end_src
+***** UI state transition functions
+#+begin_src clojure :no-expand t
+(defn switched-to-room [state room-id]
+  (assoc state :current-view {:type ::room
+                              :id room-id}))
+
+(defn switched-to-conversation [state username]
+  (assoc state :current-view {:type ::conversation
+                              :username username}))
+
+(defn auth-modal-toggled [state]
+  (update state :auth-modal
+          {:sign-up :sign-in                                     ;; <1>
+           :sign-in :sign-up}))
+
+(defn user-authenticated [state user]
+  (assoc state :current-user user))
+
+(defn create-room-input-opened [state]
+  (assoc state :create-room-input-open? true))
+
+(defn create-room-input-closed [state]
+  (assoc state :create-room-input-open? false))
+#+end_src
+***** Application data transition functions
+#+begin_src clojure :no-expand t
+(defn received-people-list [state people]
+  (assoc state :people people))
+
+(defn person-joined [state person]
+  (let [username (:username person)
+        is-joined-user? #(= username (:username %))]
+    (update state :people
+            (fn [people]
+              (if (some is-joined-user? people)
+                (map
+                  (fn [user]
+                    (if (is-joined-user? user)
+                      (assoc user :online? true)
+                      user))
+                  people)
+                (conj people person))))))
+
+(defn person-left [state username]
+  (update state :people
+          (fn [people]
+            (map #(if (= username (:username %))
+                    (assoc % :online? false)
+                    %) people))))
+
+(defn received-rooms-list [state rooms]
+  (assoc state :rooms rooms))
+
+(defn room-added [state room]
+  (update state :rooms conj room))
+
+(defn message-received [state message]
+  (update state :messages conj message))
+
+(defn messages-received [state messages]
+  (assoc state :messages messages))
+
+(defn messages-cleared [state]
+  (assoc state :messages []))
+#+end_src
+**** org
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/state.cljs")
+
+~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/state.cljs
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/state.cljs
+*** message_bus.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/chat/message_bus.cljs
+:END:
+**** org
+(find-file-other-frame "group-chat/src/learn_cljs/chat/message_bus.cljs")
+**** src
+#+begin_src clojure :no-expand t
+(ns learn-cljs.chat.message-bus
+  (:require [cljs.core.async :refer [go-loop pub sub chan <! put!]]))
+
+(def msg-ch (chan 1))                                      ;; <1>
+(def msg-bus (pub msg-ch ::type))                          ;; <2>
+
+(defn dispatch!                                            ;; <3>
+ ([ch type] (dispatch! ch type nil))
+ ([ch type payload]
+  (put! ch {::type type
+            ::payload payload})))
+
+(defn handle! [p type handle]                              ;; <4>
+  (let [sub-ch (chan)]
+    (sub p type sub-ch)
+    (go-loop []
+      (handle (::payload (<! sub-ch)))
+      (recur))))
+#+end_src
+**** exampl
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/message_bus.cljs
+** deps.edn
+*** file
+(find-file-other-frame "group-chat/deps.edn")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/deps.edn
+*** src
+
+#+begin_src clojure :no-expand t
+{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.132"}
+        org.clojure/data.json {:mvn/version "2.5.1"}
+        cljsjs/react {:mvn/version "18.3.1-1"}
+        cljsjs/react-dom {:mvn/version "18.3.1-1"}
+        org.clojure/core.async {:mvn/version "1.6.681"}
+        reagent/reagent {:mvn/version "1.2.0" }}
+ :paths ["src" "resources"]
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
+                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
+#+end_src
+
+*** exempl
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/deps.edn
+* all
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/resources/public/index.html
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/resources/public/test.html
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/resources/public/css/
+
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/test/learn_cljs/group_chat_test.cljs /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/test/learn_cljs/test_runner.cljs
+
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/deps.edn
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/dev.cljs.edn
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/figwheel-main.edn
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/.gitignore
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/README.md
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/.rebel_readline_history
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/test.cljs.edn
+** Exempl
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat-backend
+* project comands
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+** repl
+*** VERIFY run eshell in project root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+
+clojure -P
+clojure -M:fig:build
+:cljs/quit
+:cljs/restart
+
+#+begin_src elisp :results output silent :dir ./group-chat/
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+
+      ;; (execute-kbd-macro "A \C-m")
+*** run eshell in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+#+begin_src elisp :results output silent
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+
+      ;; (execute-kbd-macro "A \C-m")
+*** run repl
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+
+clojure -M:fig:build
+:cljs/quit
+:cljs/restart
+#+begin_src eshell
+clj -m cljs.main --compile my-cljs-project.core --repl
+
+
+#+end_src
+
+#+RESULTS:
+*** repl commands
+:cljs/quit
+*** repl test
+(js/alert "Am I connected?")
+** new project
+clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
+$ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
+[[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*2025-09-04T11:12:30+03:00][2025-09-04T11:12:30+03:00]]
+** cider
+If you have a Clojure project in your file system and want CIDER to launch an nREPL session for it, simply visit a file that belongs to the project, and type M-x cider-jack-in RET.[1] CIDER will start an nREPL server and automatically connect to it.
+  In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
+
+** console
+*** run console in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
+
+*** run console with command
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole -e /bin/bash --rcfile <(clj -M:dev)")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
+
+* get info
+:PROPERTIES:
+:header-args: :tangle  weather/src/learn_cljs/weather.cljs
+:END:
+** tree group-chat
+#+begin_src eshell
+tree -a ./group-chat/
+#+end_src
+
+#+RESULTS:
+#+begin_example
+./group-chat/
+├── .cpcache
+│   ├── 1658334302.basis
+│   ├── 1658334302.cp
+│   └── 1658334302.main
+├── deps.edn
+├── dev.cljs.edn
+├── figwheel-main.edn
+├── .gitignore
+├── README.md
+├── resources
+│   └── public
+│       ├── css
+│       │   └── style.css
+│       ├── index.html
+│       └── test.html
+├── src
+│   └── learn_cljs
+│       └── group_chat.cljs
+├── target
+│   └── public
+│       └── cljs-out
+│           ├── dev
+│           │   ├── cljs
+│           │   │   ├── core.cljs
+│           │   │   ├── core.js
+│           │   │   ├── core.js.map
+│           │   │   ├── pprint.cljs
+│           │   │   ├── pprint.cljs.cache.json
+│           │   │   ├── pprint.js
+│           │   │   ├── pprint.js.map
+│           │   │   ├── repl.cljs
+│           │   │   ├── repl.cljs.cache.json
+│           │   │   ├── repl.js
+│           │   │   ├── repl.js.map
+│           │   │   ├── spec
+│           │   │   │   ├── alpha.cljs
+│           │   │   │   ├── alpha.cljs.cache.json
+│           │   │   │   ├── alpha.js
+│           │   │   │   ├── alpha.js.map
+│           │   │   │   └── gen
+│           │   │   │       ├── alpha.cljs
+│           │   │   │       ├── alpha.cljs.cache.json
+│           │   │   │       ├── alpha.js
+│           │   │   │       └── alpha.js.map
+│           │   │   ├── stacktrace.cljc
+│           │   │   ├── stacktrace.cljc.cache.json
+│           │   │   ├── stacktrace.js
+│           │   │   ├── stacktrace.js.map
+│           │   │   ├── test.cljs
+│           │   │   ├── test.cljs.cache.json
+│           │   │   ├── test.js
+│           │   │   └── test.js.map
+│           │   ├── cljsc_opts.edn
+│           │   ├── cljsc_opts.json
+│           │   ├── cljs_deps.js
+│           │   ├── cljsjs
+│           │   │   ├── react
+│           │   │   │   └── development
+│           │   │   │       └── react.inc.js
+│           │   │   └── react-dom
+│           │   │       └── development
+│           │   │           └── react-dom.inc.js
+│           │   ├── cljs_test_display
+│           │   │   ├── core.cljs
+│           │   │   ├── core.cljs.cache.json
+│           │   │   ├── core.js
+│           │   │   ├── core.js.map
+│           │   │   ├── favicon.cljs
+│           │   │   ├── favicon.cljs.cache.json
+│           │   │   ├── favicon.js
+│           │   │   ├── favicon.js.map
+│           │   │   ├── notify.cljs
+│           │   │   ├── notify.cljs.cache.json
+│           │   │   ├── notify.js
+│           │   │   └── notify.js.map
+│           │   ├── clojure
+│           │   │   ├── data.cljs
+│           │   │   ├── data.cljs.cache.json
+│           │   │   ├── data.js
+│           │   │   ├── data.js.map
+│           │   │   ├── set.cljs
+│           │   │   ├── set.cljs.cache.json
+│           │   │   ├── set.js
+│           │   │   ├── set.js.map
+│           │   │   ├── string.cljs
+│           │   │   ├── string.cljs.cache.json
+│           │   │   ├── string.js
+│           │   │   ├── string.js.map
+│           │   │   ├── walk.cljs
+│           │   │   ├── walk.cljs.cache.json
+│           │   │   ├── walk.js
+│           │   │   └── walk.js.map
+│           │   ├── devtools
+│           │   │   ├── async.cljs
+│           │   │   ├── async.cljs.cache.json
+│           │   │   ├── async.js
+│           │   │   ├── async.js.map
+│           │   │   ├── context.cljs
+│           │   │   ├── context.cljs.cache.json
+│           │   │   ├── context.js
+│           │   │   ├── context.js.map
+│           │   │   ├── core.cljs
+│           │   │   ├── core.cljs.cache.json
+│           │   │   ├── core.js
+│           │   │   ├── core.js.map
+│           │   │   ├── defaults.cljs
+│           │   │   ├── defaults.cljs.cache.json
+│           │   │   ├── defaults.js
+│           │   │   ├── defaults.js.map
+│           │   │   ├── format.cljs
+│           │   │   ├── format.cljs.cache.json
+│           │   │   ├── format.js
+│           │   │   ├── format.js.map
+│           │   │   ├── formatters
+│           │   │   │   ├── budgeting.cljs
+│           │   │   │   ├── budgeting.cljs.cache.json
+│           │   │   │   ├── budgeting.js
+│           │   │   │   ├── budgeting.js.map
+│           │   │   │   ├── core.cljs
+│           │   │   │   ├── core.cljs.cache.json
+│           │   │   │   ├── core.js
+│           │   │   │   ├── core.js.map
+│           │   │   │   ├── helpers.cljs
+│           │   │   │   ├── helpers.cljs.cache.json
+│           │   │   │   ├── helpers.js
+│           │   │   │   ├── helpers.js.map
+│           │   │   │   ├── markup.cljs
+│           │   │   │   ├── markup.cljs.cache.json
+│           │   │   │   ├── markup.js
+│           │   │   │   ├── markup.js.map
+│           │   │   │   ├── printing.cljs
+│           │   │   │   ├── printing.cljs.cache.json
+│           │   │   │   ├── printing.js
+│           │   │   │   ├── printing.js.map
+│           │   │   │   ├── state.cljs
+│           │   │   │   ├── state.cljs.cache.json
+│           │   │   │   ├── state.js
+│           │   │   │   ├── state.js.map
+│           │   │   │   ├── templating.cljs
+│           │   │   │   ├── templating.cljs.cache.json
+│           │   │   │   ├── templating.js
+│           │   │   │   └── templating.js.map
+│           │   │   ├── formatters.cljs
+│           │   │   ├── formatters.cljs.cache.json
+│           │   │   ├── formatters.js
+│           │   │   ├── formatters.js.map
+│           │   │   ├── hints.cljs
+│           │   │   ├── hints.cljs.cache.json
+│           │   │   ├── hints.js
+│           │   │   ├── hints.js.map
+│           │   │   ├── munging.cljs
+│           │   │   ├── munging.cljs.cache.json
+│           │   │   ├── munging.js
+│           │   │   ├── munging.js.map
+│           │   │   ├── prefs.cljs
+│           │   │   ├── prefs.cljs.cache.json
+│           │   │   ├── prefs.js
+│           │   │   ├── prefs.js.map
+│           │   │   ├── preload.cljs
+│           │   │   ├── preload.cljs.cache.json
+│           │   │   ├── preload.js
+│           │   │   ├── preload.js.map
+│           │   │   ├── protocols.cljs
+│           │   │   ├── protocols.cljs.cache.json
+│           │   │   ├── protocols.js
+│           │   │   ├── protocols.js.map
+│           │   │   ├── reporter.cljs
+│           │   │   ├── reporter.cljs.cache.json
+│           │   │   ├── reporter.js
+│           │   │   ├── reporter.js.map
+│           │   │   ├── toolbox.cljs
+│           │   │   ├── toolbox.cljs.cache.json
+│           │   │   ├── toolbox.js
+│           │   │   ├── toolbox.js.map
+│           │   │   ├── util.cljs
+│           │   │   ├── util.cljs.cache.json
+│           │   │   ├── util.js
+│           │   │   ├── util.js.map
+│           │   │   ├── version.cljs
+│           │   │   ├── version.cljs.cache.json
+│           │   │   ├── version.js
+│           │   │   └── version.js.map
+│           │   ├── figwheel
+│           │   │   ├── core.cljc
+│           │   │   ├── core.cljc.cache.json
+│           │   │   ├── core.js
+│           │   │   ├── core.js.map
+│           │   │   ├── main
+│           │   │   │   ├── async_result.cljc
+│           │   │   │   ├── async_result.cljc.cache.json
+│           │   │   │   ├── async_result.js
+│           │   │   │   ├── async_result.js.map
+│           │   │   │   ├── css_reload.cljc
+│           │   │   │   ├── css_reload.cljc.cache.json
+│           │   │   │   ├── css_reload.js
+│           │   │   │   ├── css_reload.js.map
+│           │   │   │   ├── generated
+│           │   │   │   │   ├── dev_auto_test_runner.cljs
+│           │   │   │   │   ├── dev_auto_test_runner.cljs.cache.json
+│           │   │   │   │   ├── dev_auto_test_runner.js
+│           │   │   │   │   └── dev_auto_test_runner.js.map
+│           │   │   │   ├── system_exit.cljc
+│           │   │   │   ├── system_exit.cljc.cache.json
+│           │   │   │   ├── system_exit.js
+│           │   │   │   ├── system_exit.js.map
+│           │   │   │   ├── testing.cljc
+│           │   │   │   ├── testing.cljc.cache.json
+│           │   │   │   ├── testing.js
+│           │   │   │   └── testing.js.map
+│           │   │   ├── main.cljc
+│           │   │   ├── main.cljc.cache.json
+│           │   │   ├── main.js
+│           │   │   ├── main.js.map
+│           │   │   ├── repl
+│           │   │   │   ├── logging.cljs
+│           │   │   │   ├── logging.cljs.cache.json
+│           │   │   │   ├── logging.js
+│           │   │   │   ├── logging.js.map
+│           │   │   │   ├── preload.cljs
+│           │   │   │   ├── preload.cljs.cache.json
+│           │   │   │   ├── preload.js
+│           │   │   │   └── preload.js.map
+│           │   │   ├── repl.cljc
+│           │   │   ├── repl.cljc.cache.json
+│           │   │   ├── repl.js
+│           │   │   ├── repl.js.map
+│           │   │   └── tools
+│           │   │       ├── heads_up.cljs
+│           │   │       ├── heads_up.cljs.cache.json
+│           │   │       ├── heads_up.js
+│           │   │       └── heads_up.js.map
+│           │   ├── generated-input-files
+│           │   │   └── gen_test_runner.cljs
+│           │   ├── goog
+│           │   │   ├── array
+│           │   │   │   └── array.js
+│           │   │   ├── asserts
+│           │   │   │   ├── asserts.js
+│           │   │   │   └── dom.js
+│           │   │   ├── async
+│           │   │   │   ├── freelist.js
+│           │   │   │   ├── nexttick.js
+│           │   │   │   ├── run.js
+│           │   │   │   ├── throwexception.js
+│           │   │   │   └── workqueue.js
+│           │   │   ├── base.js
+│           │   │   ├── collections
+│           │   │   │   ├── iters.js
+│           │   │   │   └── maps.js
+│           │   │   ├── cssom
+│           │   │   │   └── cssom.js
+│           │   │   ├── debug
+│           │   │   │   ├── asyncstacktag.js
+│           │   │   │   ├── console.js
+│           │   │   │   ├── debug.js
+│           │   │   │   ├── entrypointregistry.js
+│           │   │   │   ├── errorcontext.js
+│           │   │   │   ├── errorhandler.js
+│           │   │   │   ├── error.js
+│           │   │   │   ├── formatter.js
+│           │   │   │   └── relativetimeprovider.js
+│           │   │   ├── deps.js
+│           │   │   ├── disposable
+│           │   │   │   ├── disposable.js
+│           │   │   │   ├── disposeall.js
+│           │   │   │   ├── dispose.js
+│           │   │   │   └── idisposable.js
+│           │   │   ├── dom
+│           │   │   │   ├── asserts.js
+│           │   │   │   ├── browserfeature.js
+│           │   │   │   ├── classlist.js
+│           │   │   │   ├── dataset.js
+│           │   │   │   ├── dom.js
+│           │   │   │   ├── element.js
+│           │   │   │   ├── htmlelement.js
+│           │   │   │   ├── nodetype.js
+│           │   │   │   ├── safe.js
+│           │   │   │   ├── tagname.js
+│           │   │   │   └── tags.js
+│           │   │   ├── events
+│           │   │   │   ├── browserevent.js
+│           │   │   │   ├── browserfeature.js
+│           │   │   │   ├── eventhandler.js
+│           │   │   │   ├── eventid.js
+│           │   │   │   ├── event.js
+│           │   │   │   ├── eventlike.js
+│           │   │   │   ├── events.js
+│           │   │   │   ├── eventtarget.js
+│           │   │   │   ├── eventtypehelpers.js
+│           │   │   │   ├── eventtype.js
+│           │   │   │   ├── eventwrapper.js
+│           │   │   │   ├── keycodes.js
+│           │   │   │   ├── listenable.js
+│           │   │   │   ├── listenablekey.js
+│           │   │   │   ├── listener.js
+│           │   │   │   └── listenermap.js
+│           │   │   ├── flags
+│           │   │   │   └── flags.js
+│           │   │   ├── fs
+│           │   │   │   ├── blob.js
+│           │   │   │   └── url.js
+│           │   │   ├── functions
+│           │   │   │   └── functions.js
+│           │   │   ├── html
+│           │   │   │   ├── legacyconversions.js
+│           │   │   │   ├── safehtml.js
+│           │   │   │   ├── safescript.js
+│           │   │   │   ├── safestyle.js
+│           │   │   │   ├── safestylesheet.js
+│           │   │   │   ├── safeurl.js
+│           │   │   │   ├── trustedresourceurl.js
+│           │   │   │   ├── trustedtypes.js
+│           │   │   │   └── uncheckedconversions.js
+│           │   │   ├── iter
+│           │   │   │   ├── es6.js
+│           │   │   │   └── iter.js
+│           │   │   ├── json
+│           │   │   │   ├── hybrid.js
+│           │   │   │   └── json.js
+│           │   │   ├── labs
+│           │   │   │   └── useragent
+│           │   │   │       ├── browser.js
+│           │   │   │       ├── engine.js
+│           │   │   │       ├── highentropy
+│           │   │   │       │   ├── highentropydata.js
+│           │   │   │       │   └── highentropyvalue.js
+│           │   │   │       ├── platform.js
+│           │   │   │       ├── useragent.js
+│           │   │   │       └── util.js
+│           │   │   ├── log
+│           │   │   │   └── log.js
+│           │   │   ├── math
+│           │   │   │   ├── coordinate.js
+│           │   │   │   ├── integer.js
+│           │   │   │   ├── long.js
+│           │   │   │   ├── math.js
+│           │   │   │   └── size.js
+│           │   │   ├── mochikit
+│           │   │   │   └── async
+│           │   │   │       └── deferred.js
+│           │   │   ├── net
+│           │   │   │   ├── errorcode.js
+│           │   │   │   ├── eventtype.js
+│           │   │   │   ├── httpstatus.js
+│           │   │   │   ├── jsloader.js
+│           │   │   │   ├── websocket.js
+│           │   │   │   ├── wrapperxmlhttpfactory.js
+│           │   │   │   ├── xhrio.js
+│           │   │   │   ├── xhrlike.js
+│           │   │   │   ├── xmlhttpfactory.js
+│           │   │   │   └── xmlhttp.js
+│           │   │   ├── object
+│           │   │   │   └── object.js
+│           │   │   ├── promise
+│           │   │   │   ├── promise.js
+│           │   │   │   ├── resolver.js
+│           │   │   │   └── thenable.js
+│           │   │   ├── reflect
+│           │   │   │   └── reflect.js
+│           │   │   ├── storage
+│           │   │   │   └── mechanism
+│           │   │   │       ├── errorcode.js
+│           │   │   │       ├── html5localstorage.js
+│           │   │   │       ├── html5sessionstorage.js
+│           │   │   │       ├── html5webstorage.js
+│           │   │   │       ├── ieuserdata.js
+│           │   │   │       ├── iterablemechanism.js
+│           │   │   │       ├── mechanismfactory.js
+│           │   │   │       ├── mechanism.js
+│           │   │   │       └── prefixedmechanism.js
+│           │   │   ├── string
+│           │   │   │   ├── const.js
+│           │   │   │   ├── internal.js
+│           │   │   │   ├── stringbuffer.js
+│           │   │   │   ├── stringformat.js
+│           │   │   │   ├── string.js
+│           │   │   │   └── typedstring.js
+│           │   │   ├── structs
+│           │   │   │   ├── map.js
+│           │   │   │   └── structs.js
+│           │   │   ├── timer
+│           │   │   │   └── timer.js
+│           │   │   ├── uri
+│           │   │   │   ├── uri.js
+│           │   │   │   └── utils.js
+│           │   │   └── useragent
+│           │   │       ├── product.js
+│           │   │       └── useragent.js
+│           │   ├── learn_cljs
+│           │   │   ├── group_chat.cljs
+│           │   │   ├── group_chat.cljs.cache.json
+│           │   │   ├── group_chat.js
+│           │   │   ├── group_chat.js.map
+│           │   │   ├── group_chat_test.cljs
+│           │   │   ├── group_chat_test.cljs.cache.json
+│           │   │   ├── group_chat_test.js
+│           │   │   ├── group_chat_test.js.map
+│           │   │   ├── test_runner.cljs
+│           │   │   ├── test_runner.cljs.cache.json
+│           │   │   ├── test_runner.js
+│           │   │   └── test_runner.js.map
+│           │   ├── process
+│           │   │   ├── env.cljs
+│           │   │   ├── env.cljs.cache.json
+│           │   │   ├── env.js
+│           │   │   └── env.js.map
+│           │   └── reagent
+│           │       ├── core.cljs
+│           │       ├── core.cljs.cache.json
+│           │       ├── core.js
+│           │       ├── core.js.map
+│           │       ├── debug.cljs
+│           │       ├── debug.cljs.cache.json
+│           │       ├── debug.js
+│           │       ├── debug.js.map
+│           │       ├── dom.cljs
+│           │       ├── dom.cljs.cache.json
+│           │       ├── dom.js
+│           │       ├── dom.js.map
+│           │       ├── impl
+│           │       │   ├── batching.cljs
+│           │       │   ├── batching.cljs.cache.json
+│           │       │   ├── batching.js
+│           │       │   ├── batching.js.map
+│           │       │   ├── component.cljs
+│           │       │   ├── component.cljs.cache.json
+│           │       │   ├── component.js
+│           │       │   ├── component.js.map
+│           │       │   ├── input.cljs
+│           │       │   ├── input.cljs.cache.json
+│           │       │   ├── input.js
+│           │       │   ├── input.js.map
+│           │       │   ├── protocols.cljs
+│           │       │   ├── protocols.cljs.cache.json
+│           │       │   ├── protocols.js
+│           │       │   ├── protocols.js.map
+│           │       │   ├── template.cljs
+│           │       │   ├── template.cljs.cache.json
+│           │       │   ├── template.js
+│           │       │   ├── template.js.map
+│           │       │   ├── util.cljs
+│           │       │   ├── util.cljs.cache.json
+│           │       │   ├── util.js
+│           │       │   └── util.js.map
+│           │       ├── ratom.cljs
+│           │       ├── ratom.cljs.cache.json
+│           │       ├── ratom.js
+│           │       └── ratom.js.map
+│           ├── dev-main-auto-testing.js
+│           └── dev-main.js
+├── test
+│   └── learn_cljs
+│       ├── group_chat_test.cljs
+│       └── test_runner.cljs
+└── test.cljs.edn
+
+69 directories, 387 files
+#+end_example
+
+#+begin_src eshell
+tree -a ../..
+#+end_src
+
+** tree
+#+begin_src eshell
+tree -a 
+#+end_src
+
+#+RESULTS:
+#+begin_example
+.
+|-- .cpcache
+|   |-- 2249099292.basis
+|   |-- 2249099292.cp
+|   |-- 2249099292.main
+|   |-- 3387647126.basis
+|   `-- 3387647126.cp
+|-- .git
+|   |-- COMMIT_EDITMSG
+|   |-- HEAD
+|   |-- branches
+|   |-- config
+|   |-- description
+|   |-- hooks
+|   |   |-- applypatch-msg.sample
+|   |   |-- commit-msg.sample
+|   |   |-- fsmonitor-watchman.sample
+|   |   |-- post-update.sample
+|   |   |-- pre-applypatch.sample
+|   |   |-- pre-commit.sample
+|   |   |-- pre-merge-commit.sample
+|   |   |-- pre-push.sample
+|   |   |-- pre-rebase.sample
+|   |   |-- pre-receive.sample
+|   |   |-- prepare-commit-msg.sample
+|   |   |-- push-to-checkout.sample
+|   |   |-- sendemail-validate.sample
+|   |   `-- update.sample
+|   |-- index
+|   |-- info
+|   |   `-- exclude
+|   |-- logs
+|   |   |-- HEAD
+|   |   `-- refs
+|   |       `-- heads
+|   |           `-- master
+|   |-- objects
+|   |   |-- 0c
+|   |   |   `-- bbd03849c4225b912c29c5cc1a1eb95e004406
+|   |   |-- 0e
+|   |   |   `-- 870ed249cff3194b020b449194b8cba79a49d3
+|   |   |-- 17
+|   |   |   `-- a3e74549f59d14a57aaa5d946f87798ecd2d27
+|   |   |-- 1f
+|   |   |   `-- 93999b09a0a7b82e830a7b9090f0551d0f280e
+|   |   |-- 32
+|   |   |   `-- 4d99a0a2eb602de5639061c10905a14f2ec25c
+|   |   |-- 45
+|   |   |   `-- 374bcfb2934e4cb107dd25d948d3b9a008f723
+|   |   |-- 50
+|   |   |   `-- 6579660ab72264aaa634f26bf26ae7ffbdc418
+|   |   |-- 64
+|   |   |   `-- 5a17d70fa7f64e2c3119372d253464688197af
+|   |   |-- 65
+|   |   |   `-- a5e52de8afa978f2bb081da49308b6cd34291d
+|   |   |-- 68
+|   |   |   `-- d8c0c529bb0772b6720ad9e763d778f384d54c
+|   |   |-- 6a
+|   |   |   `-- 3417b8d9d0a2fec34cf79ef2b46cc63a28b7d8
+|   |   |-- 71
+|   |   |   `-- 0abb86e53c60cd50c35ef8e3c3974ecd5a166c
+|   |   |-- 78
+|   |   |   `-- 57d22f338d2bf5a11f2c9989019274e89e11bf
+|   |   |-- 8e
+|   |   |   `-- 9d30e7d6e5c5c5cf8797dddb89c36afcd3ba53
+|   |   |-- a4
+|   |   |   `-- 5fa94e812daa483ce03c6d57b8406559ba308c
+|   |   |-- a9
+|   |   |   `-- 3c6e57355bd80bf964904be7322c2f011e0d22
+|   |   |-- af
+|   |   |   `-- 4f6bcd17f983891885b2da5bb50d94247eafde
+|   |   |-- b5
+|   |   |   `-- 37353beaf2793d612857b56c29e2c6bfc6f3bb
+|   |   |-- bf
+|   |   |   `-- 8bf5fb01b57c3c6914e97292b05eadeb0b78a6
+|   |   |-- c0
+|   |   |   `-- 75bf98b67f24573980200a3389426360f42eed
+|   |   |-- c4
+|   |   |   `-- 49315d9c35a5d2431f95a1d2d4e4831a3a00af
+|   |   |-- cd
+|   |   |   `-- fc3fe15c3684ed37efdd455b8de454e72d0ea0
+|   |   |-- d5
+|   |   |   `-- e6c53f1c5365bb3647bf2c492687effb1a4034
+|   |   |-- de
+|   |   |   `-- 743adcae8dd63e093efe46f514c7536e24752a
+|   |   |-- ee
+|   |   |   `-- d014ac3bfe7e79af47e2e71dbbb5348f55c8a3
+|   |   |-- fb
+|   |   |   `-- 9af43c306f53f296e24ec6309badfcf4e1345c
+|   |   |-- info
+|   |   `-- pack
+|   `-- refs
+|       |-- heads
+|       |   `-- master
+|       `-- tags
+|-- .gitignore
+|-- deps.edn
+|-- index.html
+|-- my-cljs-project.org
+|-- out
+|   |-- cljs
+|   |   |-- core.cljs
+|   |   |-- core.js
+|   |   |-- core.js.map
+|   |   |-- pprint.cljs
+|   |   |-- pprint.cljs.cache.json
+|   |   |-- pprint.js
+|   |   |-- pprint.js.map
+|   |   |-- repl.cljs
+|   |   |-- repl.cljs.cache.json
+|   |   |-- repl.js
+|   |   |-- repl.js.map
+|   |   `-- spec
+|   |       |-- alpha.cljs
+|   |       |-- alpha.cljs.cache.json
+|   |       |-- alpha.js
+|   |       |-- alpha.js.map
+|   |       `-- gen
+|   |           |-- alpha.cljs
+|   |           |-- alpha.cljs.cache.json
+|   |           |-- alpha.js
+|   |           `-- alpha.js.map
+|   |-- cljs_deps.js
+|   |-- cljsc_opts.edn
+|   |-- clojure
+|   |   |-- browser
+|   |   |   |-- event.cljs
+|   |   |   |-- event.cljs.cache.json
+|   |   |   |-- event.js
+|   |   |   |-- event.js.map
+|   |   |   |-- net.cljs
+|   |   |   |-- net.cljs.cache.json
+|   |   |   |-- net.js
+|   |   |   |-- net.js.map
+|   |   |   |-- repl
+|   |   |   |   |-- preload.cljs
+|   |   |   |   |-- preload.cljs.cache.json
+|   |   |   |   |-- preload.js
+|   |   |   |   `-- preload.js.map
+|   |   |   |-- repl.cljs
+|   |   |   |-- repl.cljs.cache.json
+|   |   |   |-- repl.js
+|   |   |   `-- repl.js.map
+|   |   |-- string.cljs
+|   |   |-- string.cljs.cache.json
+|   |   |-- string.js
+|   |   |-- string.js.map
+|   |   |-- walk.cljs
+|   |   |-- walk.cljs.cache.json
+|   |   |-- walk.js
+|   |   `-- walk.js.map
+|   |-- goog
+|   |   |-- array
+|   |   |   `-- array.js
+|   |   |-- asserts
+|   |   |   `-- asserts.js
+|   |   |-- async
+|   |   |   |-- delay.js
+|   |   |   |-- freelist.js
+|   |   |   |-- nexttick.js
+|   |   |   |-- run.js
+|   |   |   `-- workqueue.js
+|   |   |-- base.js
+|   |   |-- debug
+|   |   |   |-- debug.js
+|   |   |   |-- entrypointregistry.js
+|   |   |   |-- error.js
+|   |   |   |-- errorcontext.js
+|   |   |   |-- logbuffer.js
+|   |   |   |-- logger.js
+|   |   |   `-- logrecord.js
+|   |   |-- deps.js
+|   |   |-- disposable
+|   |   |   |-- disposable.js
+|   |   |   `-- idisposable.js
+|   |   |-- dom
+|   |   |   |-- asserts.js
+|   |   |   |-- browserfeature.js
+|   |   |   |-- dom.js
+|   |   |   |-- htmlelement.js
+|   |   |   |-- nodetype.js
+|   |   |   |-- safe.js
+|   |   |   |-- tagname.js
+|   |   |   `-- tags.js
+|   |   |-- events
+|   |   |   |-- browserevent.js
+|   |   |   |-- browserfeature.js
+|   |   |   |-- event.js
+|   |   |   |-- eventhandler.js
+|   |   |   |-- eventid.js
+|   |   |   |-- events.js
+|   |   |   |-- eventtarget.js
+|   |   |   |-- eventtype.js
+|   |   |   |-- listenable.js
+|   |   |   |-- listener.js
+|   |   |   `-- listenermap.js
+|   |   |-- fs
+|   |   |   `-- url.js
+|   |   |-- functions
+|   |   |   `-- functions.js
+|   |   |-- html
+|   |   |   |-- legacyconversions.js
+|   |   |   |-- safehtml.js
+|   |   |   |-- safescript.js
+|   |   |   |-- safestyle.js
+|   |   |   |-- safestylesheet.js
+|   |   |   |-- safeurl.js
+|   |   |   |-- trustedresourceurl.js
+|   |   |   |-- trustedtypes.js
+|   |   |   `-- uncheckedconversions.js
+|   |   |-- i18n
+|   |   |   `-- bidi.js
+|   |   |-- iter
+|   |   |   `-- iter.js
+|   |   |-- json
+|   |   |   |-- hybrid.js
+|   |   |   `-- json.js
+|   |   |-- labs
+|   |   |   `-- useragent
+|   |   |       |-- browser.js
+|   |   |       |-- engine.js
+|   |   |       |-- platform.js
+|   |   |       `-- util.js
+|   |   |-- log
+|   |   |   `-- log.js
+|   |   |-- math
+|   |   |   |-- coordinate.js
+|   |   |   |-- integer.js
+|   |   |   |-- long.js
+|   |   |   |-- math.js
+|   |   |   `-- size.js
+|   |   |-- messaging
+|   |   |   |-- abstractchannel.js
+|   |   |   `-- messagechannel.js
+|   |   |-- mochikit
+|   |   |   `-- async
+|   |   |       `-- deferred.js
+|   |   |-- net
+|   |   |   |-- errorcode.js
+|   |   |   |-- eventtype.js
+|   |   |   |-- httpstatus.js
+|   |   |   |-- websocket.js
+|   |   |   |-- wrapperxmlhttpfactory.js
+|   |   |   |-- xhrio.js
+|   |   |   |-- xhrlike.js
+|   |   |   |-- xmlhttp.js
+|   |   |   |-- xmlhttpfactory.js
+|   |   |   `-- xpc
+|   |   |       |-- crosspagechannel.js
+|   |   |       |-- crosspagechannelrole.js
+|   |   |       |-- directtransport.js
+|   |   |       |-- nativemessagingtransport.js
+|   |   |       |-- transport.js
+|   |   |       `-- xpc.js
+|   |   |-- object
+|   |   |   `-- object.js
+|   |   |-- promise
+|   |   |   |-- promise.js
+|   |   |   |-- resolver.js
+|   |   |   `-- thenable.js
+|   |   |-- reflect
+|   |   |   `-- reflect.js
+|   |   |-- string
+|   |   |   |-- const.js
+|   |   |   |-- internal.js
+|   |   |   |-- string.js
+|   |   |   |-- stringbuffer.js
+|   |   |   |-- stringformat.js
+|   |   |   `-- typedstring.js
+|   |   |-- structs
+|   |   |   |-- map.js
+|   |   |   `-- structs.js
+|   |   |-- timer
+|   |   |   `-- timer.js
+|   |   |-- uri
+|   |   |   |-- uri.js
+|   |   |   `-- utils.js
+|   |   `-- useragent
+|   |       |-- product.js
+|   |       `-- useragent.js
+|   |-- main.js
+|   |-- my_cljs_project
+|   |   |-- core.cljs
+|   |   |-- core.cljs.cache.json
+|   |   |-- core.js
+|   |   `-- core.js.map
+|   `-- process
+|       |-- env.cljs
+|       |-- env.cljs.cache.json
+|       |-- env.js
+|       `-- env.js.map
+`-- src
+    `-- my_cljs_project
+        `-- core.cljs
+
+83 directories, 211 files
+#+end_example
+
+#+begin_src eshell
+tree -a ../..
+#+end_src
+
+* todo
+* 2025-04-28
+** Group Chat
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat-cljs-project.org")
+
+** from my-cljs-project.org
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/my-cljs-project.org")
