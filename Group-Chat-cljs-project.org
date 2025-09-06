@@ -288,6 +288,9 @@
 **** exampl
 /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/message_bus.cljs
 ** deps.edn
+:PROPERTIES:
+:header-args: :tangle  group-chat/deps.edn
+:END:
 *** file
 (find-file-other-frame "group-chat/deps.edn")
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/deps.edn
@@ -344,6 +347,9 @@ clojure -P
 clojure -M:fig:build
 :cljs/quit
 :cljs/restart
+
+clojure -M:fig:clean
+clojure -M:fig:build
 
 #+begin_src elisp :results output silent :dir ./group-chat/
 (evil-previous-line)
