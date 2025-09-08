@@ -1,7 +1,7 @@
 :PROPERTIES:
 :header-args: :tangle no :mkdirp yes :results output silent :no-expand t
 :END:
-* Sorce files
+* src files
 ** group_chat.cljs
 :PROPERTIES:
 :header-args: :tangle  group-chat/src/learn_cljs/group_chat.cljs
@@ -119,7 +119,7 @@
 
 (in-ns 'import-fns.format)
 (in-ns 'learn-cljs.group-chat)
-** chat
+** chat/
 *** state.cljs
 :PROPERTIES:
 :header-args: :tangle  group-chat/src/learn_cljs/chat/state.cljs
@@ -287,6 +287,303 @@
 #+end_src
 **** exampl
 /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/message_bus.cljs
+** /components/
+*** component.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/chat/components/component.cljs :mkdirp yes
+:END:
+**** file
+(find-file-other-frame "group-chat/src/learn_cljs/chat/components/component.cljs")
+**** src
+***** ns
+#+begin_src clojure :no-expand t
+(ns learn-cljs.chat.components.component
+  (:require [learn-cljs.chat.state :as state]))
+#+end_src
+***** defn init-component
+#+begin_src clojure :no-expand t
+(defn init-component
+  "Initialize a component.
+  Parameters:
+  el - Element in which to render component
+  watch-key - Key that uniquely identifies this component
+  accessor - Function that takes the app state and returns the
+             component state
+  render - Function that takes the parent element and component
+           state and renders DOM"
+  [el watch-key accessor render]
+  (add-watch state/app-state watch-key                     ;; <1>
+    (fn [_ _ old new]
+      (let [state-old (accessor old)                       ;; <2>
+            state-new (accessor new)]
+        (when (not= state-old state-new)                   ;; <3>
+          (set! (.-innerText el) "")
+          (render el state-new)))))
+  (render el (accessor @state/app-state))                  ;; <4>
+  el)                                                      ;; <5>
+#+end_src
+
+1 Watch the app state for all changes
+2 Use the supplied accessor function to compute the old and new
+ app state
+3 Only re-render if the component state changed
+4 Perform an initial render
+5 Return the parent component
+
+**** org
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/component.cljs")
+
+~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/component.cljs
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/component.cljs
+*** app.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/chat/components/app.cljs :mkdirp yes
+:END:
+**** file
+(find-file-other-frame "group-chat/src/learn_cljs/chat/components/app.cljs")
+**** src
+***** ns
+#+begin_src clojure :no-expand t
+(ns learn-cljs.chat.components.app
+  (:require [learn-cljs.chat.components.header :refer [init-header]]
+            [goog.dom :as gdom])
+  (:import [goog.dom TagName]))
+
+#+end_src
+***** init
+#+begin_src clojure :no-expand t
+(defn init-main []
+  (gdom/createDom TagName.SECTION "content-main"
+    (init-header)))
+
+(defn init-app [el msg-ch]
+  (let [wrapper (gdom/createDom TagName.DIV "app-wrapper"
+                  (init-main))]
+    (set! (.-innerText el) "")
+    (.appendChild el wrapper)))
+#+end_src
+
+
+**** org
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/")
+
+*** header.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/chat/components/header.cljs :mkdirp yes
+:END:
+**** file
+(find-file-other-frame "group-chat/src/learn_cljs/chat/components/header.cljs")
+**** src
+***** ns
+#+begin_src clojure :no-expand t
+(ns learn-cljs.chat.components.header
+  (:require [learn-cljs.chat.components.dom :as dom]
+            [learn-cljs.chat.components.component :refer [init-component]]
+            [learn-cljs.chat.components.render-helpers :refer [display-name]]
+            [learn-cljs.chat.state :as state]))
+#+end_src
+***** other
+#+begin_src clojure :no-expand t
+(defn accessor [app]
+  (cond
+    (state/is-current-view-room? app)
+    {:icon "meeting_room"
+     :title (-> app
+                (get-in [:current-view :id])
+                (->> (state/room-by-id app))
+                :name)
+     :current-user (:current-user app)}
+
+    (state/is-current-view-conversation? app)
+    {:icon "person"
+     :title (-> app
+                (get-in [:current-view :username])
+                (->> (state/person-by-username app))
+                display-name)
+     :current-user (:current-user app)}
+
+    :else
+    {:title "Welcome to ClojureScript Chat"}))
+
+(defn render [header {:keys [icon title current-user]}]
+  (dom/with-children header
+    (dom/h1 "view-name"
+      (dom/i "material-icons" icon) title)
+    (dom/div "user-name"
+      (when (some? current-user)
+        (display-name current-user)))))
+
+(defn init-header []
+  (init-component (dom/header "app-header")
+    :header accessor render))
+#+end_src
+
+(defn display-name [person]                                ;; <1>
+  (if person
+    (->> person
+        ((juxt :first-name :last-name))
+        (s/join " "))
+    "REMOVED"))
+
+
+**** org
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/")
+
+*** render-helpers.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/chat/components/render-helpers.cljs :mkdirp yes
+:END:
+**** file
+(find-file-other-frame "group-chat/src/learn_cljs/chat/components/render-helpers.cljs")
+**** src
+#+begin_src clojure :no-expand t
+(ns learn-cljs.chat.components.render-helpers
+  (:require [clojure.string :as s]))
+
+(defn display-name [person]
+  (if person
+    (->> person
+        ((juxt :first-name :last-name))
+        (s/join " "))
+    "REMOVED"))
+#+end_src
+*** dom.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/chat/components/dom.cljs :mkdirp yes
+:END:
+**** file
+(find-file-other-frame "group-chat/src/learn_cljs/chat/components/dom.cljs")
+**** src
+***** ns
+#+begin_src clojure :no-expand t
+(ns learn-cljs.chat.components.dom
+  (:require [goog.dom :as gdom])
+  (:import [goog.dom TagName]))
+#+end_src
+***** others
+#+begin_src clojure :no-expand t
+(defn dom-fn [tag-name]
+  (fn [& args]
+    (apply gdom/createDom tag-name args)))
+
+(def a (dom-fn TagName.A))
+(def article (dom-fn TagName.ARTICLE))
+(def aside (dom-fn TagName.ASIDE))
+(def button (dom-fn TagName.BUTTON))
+(def div (dom-fn TagName.DIV))
+(def form (dom-fn TagName.FORM))
+(def header (dom-fn TagName.HEADER))
+(def h1 (dom-fn TagName.H1))
+(def i (dom-fn TagName.I))
+(def input (dom-fn TagName.INPUT))
+(def label (dom-fn TagName.LABEL))
+(def p (dom-fn TagName.P))
+(def section (dom-fn TagName.SECTION))
+(def textarea (dom-fn TagName.TEXTAREA))
+
+(defn with-children [el & children]
+  (doseq [child children]
+    (.appendChild el child))
+  el)
+#+end_src
+*** sidebar.cljs
+:PROPERTIES:
+:header-args: :no-expand t :mkdirp yes :tangle  group-chat/src/learn_cljs/chat/components/sidebar.cljs
+:END:
+**** file
+(find-file-other-frame "group-chat/src/learn_cljs/chat/components/sidebar.cljs")
+**** src
+***** ns
+#+begin_src clojure 
+(ns learn-cljs.chat.components.sidebar
+  (:require [learn-cljs.chat.components.dom :as dom]       ;; <1>
+            [learn-cljs.chat.components.component :refer [init-component]]
+            [learn-cljs.chat.components.render-helpers :as helpers]
+            [learn-cljs.chat.message-bus :as bus]
+            [goog.events :as gevents]
+            [learn-cljs.chat.state :as state]))
+#+end_src
+
+
+***** others
+#+begin_src clojure 
+(defn sidebar-header [title]
+  (dom/div "sidebar-header" title))
+
+(defn render-room [msg-ch room]
+  (let [class-name (str "sidebar-item" (when (:active? room)
+                                         " active"))
+        text (:name room)]
+    (doto (dom/div class-name text)
+      (gevents/listen "click"                              ;; <2>
+                      #(bus/dispatch! msg-ch :switch-to-room
+                                      {:id (:id room)})))))
+
+(defn render-create-room [msg-ch el open?]                 ;; <3>
+  (if open?
+    (let [add-room-input (dom/input "add-room-input")]
+      (dom/with-children el
+        (doto add-room-input
+          (gevents/listen "keyup"
+                          #(when (= (.-key %) "Enter")
+                             (bus/dispatch! msg-ch
+                                            :create-room (.-value add-room-input))))
+          (gevents/listen "blur"
+                          #(bus/dispatch! msg-ch
+                                          :close-create-room-input))))
+      (.focus add-room-input))                             ;; <4>
+    (dom/with-children el
+      (doto (dom/div "add-room" "Add")
+        (gevents/listen "click"
+                        #(bus/dispatch! msg-ch :open-create-room-input))))))
+
+(defn render-create-room-item [msg-ch]
+  (init-component
+    (dom/div "sidebar-item no-highlight")
+    :sidebar-create-room
+    :create-room-input-open?
+    (partial render-create-room msg-ch)))
+
+(defn render-rooms [msg-ch el rooms]
+  (apply dom/with-children el                              ;; <5>
+         (conj
+           (mapv #(render-room msg-ch %) rooms)
+           (render-create-room-item msg-ch))))
+
+(defn sidebar-rooms [msg-ch]
+  (init-component
+    (dom/div "sidebar-rooms")
+    :sidebar-rooms
+    state/room-list
+    (partial render-rooms msg-ch)))
+
+(defn render-person [msg-ch person]
+  (let [class-name (str "sidebar-item" (when (:active? person)
+                                         " active"))
+        text (helpers/display-name person)]
+    (doto (dom/div class-name text)
+      (gevents/listen "click"
+                      #(bus/dispatch! msg-ch :switch-to-conversation
+                                      {:username (:username person)})))))
+
+(defn render-people [msg-ch el people]
+  (dom/with-children el
+    (map #(render-person msg-ch %) people)))
+
+(defn sidebar-people [msg-ch]
+  (init-component
+    (dom/div "sidebar-people")
+    :sidebar-people
+    state/people-list
+    (partial render-people msg-ch)))
+
+(defn init-sidebar [msg-ch]
+  (dom/aside "sidebar"
+             (sidebar-header "Rooms")
+             (sidebar-rooms msg-ch)
+             (sidebar-header "People")
+             (sidebar-people msg-ch)))
+#+end_src
 ** deps.edn
 :PROPERTIES:
 :header-args: :tangle  group-chat/deps.edn
