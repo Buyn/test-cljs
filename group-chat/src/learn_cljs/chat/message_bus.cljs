@@ -1,16 +1,16 @@
 (ns learn-cljs.chat.message-bus
   (:require [cljs.core.async :refer [go-loop pub sub chan <! put!]]))
 
-(def msg-ch (chan 1))                                      ;; <1>
-(def msg-bus (pub msg-ch ::type))                          ;; <2>
+(def msg-ch (chan 1))
+(def msg-bus (pub msg-ch ::type))
 
-(defn dispatch!                                            ;; <3>
+(defn dispatch!
  ([ch type] (dispatch! ch type nil))
  ([ch type payload]
   (put! ch {::type type
             ::payload payload})))
 
-(defn handle! [p type handle]                              ;; <4>
+(defn handle! [p type handle]
   (let [sub-ch (chan)]
     (sub p type sub-ch)
     (go-loop []

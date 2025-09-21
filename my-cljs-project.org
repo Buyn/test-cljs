@@ -4002,6 +4002,9 @@ button {
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
 ** Group Chat
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat-cljs-project.org")
+** noter
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/noter-cljs-project.org")
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter-cljs-project.org")
 * project comands
 :PROPERTIES:
 :header-args: :tangle no
@@ -4435,6 +4438,17 @@ tree -a ../..
 #+end_src
 
 * todo
+** сделать новый орг
+положить поаналогии с предыдушим
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/deps.edn
+
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter-cljs-project.org")
+** посмотреть имя будушего приложения
+** поэксперементировать с каналами
+*** открыть урок
+*** запустить репл
+*** сделатьт репл раздел в мануале
+*** отправить команды и эксперементы
 ** DONE Осмотрет проект на котором остановился
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/Group-Chat-cljs-project.org")
 ** DONE сделать папку
@@ -4814,11 +4828,11 @@ Opening URL http://localhost:9500
            :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
            :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
 #+end_src
-** внести первые измение
+** DONE внести первые измение
 [[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
-** сделать рабочую версию
+** CANCELED сделать рабочую версию
 [[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
-** сделать оканчательную версию
+** CANCELED сделать оканчательную версию
 [[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
 ** DONE понять в чём разница
 открыть в двух rangers
