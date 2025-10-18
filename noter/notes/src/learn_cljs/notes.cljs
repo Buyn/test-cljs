@@ -1,39 +1,24 @@
-(ns ^:figwheel-hooks learn-cljs.notes
-  (:require
-   [goog.dom :as gdom]
-   [reagent.core :as reagent :refer [atom]]
-   [reagent.dom :as rdom]))
+(ns learn-cljs.notes
+  (:require [learn-cljs.notes.ui.header :refer [header]]
+            [learn-cljs.notes.ui.main :refer [main]]
+            [learn-cljs.notes.ui.sidebar :refer [sidebar]]
+            [learn-cljs.notes.ui.footer :refer [footer]]
+            [reagent.dom :as rdom]
+            [goog.dom :as gdom]))
 
-(println "This text is printed from src/learn_cljs/notes.cljs. Go ahead and edit it and see reloading in action.")
+(println "This text is printed from src/learn_cljs/group_chat.cljs. Go ahead and edit it and see reloading in action.")
 
 (defn multiply [a b] (* a b))
 
-;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {:text "Hello world!"}))
 
-(defn get-app-element []
-  (gdom/getElement "app"))
+(defn app []
+  [:div.app
+   [header]
+   [main]
+   [sidebar]
+   [footer]])
 
-(defn hello-world []
-  [:div
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this in src/learn_cljs/notes.cljs and watch it change!"]])
-
-(defn mount [el]
-  (rdom/render [hello-world] el))
-
-(defn mount-app-element []
-  (when-let [el (get-app-element)]
-    (mount el)))
-
-;; conditionally start your application based on the presence of an "app" element
-;; this is particularly helpful for testing this ns without launching the app
-(mount-app-element)
-
-;; specify reload hook with ^:after-load metadata
-(defn ^:after-load on-reload []
-  (mount-app-element)
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
+(rdom/render
+ [app]
+ (gdom/getElement "app"))

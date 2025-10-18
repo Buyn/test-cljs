@@ -2,25 +2,60 @@
 :header-args: :tangle no :mkdirp yes :results output silent :no-expand t
 :END:
 * src files
-** group_chat.cljs
+** notes/
+*** deps.edn
 :PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/group_chat.cljs
+:header-args: :tangle  notes/deps.edn
 :END:
-*** file
-(find-file-other-frame "./group-chat/src/learn_cljs/group_chat.cljs")
-
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/src/learn_cljs/group_chat.cljs
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/src/learn_cljs/
-*** src group-chat.cljs
-**** ns
-#+begin_src clojure :results output silent
-(ns ^:figwheel-hooks learn-cljs.group-chat
-  (:require
-    [goog.dom :as gdom]
-    [reagent.core :as reagent :refer [atom]]
-    [reagent.dom :as rdom]))
+**** file
+(find-file-other-frame "notes/deps.edn")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/notes/deps.edn
+**** src
+        ;; org.clojure/clojurescript {:mvn/version "1.10.773"}
+#+begin_src clojure :no-expand t
+{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.132"}
+        org.clojure/data.json {:mvn/version "2.5.1"}
+        org.clojure/core.async {:mvn/version "1.3.610"}
+        cljsjs/react {:mvn/version "18.3.1-1"}
+        funcool/bide {:mvn/version "1.7.0"}
+        camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.2"}
+        cljsjs/react-dom {:mvn/version "18.3.1-1"}
+        reagent/reagent {:mvn/version "1.2.0" }}
+ :paths ["src" "resources"]
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
+                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
 #+end_src
-**** println
+
+**** exempl
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/deps.edn")
+*** notes.cljs
+:PROPERTIES:
+:header-args: :tangle  notes/src/learn_cljs/notes.cljs
+:END:
+**** file
+(find-file-other-frame "notes/src/learn_cljs/notes.cljs")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/notes/src/learn_cljs/notes.cljs
+
+**** src notes.cljs
+***** ns
+#+begin_src clojure :results output silent
+(ns learn-cljs.notes
+  (:require [learn-cljs.notes.ui.header :refer [header]]
+            [learn-cljs.notes.ui.main :refer [main]]
+            [learn-cljs.notes.ui.sidebar :refer [sidebar]]
+            [learn-cljs.notes.ui.footer :refer [footer]]
+            [reagent.dom :as rdom]
+            [goog.dom :as gdom]))
+#+end_src
+***** println
 
 (println "Test text")
 
@@ -28,52 +63,36 @@
 
 (println "This text is printed from src/learn_cljs/group_chat.cljs. Go ahead and edit it and see reloading in action.")
 #+end_src
-**** test
+***** test
 #+begin_src clojure :results output silent
 
 (defn multiply [a b] (* a b))
 #+end_src
 
-**** defonce
+***** defonce
 #+begin_src clojure :results output silent
 
 ;; define your app data so that it doesn't get over-written on reload
 (defonce app-state (atom {:text "Hello world!"}))
 #+end_src
 
-**** render
+***** render
 #+begin_src clojure :results output silent
 
-(defn get-app-element []
-  (gdom/getElement "app"))
+(defn app []
+  [:div.app
+   [header]
+   [main]
+   [sidebar]
+   [footer]])
 
-(defn hello-world []
-  [:div
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this in src/learn_cljs/group_chat.cljs and watch it change!"]])
-
-(defn mount [el]
-  (rdom/render [hello-world] el))
-
-(defn mount-app-element []
-  (when-let [el (get-app-element)]
-    (mount el)))
-
-;; conditionally start your application based on the presence of an "app" element
-;; this is particularly helpful for testing this ns without launching the app
-(mount-app-element)
-
-;; specify reload hook with ^:after-load metadata
-(defn ^:after-load on-reload []
-  (mount-app-element)
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-  )
+(rdom/render
+ [app]
+ (gdom/getElement "app"))
 #+end_src
-*** CANCELED src core.cljs orig
+**** CANCELED src core.cljs orig
 #+begin_src clojure :tangle no
-(ns ^:figwheel-hooks learn-cljs.group-chat
+(ns ^:figwheel-hooks learn-cljs.notes
   (:require
    [goog.dom :as gdom]
    [reagent.core :as reagent :refer [atom]]
@@ -114,717 +133,781 @@
 )
 
 #+end_src
-*** repl
+**** repl
 (ns ^:figwheel-hooks learn-cljs.group-chat
 
 (in-ns 'import-fns.format)
 (in-ns 'learn-cljs.group-chat)
-** chat.cljs
+*** messaging
+**** .notes.events
+***** file
+(find-file-other-frame "notes/src/learn_cljs/notes/events.cljs")
+***** src .notes.events
 :PROPERTIES:
-:header-args: :results output silent :tangle  group-chat/src/learn_cljs/chat.cljs
+:header-args: :tangle  notes/src/learn_cljs/notes/events.cljs :mkdirp yes
 :END:
-*** file
-(find-file-other-frame "./group-chat/src/learn_cljs/chat.cljs")
-*** src core.cljs
-(in-ns `learn-cljs.chat)
-(in-ns learn-cljs.group-chat)
-#+begin_src clojure 
-(ns learn-cljs.chat
-    (:require [learn-cljs.chat.message-bus :as bus]
-              [learn-cljs.chat.components.app              ;; <1>
-               :refer [init-app]]
-              ;; [learn-cljs.chat.handlers]                   ;; <2>
-              [goog.dom :as gdom]))
+#+begin_src clojure :no-expand t
+(ns learn-cljs.notes.events)
 
-(defonce initialized?
-  (do
-    (init-app                                              ;; <3>
-      (gdom/getElement "app")
-      bus/msg-ch)
-    true))
+(def listeners (atom []))                                  ;; <1>
+
+(defn emit!                                                ;; <2>
+  ([type] (emit! type nil))
+  ([type payload]
+   (doseq [listen-fn @listeners]
+     (listen-fn type payload))))
+
+(defn register-listener! [listen-fn]                       ;; <3>
+  (swap! listeners conj listen-fn))
 
 #+end_src
-*** exempl
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat.cljs")
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat.cljs
-** chat/
-*** state.cljs
+
+**** .notes.command
+***** file
+(find-file-other-frame "notes/src/learn_cljs/notes/command.cljs")
+***** src command.cljs
 :PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/chat/state.cljs
+:header-args: :tangle  notes/src/learn_cljs/notes/command.cljs :mkdirp yes
 :END:
-**** file
-(find-file-other-frame "group-chat/src/learn_cljs/chat/state.cljs")
-**** src
-***** ns
 #+begin_src clojure :no-expand t
-(ns learn-cljs.chat.state)
+(ns learn-cljs.notes.command
+  (:require [learn-cljs.notes.events :refer [emit!]]
+            [learn-cljs.notes.routes :as routes]))
+
+
+(defn handle-test-hello! [name]
+  (println "Hello" name)                                   ;; <1>
+  (emit! :test/greeting-dispatched {:name name}))          ;; <2>
+
+(defn handle-navigate! [route-params]
+  (routes/navigate! route-params))
+
+(defn dispatch!
+  ([command] (dispatch! command nil))
+  ([command payload]
+   (js/setTimeout                                          ;; <3>
+     #(case command
+        :test/hello (handle-test-hello! payload)
+        :route/navigate (handle-navigate! payload)
+        )
+
+        (js/console.error (str "Error: unhandled command: " command)))
+     0))
+
 #+end_src
-***** defonce
+
+**** .notes.routes
+***** file
+(find-file-other-frame "notes/src/learn_cljs/notes/routes.cljs")
+***** src .notes.events
+:PROPERTIES:
+:header-args: :tangle  notes/src/learn_cljs/notes/routes.cljs :mkdirp yes
+:END:
 #+begin_src clojure :no-expand t
+(ns learn-cljs.notes.routes
+  (:require [learn-cljs.notes.events :refer [emit!]]
+            [bide.core :as bide]))
+
+(defonce router                                            ;; <1>
+  (bide/router [["/" :home]
+                ["/notes/new" :create-note]
+                ["/notes/:note-id" :edit-note]]))
+
+(defn navigate! [route-params]                             ;; <2>
+  (apply bide/navigate! router route-params))
+
+(defn- on-navigate [name params query]                     ;; <3>
+  (emit! :route/navigated [name params query]))
+
+(defn initialize! []                                       ;; <4>
+  (bide/start! router {:default :routes/home
+                       :on-navigate on-navigate}))
+
+#+end_src
+
+**** .notes.event-handlers.routes
+***** file
+(find-file-other-frame "notes/src/learn_cljs/notes/event-handlers/routes.cljs")
+***** src .notes.event-handlers.routes
+:PROPERTIES:
+:header-args: :tangle  notes/src/learn_cljs/notes/event-handlers/routes.cljs :mkdirp yes
+:END:
+#+begin_src clojure :no-expand t
+(ns learn-cljs.notes.event-handlers.routes
+  (:require [learn-cljs.notes.state :refer [register-handler!]]))
+
+(register-handler!
+ :route/navigated
+ (fn [db route-params]
+   (assoc db :current-route route-params)))
+#+end_src
+
+*** state
+**** .notes.state
+***** file
+(find-file-other-frame "notes/src/learn_cljs/notes/state.cljs")
+***** src .notes.state
+:PROPERTIES:
+:header-args: :tangle  notes/src/learn_cljs/notes/state.cljs :mkdirp yes
+:END:
+#+begin_src clojure :no-expand t
+(ns learn-cljs.notes.state
+  (:require [reagent.core :as r]
+            [learn-cljs.notes.events :as events]))
+
 (def initial-state
-  {:rooms []
-   :people []
-   :messages []
-   :current-user nil
-   :current-view nil
-   :auth-modal :sign-in
-   :create-room-input-open? false})
+  {:current-route [:home]                                  ;; <1>
+   :notifications {:messages []                            ;; <2>
+                   :next-id 0}
+   :data {:notes {}
+          :tags {}}})
 
-(defonce app-state (atom initial-state))                   ;; <2>
+(defonce app (r/atom initial-state))
+
+(def handlers (atom {}))
+
+(defn register-handler! [event-type handler-fn]
+  (swap! handlers assoc event-type handler-fn))
+
+(events/register-listener!
+ (fn [type payload]
+   (when-let [handler-fn (get @handlers type)]
+     (swap! app #(handler-fn  % payload)))))
+
 #+end_src
-***** Application data queries
-#+begin_src clojure :no-expand t
-(defn room-by-id [state id]
-  (->> state
-       :rooms
-       (filter #(= id (:id %)))
-       first))
 
-(defn person-by-username [state username]
-  (->> state
-       :people
-       (filter #(= username (:username %)))
-       first))
-#+end_src
-***** UI state queries
-#+begin_src clojure :no-expand t
-(defn is-current-view-room? [state]
-  (= ::room (get-in state [:current-view :type])))
-
-(defn current-room-id [state]
-  (get-in state [:current-view :id]))
-
-(defn is-current-view-conversation? [state]
-  (= ::conversation (get-in state [:current-view :type])))
-
-(defn current-conversation-recipient [state]
-  (get-in state [:current-view :username]))
-
-(defn room-list [state]
-  (let [current-room (when (is-current-view-room? state)
-                       (get-in state [:current-view :id]))]
-    (map (fn [room]
-           (assoc room
-                  :active? (= current-room (:id room))))
-         (:rooms state))))
-
-(defn people-list [app]
-  (let [current-username (when (is-current-view-conversation? app)
-                           (get-in app [:current-view :username]))]
-    (map (fn [person]
-           (assoc person
-                  :active? (= current-username (:username person))))
-         (:people app))))
-#+end_src
-***** UI state transition functions
-#+begin_src clojure :no-expand t
-(defn switched-to-room [state room-id]
-  (assoc state :current-view {:type ::room
-                              :id room-id}))
-
-(defn switched-to-conversation [state username]
-  (assoc state :current-view {:type ::conversation
-                              :username username}))
-
-(defn auth-modal-toggled [state]
-  (update state :auth-modal
-          {:sign-up :sign-in                                     ;; <1>
-           :sign-in :sign-up}))
-
-(defn user-authenticated [state user]
-  (assoc state :current-user user))
-
-(defn create-room-input-opened [state]
-  (assoc state :create-room-input-open? true))
-
-(defn create-room-input-closed [state]
-  (assoc state :create-room-input-open? false))
-#+end_src
-***** Application data transition functions
-#+begin_src clojure :no-expand t
-(defn received-people-list [state people]
-  (assoc state :people people))
-
-(defn person-joined [state person]
-  (let [username (:username person)
-        is-joined-user? #(= username (:username %))]
-    (update state :people
-            (fn [people]
-              (if (some is-joined-user? people)
-                (map
-                  (fn [user]
-                    (if (is-joined-user? user)
-                      (assoc user :online? true)
-                      user))
-                  people)
-                (conj people person))))))
-
-(defn person-left [state username]
-  (update state :people
-          (fn [people]
-            (map #(if (= username (:username %))
-                    (assoc % :online? false)
-                    %) people))))
-
-(defn received-rooms-list [state rooms]
-  (assoc state :rooms rooms))
-
-(defn room-added [state room]
-  (update state :rooms conj room))
-
-(defn message-received [state message]
-  (update state :messages conj message))
-
-(defn messages-received [state messages]
-  (assoc state :messages messages))
-
-(defn messages-cleared [state]
-  (assoc state :messages []))
-#+end_src
-**** org
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/state.cljs")
-
-~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/state.cljs
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/state.cljs
-*** message_bus.cljs
+*** UI
+**** ui.header
 :PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/chat/message_bus.cljs
+:header-args: :tangle  notes/src/learn_cljs/notes/ui/header.cljs :mkdirp yes
 :END:
-**** org
-(find-file-other-frame "group-chat/src/learn_cljs/chat/message_bus.cljs")
-**** src
 #+begin_src clojure :no-expand t
-(ns learn-cljs.chat.message-bus
-  (:require [cljs.core.async :refer [go-loop pub sub chan <! put!]]))
+(ns learn-cljs.notes.ui.header
+  (:require [learn-cljs.notes.ui.common :refer [button]]))
 
-(def msg-ch (chan 1))                                      ;; <1>
-(def msg-bus (pub msg-ch ::type))                          ;; <2>
+(defn header []
+  [:header.page-header
+   [button "+ New Note"
+     {:route-params [:create-note]                         ;; <1>
+      :class "inverse"}]])
 
-(defn dispatch!                                            ;; <3>
- ([ch type] (dispatch! ch type nil))
- ([ch type payload]
-  (put! ch {::type type
-            ::payload payload})))
-
-(defn handle! [p type handle]                              ;; <4>
-  (let [sub-ch (chan)]
-    (sub p type sub-ch)
-    (go-loop []
-      (handle (::payload (<! sub-ch)))
-      (recur))))
 #+end_src
-**** exampl
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/message_bus.cljs
-*** handlers.cljs
+**** ui.main
 :PROPERTIES:
-:header-args: :results output silent :tangle  group-chat/src/learn_cljs/chat/handlers.cljs
+:header-args: :tangle  notes/src/learn_cljs/notes/ui/main.cljs :mkdirp yes
 :END:
-**** file
-**** src
-#+begin_src clojure :tangle no
-(ns learn-cljs.chat.handlers
-  (:require [learn-cljs.chat.message-bus :as bus]
-            [learn-cljs.chat.api :as api]
-            [learn-cljs.chat.state :as state]))
+#+begin_src clojure :no-expand t
+(ns learn-cljs.notes.ui.main
+  (:require [learn-cljs.notes.state :as state]
+            [learn-cljs.notes.ui.views.home :refer [home]]))
 
-(defn should-set-message? [username room]
-  (let [app @state/app-state]
-    (or
-      (and (some? username)
-          (state/is-current-view-conversation? app)
-          (= username (state/current-conversation-recipient app)))
-      (and (some? room)
-          (state/is-current-view-room? app)
-          (= room (state/current-room-id app))))))
+(defn not-found []                                         ;; <1>
+  [:section.hero
+   [:h1.title "Page Not Found!"]])
 
-(defonce is-initialized?
-  (do
-    ;;;;;;;;;;;;;;;;;;;;;
-    ;; Sidebar
+(defn main []
+  (let [[route params query] (:current-route @state/app)]  ;; <2>
+    [:div.main
+     (case route
+       :home [home]
+       [not-found])]))
 
-    (bus/handle! bus/msg-bus :switch-to-conversation
-      (fn [{:keys [username]}]
-        (api/send! :set-view {:type :conversation, :username username})
-        (swap! state/app-state
-          #(-> %
-               (state/switched-to-conversation username)
-               (state/messages-cleared)))))
-
-    (bus/handle! bus/msg-bus :switch-to-room
-      (fn [{:keys [id]}]
-        (api/send! :set-view {:type :room, :id id})
-        (swap! state/app-state
-          #(-> %
-               (state/switched-to-room id)
-               (state/messages-cleared)))))
-
-    ;;;;;;;;;;;;;;;;;;;;;
-    ;; Composer
-
-    (bus/handle! bus/msg-bus :add-message
-      (fn [content]
-        (api/send! :add-message {:content content})))
-
-    ;;;;;;;;;;;;;;;;;;;;;
-    ;; People
-
-    (bus/handle! bus/msg-bus :api/people-listed
-      (fn [people]
-        (swap! state/app-state state/received-people-list people)))
-
-    (bus/handle! bus/msg-bus :api/person-joined
-      (fn [person]
-        (swap! state/app-state state/person-joined person)))
-
-    (bus/handle! bus/msg-bus :api/person-left
-      (fn [username]
-        (swap! state/app-state state/person-left username)))
-
-    ;;;;;;;;;;;;;;;;;;;;;
-    ;; Rooms
-
-    (bus/handle! bus/msg-bus :open-create-room-input
-      (fn []
-        (swap! state/app-state state/create-room-input-opened)))
-
-    (bus/handle! bus/msg-bus :close-create-room-input
-      (fn []
-        (swap! state/app-state state/create-room-input-closed)))
-
-    (bus/handle! bus/msg-bus :create-room
-      (fn [name]
-        (api/send! :create-room {:name name})))
-
-    (bus/handle! bus/msg-bus :api/rooms-listed
-      (fn [rooms]
-        (swap! state/app-state state/received-rooms-list rooms)
-        (when-let [first-room (first rooms)]
-          (bus/dispatch! bus/msg-ch :switch-to-room
-            {:id (:id first-room)}))))
-
-    (bus/handle! bus/msg-bus :api/room-created
-      (fn [room]
-        (swap! state/app-state
-          #(-> %
-               (state/room-added room)
-               (state/create-room-input-closed)))))
-
-    ;;;;;;;;;;;;;;;;;;;;;
-    ;; Messages
-
-    (bus/handle! bus/msg-bus :api/message-received
-      (fn [{:keys [message username room]}]
-        (when (should-set-message? username room)
-          (swap! state/app-state state/message-received message))))
-
-    (bus/handle! bus/msg-bus :api/messages-received
-      (fn [{:keys [messages username room]}]
-        (when (should-set-message? username room)
-          (swap! state/app-state state/messages-received messages))))
-
-    ;;;;;;;;;;;;;;;;;;;;;
-    ;; Auth
-
-    (bus/handle! bus/msg-bus :toggle-auth-modal
-      (fn []
-        (swap! state/app-state state/auth-modal-toggled)))
-
-    (bus/handle! bus/msg-bus :sign-in
-      (fn [data]
-        (api/send! :sign-in data)))
-
-    (bus/handle! bus/msg-bus :sign-up
-      (fn [data]
-        (api/send! :sign-up data)))
-
-    (bus/handle! bus/msg-bus :api/authenticated
-      (fn [user-info]
-        (swap! state/app-state state/user-authenticated user-info)
-        (api/send! :list-people)
-        (api/send! :list-rooms)))
-
-    true))
 
 #+end_src
-**** exempl 
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/handlers.cljs")
 
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/handlers.cljs
-** /components/
-*** component.cljs
+
+**** ui.sidebar
 :PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/chat/components/component.cljs :mkdirp yes
+:header-args: :tangle  notes/src/learn_cljs/notes/ui/sidebar.cljs :mkdirp yes
 :END:
-**** file
-(find-file-other-frame "group-chat/src/learn_cljs/chat/components/component.cljs")
-**** src
-***** ns
 #+begin_src clojure :no-expand t
-(ns learn-cljs.chat.components.component
-  (:require [learn-cljs.chat.state :as state]))
+(ns learn-cljs.notes.ui.sidebar)
+
+(defn sidebar []
+  [:nav.sidebar])
+
 #+end_src
-***** defn init-component
-#+begin_src clojure :no-expand t
-(defn init-component
-  "Initialize a component.
-  Parameters:
-  el - Element in which to render component
-  watch-key - Key that uniquely identifies this component
-  accessor - Function that takes the app state and returns the
-             component state
-  render - Function that takes the parent element and component
-           state and renders DOM"
-  [el watch-key accessor render]
-  (add-watch state/app-state watch-key                     ;; <1>
-    (fn [_ _ old new]
-      (let [state-old (accessor old)                       ;; <2>
-            state-new (accessor new)]
-        (when (not= state-old state-new)                   ;; <3>
-          (set! (.-innerText el) "")
-          (render el state-new)))))
-  (render el (accessor @state/app-state))                  ;; <4>
-  el)                                                      ;; <5>
-#+end_src
-
-1 Watch the app state for all changes
-2 Use the supplied accessor function to compute the old and new
- app state
-3 Only re-render if the component state changed
-4 Perform an initial render
-5 Return the parent component
-
-**** org
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/component.cljs")
-
-~/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/component.cljs
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/component.cljs
-*** app.cljs
+**** ui.footer
 :PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/chat/components/app.cljs :mkdirp yes
+:header-args: :tangle  notes/src/learn_cljs/notes/ui/footer.cljs :mkdirp yes
 :END:
-**** file
-(find-file-other-frame "group-chat/src/learn_cljs/chat/components/app.cljs")
-**** src
-***** ns
 #+begin_src clojure :no-expand t
-(ns learn-cljs.chat.components.app
-  (:require [learn-cljs.chat.components.header :refer [init-header]]
-            [learn-cljs.chat.components.sidebar            ;; <1>
-             :refer [init-sidebar]]
-            [learn-cljs.chat.components.dom :as dom]
-            [goog.dom :as gdom])
-  (:import [goog.dom TagName]))
+(ns learn-cljs.notes.ui.footer)
+
+(defn footer []
+  [:footer.footer "CLJS Notes"])
 
 #+end_src
-***** init
-#+begin_src clojure :no-expand t
-(defn init-main []
-  (gdom/createDom TagName.SECTION "content-main"
-    (init-header)))
-
-(defn init-app [el msg-ch]
-  (let [wrapper (dom/div "app-wrapper"                     ;; <2>
-                  (init-sidebar msg-ch)
-                  (init-main))]
-    (set! (.-innerText el) "")
-    (.appendChild el wrapper)))
-#+end_src
-
-**** org
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/")
-
-*** header.cljs
+**** ui.common
 :PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/chat/components/header.cljs :mkdirp yes
+:header-args: :tangle  notes/src/learn_cljs/notes/ui/common.cljs :mkdirp yes
 :END:
-**** file
-(find-file-other-frame "group-chat/src/learn_cljs/chat/components/header.cljs")
-**** src
-***** ns
 #+begin_src clojure :no-expand t
-(ns learn-cljs.chat.components.header
-  (:require [learn-cljs.chat.components.dom :as dom]
-            [learn-cljs.chat.components.component :refer [init-component]]
-            [learn-cljs.chat.components.render-helpers :refer [display-name]]
-            [learn-cljs.chat.state :as state]))
-#+end_src
-***** other
-#+begin_src clojure :no-expand t
-(defn accessor [app]
-  (cond
-    (state/is-current-view-room? app)
-    {:icon "meeting_room"
-     :title (-> app
-                (get-in [:current-view :id])
-                (->> (state/room-by-id app))
-                :name)
-     :current-user (:current-user app)}
+(ns learn-cljs.notes.ui.common
+  (:require [learn-cljs.notes.command :refer [dispatch!]]))
 
-    (state/is-current-view-conversation? app)
-    {:icon "person"
-     :title (-> app
-                (get-in [:current-view :username])
-                (->> (state/person-by-username app))
-                display-name)
-     :current-user (:current-user app)}
+(defn handle-navigate [route-params]
+  (fn [_]
+    (dispatch! :route/navigate route-params)))
 
-    :else
-    {:title "Welcome to ClojureScript Chat"}))
+(defn button [text {:keys [route-params class]
+                    :or {class ""}}]
+  (println "from button def")
+             [:button {:class (str "button " class)
+                        :on-click (handle-navigate route-params)}
+                    text])
 
-(defn render [header {:keys [icon title current-user]}]
-  (dom/with-children header
-    (dom/h1 "view-name"
-      (dom/i "material-icons" icon) title)
-    (dom/div "user-name"
-      (when (some? current-user)
-        (display-name current-user)))))
-
-(defn init-header []
-  (init-component (dom/header "app-header")
-    :header accessor render))
 #+end_src
 
-(defn display-name [person]                                ;; <1>
-  (if person
-    (->> person
-        ((juxt :first-name :last-name))
-        (s/join " "))
-    "REMOVED"))
-
-
-**** org
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/src/learn_cljs/chat/components/")
-
-*** render-helpers.cljs
+*** views
+**** ui.views.home
 :PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/chat/components/render-helpers.cljs :mkdirp yes
+:header-args: :tangle  notes/src/learn_cljs/notes/ui/views/home.cljs :mkdirp yes
 :END:
-**** file
-(find-file-other-frame "group-chat/src/learn_cljs/chat/components/render-helpers.cljs")
-**** src
 #+begin_src clojure :no-expand t
-(ns learn-cljs.chat.components.render-helpers
-  (:require [clojure.string :as s]))
+(ns learn-cljs.notes.ui.views.home)
 
-(defn display-name [person]
-  (if person
-    (->> person
-        ((juxt :first-name :last-name))
-        (s/join " "))
-    "REMOVED"))
+(defn home []
+  [:div.home.hero
+   [:h1.title "Welcome to Notes"]
+   [:h2.subtitle "Select a note or create a new one to get started."]])
+
 #+end_src
-*** dom.cljs
+
+*** resurses
+**** css
+***** src css
 :PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/chat/components/dom.cljs :mkdirp yes
+:header-args: :tangle  notes/resources/public/css/style.css :mkdirp yes
 :END:
-**** file
-(find-file-other-frame "group-chat/src/learn_cljs/chat/components/dom.cljs")
-**** src
-***** ns
 #+begin_src clojure :no-expand t
-(ns learn-cljs.chat.components.dom
-  (:require [goog.dom :as gdom])
-  (:import [goog.dom TagName]))
+:root {
+  --bg-dark: #312450;
+  --bg-highlight: #483575;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+.app {
+  display: grid;
+  grid-template-areas:
+    "header header"
+    "sidebar main"
+    "footer main";
+  grid-template-rows: 3em 1fr 2em;
+  grid-template-columns: 20em 1fr;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+}
+
+.page-header,
+.sidebar,
+.main,
+.footer {
+  padding-left: 16px;
+  padding-right: 8px;
+}
+
+.page-header {
+  grid-area: header;
+  background-color: var(--bg-highlight);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  padding: 0 16px;
+}
+
+.sidebar {
+  grid-area: sidebar;
+  overflow-x: hidden;
+  overflow-y: auto;
+  color: #dddddd;
+
+  background-color: var(--bg-dark);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='30' viewBox='0 0 1000 120'%3E%3Cg fill='none' stroke='%23342654' stroke-width='10' %3E%3Cpath d='M-500 75c0 0 125-30 250-30S0 75 0 75s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 45c0 0 125-30 250-30S0 45 0 45s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 105c0 0 125-30 250-30S0 105 0 105s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 15c0 0 125-30 250-30S0 15 0 15s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500-15c0 0 125-30 250-30S0-15 0-15s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 135c0 0 125-30 250-30S0 135 0 135s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3C/g%3E%3C/svg%3E");
+}
+
+.sidebar-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 100%;
+  padding: 2.5em;
+}
+
+.sidebar ul a {
+  display: block;
+  border: 0;
+  outline: 0;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.7em;
+  letter-spacing: 0.1em;
+  text-decoration: none;
+  position: relative;
+  padding: 0.5em 0;
+}
+
+.sidebar nav a:before,
+.sidebar nav a:after {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 0.2em;
+  border-radius: 0.2em;
+  content: "";
+}
+
+.sidebar nav a:before {
+  background: #3c2c62;
+}
+
+.sidebar nav a:after {
+  background-image: linear-gradient(to left, #5e42a6, #b74e91);
+  transition: max-width 0.2s ease;
+  max-width: 0;
+}
+
+.sidebar nav a.active,
+.sidebar nav a:hover {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.sidebar nav a.active:after,
+.sidebar nav a:hover:after {
+  max-width: 100%;
+}
+
+.sidebar nav a.active {
+  color: #ffffff;
+}
+
+/* main area */
+
+.main {
+  grid-area: main;
+  padding-top: 12px;
+}
+
+/* footer */
+
+.footer {
+  grid-area: footer;
+  padding: 0.2em 2.5em;
+  text-align: center;
+  background-color: #483575;
+  text-transform: uppercase;
+  font-weight: bold;
+  color: #fff;
+}
+
+/* notifications */
+
+.messages {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  z-index: 500;
+  pointer-events: none;
+}
+
+.messages > * {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.messages .notification {
+  position: relative;
+  margin-top: 24px;
+  width: 80%;
+  max-width: 600px;
+  padding: 16px;
+  border-radius: 12px;
+  min-height: 32px;
+  background-color: #fff;
+  pointer-events: auto;
+}
+
+.notification > .delete {
+  right: 0.5rem;
+  position: absolute;
+  top: 0.5rem;
+
+  background-color: rgba(10, 10, 10, 0.2);
+  border: none;
+  border-radius: 290486px;
+  cursor: pointer;
+  pointer-events: auto;
+  display: inline-block;
+  flex-grow: 0;
+  flex-shrink: 0;
+  font-size: 0;
+  height: 20px;
+  max-height: 20px;
+  max-width: 20px;
+  min-height: 20px;
+  min-width: 20px;
+  outline: 0;
+  vertical-align: top;
+  width: 20px;
+}
+
+.notification > .delete::before,
+.notification > .delete::after {
+  background-color: #fff;
+  content: "";
+  display: block;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translateX(-50%) translateY(-50%) rotate(45deg);
+  transform-origin: center center;
+}
+
+.notification > .delete::before {
+  height: 2px;
+  width: 50%;
+}
+
+.notification > .delete::after {
+  height: 50%;
+  width: 2px;
+}
+
+.notification.is-error {
+  background-color: #dc143c;
+  color: #fff;
+}
+
+.notification.is-info {
+  background-color: #483575;
+  color: #fff;
+}
+
+/* full-height hero */
+
+.hero {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+/* title */
+
+.title {
+  color: var(--bg-dark);
+  opacity: 0.8;
+}
+
+.subtitle {
+  color: var(--bg-highlight);
+  opacity: 0.8;
+}
+
+.page-title {
+  color: var(--bg-dark);
+  opacity: 0.8;
+  border-bottom: 2px solid var(--bg-dark);
+  margin-bottom: 16px;
+}
+
+/* buttons */
+
+.button {
+  display: inline-block;
+  border: 2px solid var(--bg-dark);
+  padding: 4px 8px;
+  color: var(--bg-dark);
+  background-color: #fff;
+  outline: none;
+  cursor: pointer;
+}
+
+.button.inverse {
+  border-color: #fff;
+  color: #fff;
+  background-color: var(--bg-highlight);
+}
+
+.button:hover {
+  border-color: var(--bg-highlight);
+  color: var(--bg-highlight);
+  background-color: #fff;
+}
+
+.button.block {
+  border-radius: 0;
+  width: 100%;
+  display: inline-block;
+}
+
+/* forms */
+
+.field {
+  margin-bottom: 12px;
+}
+
+.field:last-child {
+  margin-bottom: 0;
+}
+
+.field > .label {
+  font-size: 0.8em;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 0.05em;
+}
+
+.field > .control input,
+.field > .control textarea {
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #bbb;
+  padding: 8px;
+}
+
+.note-form .editor {
+  display: flex;
+}
+
+.note-form .editor .note {
+  flex-grow: 1;
+}
+
+.note-form .editor .tags {
+  flex-basis: 30%;
+  margin-left: 24px;
+}
+
+.note-form .editor .tags > h3 {
+  font-size: 1.1em;
+  font-weight: 700;
+  color: #555;
+  letter-spacing: 0.05em;
+}
+
+/* tags */
+
+.tag-selector .attached,
+.tag-selector .available,
+.tag-selector .create {
+  margin-top: 16px;
+}
+
+.tag-selector .attached .tag {
+  padding: 2px 8px;
+  margin-right: 4px;
+  background-color: var(--bg-highlight);
+  color: #fff;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tag-selector .available .tag {
+  padding: 2px 8px;
+  border-left: 4px solid var(--bg-dark);
+  margin-bottom: 4px;
+  cursor: pointer;
+}
+
+.tag-selector .available .tag:hover {
+  border-left-color: #b74e91;
+}
+
+.tag-selector .available .tag .add {
+  margin-right: 8px;
+  font-weight: 800;
+}
+
+/* slide-in animation */
+
+:root {
+  --anim-duration: 500ms;
+}
+
+.slide-in {
+  transition: transform var(--anim-duration) ease-in-out;
+}
+
+.slide-in.transition-initial.direction-left {
+  transform: translateX(-100vw);
+}
+
+.slide-in.transition-initial.direction-right {
+  transform: translateX(100vw);
+}
+
+.slide-in.transition-initial.direction-top {
+  transform: translateY(-100vh);
+}
+
+.slide-in.transition-initial.direction-bottom {
+  transform: translateY(100vh);
+}
+
+.slide-in.transition-triggered {
+  transform: translate(0) !important;
+}
+
+/* Style reset adapted from Bulma */
+
+html {
+  background-color: #fff;
+  font-size: 16px;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-font-smoothing: antialiased;
+  min-width: 300px;
+  overflow-x: hidden;
+  overflow-y: hidden;
+  text-rendering: optimizeLegibility;
+  -webkit-text-size-adjust: 100%;
+  -moz-text-size-adjust: 100%;
+  -ms-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  color: #4a4a4a;
+  font-size: 1em;
+  font-weight: 400;
+  line-height: 1.5;
+
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+}
+
+body,
+button,
+input,
+select,
+textarea {
+  font-family: BlinkMacSystemFont, -apple-system, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", Helvetica,
+    Arial, sans-serif;
+}
+
+blockquote,
+body,
+dd,
+dl,
+dt,
+fieldset,
+figure,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+hr,
+html,
+iframe,
+legend,
+li,
+ol,
+p,
+pre,
+textarea,
+ul {
+  margin: 0;
+  padding: 0;
+}
+
+ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+a {
+  color: #3273dc;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+article,
+aside,
+figure,
+footer,
+header,
+hgroup,
+section {
+  display: block;
+}
+
+*,
+::after,
+::before {
+  box-sizing: inherit;
+}
+
 #+end_src
-***** others
-#+begin_src clojure :no-expand t
-(defn dom-fn [tag-name]
-  (fn [& args]
-    (apply gdom/createDom tag-name args)))
-
-(def a (dom-fn TagName.A))
-(def article (dom-fn TagName.ARTICLE))
-(def aside (dom-fn TagName.ASIDE))
-(def button (dom-fn TagName.BUTTON))
-(def div (dom-fn TagName.DIV))
-(def form (dom-fn TagName.FORM))
-(def header (dom-fn TagName.HEADER))
-(def h1 (dom-fn TagName.H1))
-(def i (dom-fn TagName.I))
-(def input (dom-fn TagName.INPUT))
-(def label (dom-fn TagName.LABEL))
-(def p (dom-fn TagName.P))
-(def section (dom-fn TagName.SECTION))
-(def textarea (dom-fn TagName.TEXTAREA))
-
-(defn with-children [el & children]
-  (doseq [child children]
-    (.appendChild el child))
-  el)
-#+end_src
-*** sidebar.cljs
-:PROPERTIES:
-:header-args: :no-expand t :mkdirp yes :tangle  group-chat/src/learn_cljs/chat/components/sidebar.cljs
-:END:
-**** file
-(find-file-other-frame "group-chat/src/learn_cljs/chat/components/sidebar.cljs")
-**** src
-***** ns
-#+begin_src clojure 
-(ns learn-cljs.chat.components.sidebar
-  (:require [learn-cljs.chat.components.dom :as dom]       ;; <1>
-            [learn-cljs.chat.components.component :refer [init-component]]
-            [learn-cljs.chat.components.render-helpers :as helpers]
-            [learn-cljs.chat.message-bus :as bus]
-            [goog.events :as gevents]
-            [learn-cljs.chat.state :as state]))
-#+end_src
+***** exempl
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/resources/public/css/style.css
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/resources/public/css/
+*** tests
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/notes/dev.cljs.edn")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/notes/dev.cljs.edn
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/notes/test.cljs.edn
 
 
-***** others
-#+begin_src clojure 
-(defn sidebar-header [title]
-  (dom/div "sidebar-header" title))
-
-(defn render-room [msg-ch room]
-  (let [class-name (str "sidebar-item" (when (:active? room)
-                                         " active"))
-        text (:name room)]
-    (doto (dom/div class-name text)
-      (gevents/listen "click"                              ;; <2>
-                      #(bus/dispatch! msg-ch :switch-to-room
-                                      {:id (:id room)})))))
-
-(defn render-create-room [msg-ch el open?]                 ;; <3>
-  (if open?
-    (let [add-room-input (dom/input "add-room-input")]
-      (dom/with-children el
-        (doto add-room-input
-          (gevents/listen "keyup"
-                          #(when (= (.-key %) "Enter")
-                             (bus/dispatch! msg-ch
-                                            :create-room (.-value add-room-input))))
-          (gevents/listen "blur"
-                          #(bus/dispatch! msg-ch
-                                          :close-create-room-input))))
-      (.focus add-room-input))                             ;; <4>
-    (dom/with-children el
-      (doto (dom/div "add-room" "Add")
-        (gevents/listen "click"
-                        #(bus/dispatch! msg-ch :open-create-room-input))))))
-
-(defn render-create-room-item [msg-ch]
-  (init-component
-    (dom/div "sidebar-item no-highlight")
-    :sidebar-create-room
-    :create-room-input-open?
-    (partial render-create-room msg-ch)))
-
-(defn render-rooms [msg-ch el rooms]
-  (apply dom/with-children el                              ;; <5>
-         (conj
-           (mapv #(render-room msg-ch %) rooms)
-           (render-create-room-item msg-ch))))
-
-(defn sidebar-rooms [msg-ch]
-  (init-component
-    (dom/div "sidebar-rooms")
-    :sidebar-rooms
-    state/room-list
-    (partial render-rooms msg-ch)))
-
-(defn render-person [msg-ch person]
-  (let [class-name (str "sidebar-item" (when (:active? person)
-                                         " active"))
-        text (helpers/display-name person)]
-    (doto (dom/div class-name text)
-      (gevents/listen "click"
-                      #(bus/dispatch! msg-ch :switch-to-conversation
-                                      {:username (:username person)})))))
-
-(defn render-people [msg-ch el people]
-  (dom/with-children el
-    (map #(render-person msg-ch %) people)))
-
-(defn sidebar-people [msg-ch]
-  (init-component
-    (dom/div "sidebar-people")
-    :sidebar-people
-    state/people-list
-    (partial render-people msg-ch)))
-
-(defn init-sidebar [msg-ch]
-  (dom/aside "sidebar"
-             (sidebar-header "Rooms")
-             (sidebar-rooms msg-ch)
-             (sidebar-header "People")
-             (sidebar-people msg-ch)))
-#+end_src
-** deps.edn
-:PROPERTIES:
-:header-args: :tangle  group-chat/deps.edn
-:END:
-*** file
-(find-file-other-frame "group-chat/deps.edn")
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/deps.edn
-*** src
-
-#+begin_src clojure :no-expand t
-{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
-        org.clojure/clojurescript {:mvn/version "1.11.132"}
-        org.clojure/data.json {:mvn/version "2.5.1"}
-        cljsjs/react {:mvn/version "18.3.1-1"}
-        cljsjs/react-dom {:mvn/version "18.3.1-1"}
-        org.clojure/core.async {:mvn/version "1.6.681"}
-        reagent/reagent {:mvn/version "1.2.0" }}
- :paths ["src" "resources"]
- :aliases {:fig {:extra-deps
-                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
-                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
-                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
-                 :extra-paths ["target" "test"]}
-           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
-           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
-           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
-           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
-#+end_src
-
-*** exempl
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/deps.edn
+[Figwheel:WARNING] Could not Analyze: Invalid :refer,
+var learn-cljs.notes/multiply does not exist in file /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/notes/test/learn_cljs/notes_test.cljs  target/public/cljs-out/dev/generated-input-files/gen_test_runner.cljs   
+[Figwheel:SEVERE] failed compiling file:target/public/cljs-out/dev/generated-input-files/gen_test_runner.cljs
+** notes-backend/
 * all
 ** exempls files
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/resources/public/index.html
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/resources/public/test.html
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/resources/public/css/
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/ /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes-backend/ /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/deploy-image.sh /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/Dockerfile
 
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/test/learn_cljs/group_chat_test.cljs /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/test/learn_cljs/test_runner.cljs
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/resources /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/test /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/deps.edn /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/dev.cljs.edn /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/figwheel-main.edn /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/README.md /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/test.cljs.edn
 
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/deps.edn
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/dev.cljs.edn
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/figwheel-main.edn
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/.gitignore
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/README.md
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/.rebel_readline_history
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/test.cljs.edn
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/event_handlers/ /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/ /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/api.cljs
+
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/command.cljs")
+
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/errors.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/events.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/routes.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/state.cljs
+
+
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/event_handlers/api_data.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/event_handlers/core.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/event_handlers/header.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/event_handlers/notifications.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/event_handlers/routes.cljs
+
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/views/ /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/animation.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/card.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/common.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/footer.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/header.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/main.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/notifications.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/sidebar.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/src/learn_cljs/notes/ui/tags.cljs
 ** poject exampls
-*** chat-backend
+*** notes
 **** dir
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat-backend
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/
 **** console
-#+begin_src elisp :results output silent :dir /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/
+#+begin_src elisp :results output silent :dir /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/
 (buyn-shell-start "konsole -e /bin/bash --rcfile <(clj -M:fig:build)")
 (evil-previous-line)
 (org-cycle)
 (delete-other-windows)
 #+end_src
-*** chat
-**** dir
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/build.sh
-**** reple
-***** run eshell in project root
+*** notes-backend
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes-backend/ 
+*** ranger
+(ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/")
+** Exempl dirs
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat-backend
+* REPL
+:PROPERTIES:
+:header-args: :tangle no :mkdirp yes :results output silent :no-expand t
+:END:
+** start
 clojure -M:fig:build
-:cljs/quit
-:cljs/restart
-
-clj -M:dev
-clojure -m cljs.main --compile my-cljs-project.core --repl
-
-
-clojure -P
-clojure -M:fig:clean
-clojure -M:fig:build
-cd /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/
-#+begin_src elisp :results output silent :dir /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/
+#+begin_src elisp :results output silent :dir ./notes/
 (evil-previous-line)
 (org-cycle)
 (delete-other-windows)
@@ -834,10 +917,386 @@ cd /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat/
         (evil-quit)
         (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
+** commans
+clojure -M:fig:build
+:cljs/quit
+:cljs/restart
 
-      ;; (execute-kbd-macro "A \C-m")
-** Exempl dirs
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat /home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-26/chat-backend
+clojure -M:fig:clean
+clojure -M:fig:build
+** normilise
+*** notes
+
+{:notes                                                    ;; <1>
+   {1 {:id 1
+       :title "Books to Read"
+       :content "..."}
+    2 {:id 2
+       :title "Groceries"
+       :content "..."}}
+ :tags
+   {1 {:id 1 :name "food"}
+    2 {:id 2 :name "list"}
+    3 {:id 3 :name "reading"}}}
+
+ :notes-tags
+   {:by-note-id                                            ;; <2>
+     {1 [2 3]
+      2 [1 2]}
+    :by-tag-id
+     {1 [2]
+      2 [1 2]
+      3 [1]}}}
+
+*** def notes
+(def date-items
+  {:notes                                                    ;; <1>
+    {1 {:id 1
+        :title "Books to Read"
+        :content "..."}
+      2 {:id 2
+        :title "Groceries"
+        :content "..."}}
+  :tags
+    {1 {:id 1 :name "food"}
+      2 {:id 2 :name "list"}
+      3 {:id 3 :name "reading"}}
+
+  :notes-tags
+    {:by-note-id                                            ;; <2>
+      {1 [2 3]
+        2 [1 2]}
+      :by-tag-id
+      {1 [2]
+        2 [1 2]
+        3 [1]}}})
+*** first
+(def items [{:id 1 :title "foo"}
+                        {:id 2 :title "bar"}])
+
+(def links [{:note-id 1 :tag-id 2}
+            {:note-id 1 :tag-id 3}
+            {:note-id 2 :tag-id 1}
+            {:note-id 2 :tag-id 2}])
+
+(defn map-values [f m]
+  (into {} (for [[k v] m] [k (f v)])))
+
+(defn make-index [coll & {:keys [index-fn value-fn group-fn]
+                          :or {value-fn identity
+                               group-fn identity}}]
+                (->> coll
+                    (group-by index-fn)
+                    (map-values #(group-fn (mapv value-fn %)))))
+*** test
+(group-by :id items)
+
+(make-index items
+            :index-fn :id
+            :group-fn first)
+
+(make-index links
+            :index-fn :note-id
+            :value-fn :tag-id)
+*** ии       
+(make-index items
+            :index-fn :id
+            :group-fn first)
+
+(make-index links
+            :index-fn :note-id
+            :value-fn :tag-id)
+  новерное всеровно не понимаю вот два приминения в каждом из которых передаётся только один из необезательных параметров
+  так чему же равен второй врезультате, при исполнении функции?
+
+(def items [{:id 1 :title "foo"}
+                        {:id 2 :title "bar"}])
+
+(def links [{:note-id 1 :tag-id 2}
+            {:note-id 1 :tag-id 3}
+            {:note-id 2 :tag-id 1}
+            {:note-id 2 :tag-id 2}])
+*** end
+
+(defn get-links [notes]
+  (mapcat (fn [note]
+            (for [tag (:tags note)]
+              {:note-id (:id note)
+               :tag-id (:id tag)}))
+          notes))
+
+(defn normalize-notes [notes]
+  (let [links (get-links notes)
+        notes-without-tags (mapv #(dissoc % :tags) notes)
+        all-note-tags (mapcat :tags notes)]
+    {:notes (make-index notes-without-tags
+                        :index-fn :id
+                        :group-fn first)
+     :tags (make-index all-note-tags
+                       :index-fn :id
+                       :group-fn first)
+     :notes-tags
+     {:by-note-id
+      (make-index links
+                  :index-fn :note-id
+                  :value-fn :tag-id)
+      :by-tag-id
+      (make-index links
+                  :index-fn :tag-id
+                  :value-fn :note-id)}}))
+*** test
+date-items
+(:notes date-items)
+
+(get-links (:notes date-items))
+(get-links date-items)
+(:tags date-items)
+(for [tag (:tags date-items)]
+              {:note-id (:id date-items)
+               :tag-id (:id tag)})
+
+
+(normalize-notes (:notes date-items))
+** DONE masseging
+*** DONE .notes.events
+(ns learn-cljs.notes.events)
+
+(def listeners (atom []))                                  ;; <1>
+
+(defn emit!                                                ;; <2>
+  ([type] (emit! type nil))
+  ([type payload]
+   (doseq [listen-fn @listeners]
+     (listen-fn type payload))))
+
+(defn register-listener! [listen-fn]                       ;; <3>
+  (swap! listeners conj listen-fn))
+
+*** DONE .notes.command
+
+(ns learn-cljs.notes.command
+  (:require [learn-cljs.notes.events :refer [emit!]
+            [learn-cljs.notes.routes :as routes]]))
+
+
+(defn handle-test-hello! [name]
+  (println "Hello" name)                                   ;; <1>
+  (emit! :test/greeting-dispatched {:name name}))          ;; <2>
+
+(defn handle-navigate! [route-params]
+  (routes/navigate! route-params))
+
+(defn dispatch!
+  ([command] (dispatch! command nil))
+  ([command payload]
+   (js/setTimeout                                          ;; <3>
+     #(case command
+        :test/hello (handle-test-hello! payload)
+        :route/navigate (handle-navigate! payload))
+
+        (js/console.error (str "Error: unhandled command: " command)))
+     0)))
+**** add
+(ns learn-cljs.notes.command
+  (:require ;; ...
+            [learn-cljs.notes.routes :as routes]))
+
+(defn handle-navigate! [route-params]
+  (routes/navigate! route-params))
+;; ...
+
+(defn dispatch
+  ;;...
+  :route/navigate (handle-navigate! payload))
+
+**** test
+# (require '[learn-cljs.notes.routes :as routes]))
+
+(defn handle-navigate! [route-params]
+  (navigate! route-params))
+
+(defn dispatch
+  :navigate (handle-navigate! payload))
+*** DONE notes.state
+**** ns
+(ns learn-cljs.notes.state
+  (:require [reagent.core :as r]))
+(require '[reagent.core :as r])
+
+(def initial-state
+  {:current-route [:home]                                  ;; <1>
+   :notifications {:messages []                            ;; <2>
+                   :next-id 0}
+   :data {:notes {}
+          :tags {}}})
+
+(defonce app (r/atom initial-state))
+**** handlers
+(def handlers (atom {}))
+
+(defn register-handler! [event-type handler-fn]
+  (swap! handlers assoc event-type handler-fn))
+
+(register-listener!
+ (fn [type payload]
+   (when-let [handler-fn (get @handlers type)]
+     (swap! app #(handler-fn  % payload)))))
+
+*** test
+
+(defn caller-hello! [type payload]
+  (println "hadler call " type payload))
+
+(register-listener! caller-hello!)
+
+(dispatch! :test/hello "world")
+
+@listeners
+@app
+(dispatch! :test/helo)
+** UI
+*** DONE main notes
+**** ns
+(ns learn-cljs.notes
+  (:require [learn-cljs.notes.ui.header :refer [header]]
+            [learn-cljs.notes.ui.main :refer [main]]
+            [learn-cljs.notes.ui.sidebar :refer [sidebar]]
+            [learn-cljs.notes.ui.footer :refer [footer]]
+            [reagent.dom :as rdom]
+            [goog.dom :as gdom]))
+
+(require '[learn-cljs.notes.ui.header :refer [header]]
+          '[learn-cljs.notes.ui.main :refer [main]]
+          '[learn-cljs.notes.ui.sidebar :refer [sidebar]]
+          '[learn-cljs.notes.ui.footer :refer [footer]]
+          '[reagent.dom :as rdom]
+          '[goog.dom :as gdom])
+
+(require 
+          '[reagent.dom :as rdom]
+          '[goog.dom :as gdom])
+**** render
+(defn app []
+  [:div.app
+   [header]
+   [main]
+   [sidebar]
+   [footer]])
+
+(rdom/render
+ [app]
+ (gdom/getElement "app"))
+**** test
+(defn app []
+  [:div.app
+   [:p "hi!"]
+   ])
+
+(rdom/render
+ [app]
+ (gdom/getElement "app"))
+*** DONE header
+(ns learn-cljs.notes.ui.header)
+
+(defn header []
+  [:header.page-header])
+*** DONE ui.main
+(ns learn-cljs.notes.ui.main)
+
+(defn main []
+  [:div.main])
+*** DONE sidebar
+(ns learn-cljs.notes.ui.sidebar)
+
+(defn sidebar []
+  [:nav.sidebar])
+*** DONE footer
+(ns learn-cljs.notes.ui.footer)
+
+(defn footer []
+  [:footer.footer "CLJS Notes"])
+*** TODO [button]
+**** DONE ui.common
+(ns learn-cljs.notes.ui.common
+  (:require [learn-cljs.notes.command :refer [dispatch!]]))
+
+(defn handle-navigate [route-params]
+  (fn [_]
+    (dispatch! :route/navigate route-params)))
+
+(defn button [text {:keys [route-params class]
+                    :or {class ""}}]
+  [:button {:class (str "button " class)
+            :on-click (handle-navigate route-params)}
+   text])
+
+**** DONE ui.header
+(ns learn-cljs.notes.ui.header
+  (require [learn-cljs.notes.ui.common :refer [button]]))
+
+(defn header []
+  [:header.page-header
+   [button "+ New Note"
+     {:route-params [:create-note]                         ;; <1>
+      :class "inverse"}]])
+**** DONE views.home
+(ns learn-cljs.notes.ui.views.home)
+
+(defn home []
+  [:div.home.hero
+   [:h1.title "Welcome to Notes"]
+   [:h2.subtitle "Select a note or create a new one to get started."]])
+
+**** DONE ui.main
+
+(ns learn-cljs.notes.ui.main
+  (:require [learn-cljs.notes.state :as state]
+            [learn-cljs.notes.ui.views.home :refer [home]]))
+
+(defn not-found []                                         ;; <1>
+  [:section.hero
+   [:h1.title "Page Not Found!"]])
+
+(defn main []
+  (let [[route params query] (:current-route @state/app)]  ;; <2>
+    [:div.main
+     (case route
+       :home [home]
+       [not-found])]))
+
+**** DONE notes.routes
+***** test
+(require '[learn-cljs.notes.events :refer [emit!]]
+         '[bide.core :as bide])
+***** all
+(ns learn-cljs.notes.routes
+  (:require [learn-cljs.notes.events :refer [emit!]]
+            [bide.core :as bide]))
+
+(defonce router                                            ;; <1>
+  (bide/router [["/" :home]
+                ["/notes/new" :create-note]
+                ["/notes/:note-id" :edit-note]]))
+
+(defn navigate! [route-params]                             ;; <2>
+  (apply bide/navigate! router route-params))
+
+(defn- on-navigate [name params query]                     ;; <3>
+  (emit! :route/navigated [name params query]))
+
+(defn initialize! []                                       ;; <4>
+  (bide/start! router {:default :routes/home
+                       :on-navigate on-navigate}))
+
+**** event-handlers.routes
+(ns learn-cljs.notes.event-handlers.routes
+  (:require [learn-cljs.notes.state :refer [register-handler!]]))
+
+(register-handler!
+ :route/navigated
+ (fn [db route-params]
+   (assoc db :current-route route-params)))
+
 * project comands
 :PROPERTIES:
 :header-args: :tangle no
@@ -856,7 +1315,7 @@ clojure -P
 clojure -M:fig:clean
 clojure -M:fig:build
 
-#+begin_src elisp :results output silent :dir ./group-chat/
+#+begin_src elisp :results output silent :dir ./notes/
 (evil-previous-line)
 (org-cycle)
 (delete-other-windows)
@@ -937,7 +1396,7 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 
 * get info
 :PROPERTIES:
-:header-args: :tangle  weather/src/learn_cljs/weather.cljs
+:header-args: :tangle no
 :END:
 ** tree group-chat
 #+begin_src eshell
@@ -1263,6 +1722,27 @@ tree -a ../..
 #+end_src
 
 * todo
+** DONE сделать новый орг
+положить поаналогии с предыдушим
+/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/deps.edn
+
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter-cljs-project.org")
+** DONE посмотреть имя будушего приложения
+** DONE запустить собраное
+[[*run eshell in project root][run eshell in project root]]
+** DONE как в гите вернуть один фаил
+как откатить один фаил в гит
+к вариаунту последнего комита?
+** DONE как это сделать в магит
+** за реплить
+** попробывать пример с го
+** поэксперементировать с каналами
+*** открыть урок
+*** запустить репл
+*** сделатьт репл раздел в мануале
+*** отправить команды и эксперементы
+** начать вносить измения по книге
+* arhiv
 * 2025-04-28
 ** noter
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/noter-cljs-project.org")

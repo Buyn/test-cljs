@@ -4437,18 +4437,11 @@ tree -a
 tree -a ../..
 #+end_src
 
-* todo
-** сделать новый орг
-положить поаналогии с предыдушим
-/home/buyn/Dev/ClojureScript/tutorials/learn-cljs/code/lesson-30/notes/deps.edn
-
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter-cljs-project.org")
-** посмотреть имя будушего приложения
-** поэксперементировать с каналами
-*** открыть урок
-*** запустить репл
-*** сделатьт репл раздел в мануале
-*** отправить команды и эксперементы
+* TODO todo
+** DONE [[file:noter/noter-cljs-project.org::*начать вносить измения по книге][начать вносить измения по книге]]
+** TODO [[file:noter/noter-cljs-project.org::*поэксперементировать с каналами][поэксперементировать с каналами]]
+** [[file:noter/noter-cljs-project.org::*запустить собраное][запустить собраное]]
+* arhiv
 ** DONE Осмотрет проект на котором остановился
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/Group-Chat-cljs-project.org")
 ** DONE сделать папку
