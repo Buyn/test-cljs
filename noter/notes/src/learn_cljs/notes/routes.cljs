@@ -7,10 +7,12 @@
                 ["/notes/new" :create-note]
                 ["/notes/:note-id" :edit-note]]))
 
-(defn navigate! [route-params]                             ;; <2>
+(defn navigate! [route-params]
+  (println "routes navigate!" route-params)
   (apply bide/navigate! router route-params))
 
-(defn- on-navigate [name params query]                     ;; <3>
+(defn- on-navigate [name params query]
+  (println "bide on-navigate " name params query)
   (emit! :route/navigated [name params query]))
 
 (defn initialize! []                                       ;; <4>

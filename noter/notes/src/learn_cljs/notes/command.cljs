@@ -17,7 +17,5 @@
      #(case command
         :test/hello (handle-test-hello! payload)
         :route/navigate (handle-navigate! payload)
-        )
-
         (js/console.error (str "Error: unhandled command: " command)))
-     0))
+     0)))

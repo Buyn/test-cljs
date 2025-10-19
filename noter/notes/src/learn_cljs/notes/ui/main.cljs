@@ -1,6 +1,8 @@
 (ns learn-cljs.notes.ui.main
   (:require [learn-cljs.notes.state :as state]
-            [learn-cljs.notes.ui.views.home :refer [home]]))
+            [learn-cljs.notes.ui.views.home :refer [home]]
+            [learn-cljs.notes.ui.views.note-form :refer [note-form]]))
+
 
 (defn not-found []                                         ;; <1>
   [:section.hero

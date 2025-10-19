@@ -3,6 +3,7 @@
             [learn-cljs.notes.ui.main :refer [main]]
             [learn-cljs.notes.ui.sidebar :refer [sidebar]]
             [learn-cljs.notes.ui.footer :refer [footer]]
+            [learn-cljs.notes.routes :as routes]
             [reagent.dom :as rdom]
             [goog.dom :as gdom]))
 
@@ -11,6 +12,11 @@
 (defn multiply [a b] (* a b))
 
 (defonce app-state (atom {:text "Hello world!"}))
+
+(defonce initialized?
+  (do
+    (routes/initialize!)
+    true))
 
 (defn app []
   [:div.app
