@@ -2,6 +2,7 @@
   (:require [learn-cljs.notes.ui.header :refer [header]]
             [learn-cljs.notes.ui.main :refer [main]]
             [learn-cljs.notes.ui.sidebar :refer [sidebar]]
+            [learn-cljs.notes.event-handlers.core]
             [learn-cljs.notes.ui.footer :refer [footer]]
             [learn-cljs.notes.routes :as routes]
             [reagent.dom :as rdom]

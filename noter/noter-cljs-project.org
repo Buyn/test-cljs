@@ -51,6 +51,7 @@
   (:require [learn-cljs.notes.ui.header :refer [header]]
             [learn-cljs.notes.ui.main :refer [main]]
             [learn-cljs.notes.ui.sidebar :refer [sidebar]]
+            [learn-cljs.notes.event-handlers.core]
             [learn-cljs.notes.ui.footer :refer [footer]]
             [learn-cljs.notes.routes :as routes]
             [reagent.dom :as rdom]
@@ -144,6 +145,71 @@
 
 (in-ns 'import-fns.format)
 (in-ns 'learn-cljs.group-chat)
+*** state
+**** .notes.state
+***** file
+(find-file-other-frame "notes/src/learn_cljs/notes/state.cljs")
+***** src .notes.state
+:PROPERTIES:
+:header-args: :tangle  notes/src/learn_cljs/notes/state.cljs :mkdirp yes
+:END:
+#+begin_src clojure :no-expand t
+(ns learn-cljs.notes.state
+  (:require [reagent.core :as r]
+            [learn-cljs.notes.events :as events]))
+
+(def initial-state
+  {:current-route [:home]                                  ;; <1>
+   :notifications {:messages []                            ;; <2>
+                   :next-id 0}
+   :data {:notes {}
+          :tags {}}})
+
+(defonce app (r/atom initial-state))
+
+(def handlers (atom {}))
+
+(defn register-handler! [event-type handler-fn]
+  (swap! handlers assoc event-type handler-fn))
+
+(events/register-listener!
+ (fn [type payload]
+   (println "handlerer externel")
+   (when-let [handler-fn (get @handlers type)]
+     (println "handlerer internel")
+     (swap! app #(handler-fn  % payload)))))
+
+#+end_src
+
+**** .notes.event-handlers.routes
+***** file
+(find-file-other-frame "notes/src/learn_cljs/notes/event-handlers/routes.cljs")
+***** src .notes.event-handlers.routes
+:PROPERTIES:
+:header-args: :tangle  notes/src/learn_cljs/notes/event-handlers/routes.cljs :mkdirp yes
+:END:
+#+begin_src clojure :no-expand t
+(ns learn-cljs.notes.event-handlers.routes
+  (:require [learn-cljs.notes.state :refer [register-handler!]]))
+
+(register-handler!
+ :route/navigated
+ (fn [db route-params]
+   (assoc db :current-route route-params)))
+#+end_src
+
+**** .notes.event-handlers.core
+***** file
+(find-file-other-frame "notes/src/learn_cljs/notes/event-handlers/core.cljs")
+***** src .notes.event-handlers.core
+:PROPERTIES:
+:header-args: :tangle  notes/src/learn_cljs/notes/event-handlers/core.cljs :mkdirp yes
+:END:
+#+begin_src clojure :no-expand t
+(ns learn-cljs.notes.event-handlers.core
+  (:require [learn-cljs.notes.event-handlers.routes]))
+#+end_src
+
 *** messaging
 **** .notes.events
 ***** file
@@ -188,6 +254,10 @@
 (defn handle-navigate! [route-params]
   (routes/navigate! route-params))
 
+(defn handle-create-note! [note]
+  ;; (api/create-note! note)
+  )
+
 (defn dispatch!
   ([command] (dispatch! command nil))
   ([command payload]
@@ -195,10 +265,13 @@
      #(case command
         :test/hello (handle-test-hello! payload)
         :route/navigate (handle-navigate! payload)
+        :notes/create (handle-create-note! payload)
         (js/console.error (str "Error: unhandled command: " command)))
      0)))
 
 #+end_src
+
+
 
 **** .notes.routes
 ***** file
@@ -222,63 +295,15 @@
   (apply bide/navigate! router route-params))
 
 (defn- on-navigate [name params query]
-  ;; (println "bide on-navigate " name params query)
+  (println "bide on-navigate:"
+           "\n name  =" name
+           "\n params=" (pr-str params)
+           "\n query =" (pr-str query))
   (emit! :route/navigated [name params query]))
 
 (defn initialize! []                                       ;; <4>
   (bide/start! router {:default :routes/home
                        :on-navigate on-navigate}))
-
-#+end_src
-
-**** .notes.event-handlers.routes
-***** file
-(find-file-other-frame "notes/src/learn_cljs/notes/event-handlers/routes.cljs")
-***** src .notes.event-handlers.routes
-:PROPERTIES:
-:header-args: :tangle  notes/src/learn_cljs/notes/event-handlers/routes.cljs :mkdirp yes
-:END:
-#+begin_src clojure :no-expand t
-(ns learn-cljs.notes.event-handlers.routes
-  (:require [learn-cljs.notes.state :refer [register-handler!]]))
-
-(register-handler!
- :route/navigated
- (fn [db route-params]
-   (assoc db :current-route route-params)))
-#+end_src
-
-*** state
-**** .notes.state
-***** file
-(find-file-other-frame "notes/src/learn_cljs/notes/state.cljs")
-***** src .notes.state
-:PROPERTIES:
-:header-args: :tangle  notes/src/learn_cljs/notes/state.cljs :mkdirp yes
-:END:
-#+begin_src clojure :no-expand t
-(ns learn-cljs.notes.state
-  (:require [reagent.core :as r]
-            [learn-cljs.notes.events :as events]))
-
-(def initial-state
-  {:current-route [:home]                                  ;; <1>
-   :notifications {:messages []                            ;; <2>
-                   :next-id 0}
-   :data {:notes {}
-          :tags {}}})
-
-(defonce app (r/atom initial-state))
-
-(def handlers (atom {}))
-
-(defn register-handler! [event-type handler-fn]
-  (swap! handlers assoc event-type handler-fn))
-
-(events/register-listener!
- (fn [type payload]
-   (when-let [handler-fn (get @handlers type)]
-     (swap! app #(handler-fn  % payload)))))
 
 #+end_src
 
@@ -317,7 +342,8 @@
   (let [[route params query] (:current-route @state/app)]  ;; <2>
     [:div.main
      (case route
-       :home [home]
+       ;; :home [home]
+       :routes/home [home]
        [not-found])]))
 
 
@@ -384,21 +410,6 @@
 
 
 
-*** views
-**** ui.views.home
-:PROPERTIES:
-:header-args: :tangle  notes/src/learn_cljs/notes/ui/views/home.cljs :mkdirp yes
-:END:
-#+begin_src clojure :no-expand t
-(ns learn-cljs.notes.ui.views.home)
-
-(defn home []
-  [:div.home.hero
-   [:h1.title "Welcome to Notes"]
-   [:h2.subtitle "Select a note or create a new one to get started."]])
-
-#+end_src
-
 **** ui.views.note-form
 :PROPERTIES:
 :header-args: :tangle  notes/src/learn_cljs/notes/ui/views/note-form.cljs :mkdirp yes
@@ -446,6 +457,21 @@
         [input form-data :title "Title"]
         [textarea form-data :content "Content"]
         [submit-button form-data "Save"]]])))
+
+#+end_src
+
+*** views
+**** ui.views.home
+:PROPERTIES:
+:header-args: :tangle  notes/src/learn_cljs/notes/ui/views/home.cljs :mkdirp yes
+:END:
+#+begin_src clojure :no-expand t
+(ns learn-cljs.notes.ui.views.home)
+
+(defn home []
+  [:div.home.hero
+   [:h1.title "Welcome to Notes"]
+   [:h2.subtitle "Select a note or create a new one to get started."]])
 
 #+end_src
 
@@ -1420,12 +1446,13 @@ date-items
 как мне сменить значение этого атома?
 ** ui.views.note-form
 *** test
-
-  (require '[reagent.core :as r]
-           '[learn-cljs.notes.state :refer [app]]
-           '[learn-cljs.notes.events :refer [emit!]]
-           '[bide.core :as bide]
-           '[learn-cljs.notes.ui.common :refer [button]])
+**** 01
+(require '[reagent.core :as r]
+          '[learn-cljs.notes.state :refer [app]]
+          '[learn-cljs.notes.events :refer [emit!]]
+          '[learn-cljs.notes.routes :as routes]
+          '[bide.core :as bide]
+          '[learn-cljs.notes.ui.common :refer [button]])
 
 
 (defonce router                                            ;; <1>
@@ -1434,6 +1461,53 @@ date-items
                 ["/notes/:note-id" :edit-note]]))
 
 (apply bide/navigate! router route-params)
+
+(routes/navigate! [:edit-note {:note-id 123}])
+
+(in-ns 'user)
+(require 'learn-cljs.notes.routes :reload)
+(defn learn-cljs.notes.routes/greet []
+  (println "🔥 Updated!"))
+
+  
+**** 02
+@learn-cljs.notes.events/listeners
+@learn-cljs.notes.state/handlers
+@learn-cljs.notes.state/app
+
+(let [[route params query] (:current-route @learn-cljs.notes.state/app)]
+  (println route))
+
+(require '[reagent.core :as r]
+          '[learn-cljs.notes.state :refer [app]]
+          # '[learn-cljs.notes.events :refer [emit!]]
+          '[learn-cljs.notes.events :as events]
+          '[learn-cljs.notes.routes :as routes]
+          '[bide.core :as bide]
+          '[learn-cljs.notes.ui.common :refer [button]])
+
+  (emit! :route/navigated [name params query])
+
+  
+(defn emit!                                                ;; <2>
+  ([type] (emit! type nil))
+  ([type payload]
+   (doseq [listen-fn @listeners]
+     (listen-fn type payload))))
+
+
+(def listeners (atom []))                                  ;; <1>
+
+
+(defn register-listener! [listen-fn]                       ;; <3>
+  (swap! listeners conj listen-fn))
+
+(def handlers (atom {}))
+
+
+(defn register-handler! [event-type handler-fn]
+  (swap! handlers assoc event-type handler-fn))
+
 *** all
 (ns learn-cljs.notes.ui.views.note-form
   (:require [reagent.core :as r]
@@ -1477,6 +1551,7 @@ date-items
         [input form-data :title "Title"]
         [textarea form-data :content "Content"]
         [submit-button form-data "Save"]]])))
+** api
 
 * project comands
 :PROPERTIES:

@@ -12,5 +12,6 @@
   (let [[route params query] (:current-route @state/app)]  ;; <2>
     [:div.main
      (case route
-       :home [home]
+       ;; :home [home]
+       :routes/home [home]
        [not-found])]))

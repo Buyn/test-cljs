@@ -10,6 +10,10 @@
 (defn handle-navigate! [route-params]
   (routes/navigate! route-params))
 
+(defn handle-create-note! [note]
+  ;; (api/create-note! note)
+  )
+
 (defn dispatch!
   ([command] (dispatch! command nil))
   ([command payload]
@@ -17,5 +21,6 @@
      #(case command
         :test/hello (handle-test-hello! payload)
         :route/navigate (handle-navigate! payload)
+        :notes/create (handle-create-note! payload)
         (js/console.error (str "Error: unhandled command: " command)))
      0)))

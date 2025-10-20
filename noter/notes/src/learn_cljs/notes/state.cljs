@@ -18,5 +18,7 @@
 
 (events/register-listener!
  (fn [type payload]
+   (println "handlerer externel")
    (when-let [handler-fn (get @handlers type)]
+     (println "handlerer internel")
      (swap! app #(handler-fn  % payload)))))
