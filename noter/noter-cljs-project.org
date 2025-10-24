@@ -1552,6 +1552,60 @@ date-items
         [textarea form-data :content "Content"]
         [submit-button form-data "Save"]]])))
 ** api
+*** notes.api
+
+(ns learn-cljs.notes.api
+  (:require [learn-cljs.notes.events :refer [emit!]]
+            [learn-cljs.notes.errors :as err]
+            [camel-snake-kebab.core :as csk]
+            [camel-snake-kebab.extras :as cske]))
+
+(defn do-request!
+  ([method path cb] (do-request! method path nil cb))
+  ([method path body cb]
+   (let [serialized-body (when body
+                           (->> body                       ;; <1>
+                                (cske/transform-keys csk/->camelCaseString)
+                                (clj->js)
+                                (js/JSON.stringify)))]
+     (-> (js/fetch (str js/API_URL path)                   ;; <2>
+                   (cond-> {:method (name method)
+                            :headers {"Authorization" (str "Bearer " js/API_TOKEN)}
+                            :credentials "include"}
+                     (some? body)
+                     (->
+                      (assoc :body serialized-body)
+                      (update :headers merge {"content-type" "application/json"}))
+
+                     :always
+                     clj->js))
+         (.then (fn [res]
+                  (if (.-ok res)
+                    (when (= 200 (.-status res))
+                      (.json res))
+                    (throw (ex-info "API Request Failed"
+                                    {:status-code (.-status res)
+                                     :status (.-statusText res)}
+                                    :api-failure)))))
+         (.then #(->> %
+                      (js->clj)                            ;; <3>
+                      (cske/transform-keys csk/->kebab-case-keyword)
+                      (err/ok)
+                      (cb)))
+         (.catch #(cb (err/error %)))))))                  ;; <4>
+
+(defn- display-error [err]                                 ;; <5>
+  (emit! :notification/added
+         {:type :error
+          :text (str "API Error: " (ex-message err))}))
+
+(defn create-note! [note]                                  ;; <6>
+  (do-request! :post "/notes" note
+               (fn [res]
+                 (->> res
+                      (err/map
+                       #(emit! :note/created %))
+                      (err/unwrap-or display-error)))))
 
 * project comands
 :PROPERTIES:
