@@ -3330,10 +3330,51 @@ localhost:3449
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/README.md")
 
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/core.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/ui/main.cljs")
 
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/resources/public/index.html")
+*** risoning
+**** src/cljs/keechma_counter/core.cljs
+(restart-app!)
+
+который
+
+    (if @running-app
+      (keechma.app-state/stop! @running-app start-app!)
+      (start-app!))))
+где
+(defonce running-app (clojure.core/atom nil))
+
+а
+(defn start-app!
+  (reset! running-app (keechma.app-state/start! app-definition)))
+
+**** (keechma.app-state/start! app-definition)
+тоесть всё сводится к (keechma.app-state/start! app-definition)
+
+в котором всё преложение описано в app-definition
+**** def app-definition
+  {:controllers {:counter (counter/->Controller)}
+   :components {:main (assoc main/component :topic :counter)}
+   :subscriptions {:counter-value counter-value-sub}
+   :html-element (.getElementById js/document "app")})
+**** :controllers {:counter (counter/->Controller)}
+:controllers {:counter (keechma-counter.controllers.counter/->Controller)}
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
+
+
+
+
+**** :components {:main (assoc main/component :topic :counter)}
+:components {:main (assoc keechma-counter.ui.main/component :topic :counter)}
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/ui/main.cljs")
+
+
+**** :subscriptions {:counter-value counter-value-sub}
+**** :html-element (.getElementById js/document "app")})
 
 ** noter
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/noter-cljs-project.org")
