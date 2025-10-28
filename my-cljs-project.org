@@ -3316,11 +3316,226 @@ clj -A:fig:build                                         # <2>
 clj -A:fig:build
 (js/alert "Am I connected?")
 * Source files
+** TodoMVC
+*** clon
+git clone https://github.com/keechma/example-todomvc.git
+cd example-todomvc
+*** run
+lein figwheel
+*** files
+**** src core
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/app.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/subscriptions.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/ui.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/util.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.clj")
+**** src components
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_edit.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_item.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_list.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/toggle_todos.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/app.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/footer.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/new_todo.cljs")
+**** src controler
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/controllers/todos.cljs")
+**** src entities
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
+**** resurs
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/resources/public/css/style.css")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/resources/public/index.html")
+**** project
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/project.clj")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/target/stale/leiningen.figwheel.clean-on-dependency-change")
+**** other
+find "$PWD" -type f >>filepath.txt
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/README.md")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/figwheel_server.log")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/file_path.txt")
+*** risoning
+**** index.html
+определяет точку в хода в скрипт
+    <script>keechma_todomvc.app.main()</script>
+**** app.cljs
+***** ^:export main
+(defn ^:export main
+  "Called from `index.html` to start the app. Exported because
+  `index.html` refers to it by name even in non-dev builds."
+  []
+  (dev-setup)
+  (start!))
+***** dev-setup
+похоже при наличии гдето переменной включает режим дебага
+поидее если не релиз то переменная влючена
+После вызова (enable-console-print!):
+(println "hello") ;; => в браузерной консоли появится "hello"
+
+(defn dev-setup
+  "Enables console output for dev builds."
+  []
+  (when ^boolean js/goog.DEBUG
+    (enable-console-print!)
+    (println "dev mode")))
+***** (defn start!
+стандартно
+  (reset! running-app (keechma.app-state/start! app-definition)))
+***** (def app-definition
+  {:routes [[":status" {:status "all"}]]
+   :controllers {:todos (keechma-todomvc.controllers.todos/->Controller)}
+   :components keechma-todomvc.components/system
+   :subscriptions keechma-todomvc.subscriptions/subscriptions
+   :html-element (.getElementById js/document "app")})
+стандартно
+    <div id="app"> </div>
+**** :controllers {:todos (keechma-todomvc.controllers.todos/->Controller)}
+***** клоючевое в start Controller
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/controllers/todos.cljs")
+(defmethod controller/start Controller
+  [_ params app-db]
+  (keechma-todomvc.entities.todo/create-todos app-db))
+он запускает todo/create-todos с app-db
+[[*entities/todo.cljs][entities/todo.cljs]]
+
+
+(defmethod controller/handler Controller
+  [_ app-db-atom in-chan _]
+  (controller/dispatcher app-db-atom in-chan (keechma-todomvc.entities.todo/actions)))
+и видемо функция команд в entities.todo/actions
+[[*entities/todo.cljs][entities/todo.cljs]]
+(defn actions
+  (let [cmd-handlers {:start-edit start-edit
+                      :cancel-edit cancel-edit
+                      :confirm-edit confirm-edit
+                      :create-todo create-todo
+                      :delete-todo delete-todo
+                      :toggle-todo toggle-todo
+                      :toggle-all toggle-all
+                      :delete-completed delete-completed}
+***** [[*entities/todo.cljs][entities/todo.cljs]]
+**** :subscriptions keechma-todomvc.subscriptions/subscriptions
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/subscriptions.cljs")
+
+набор подпосок вынесен в другой фаил в целов всё также
+(def subscriptions {:todos-by-status todos-by-status
+                    :count-todos-by-status count-todos-by-status
+                    :has-todos-by-status? has-todos-by-status?
+                    :has-todos? has-todos?
+                    :edit-todo edit-todo})
+
+подписки врашаются в основном вокруг получения реактивного атома
+но часть действий вынесана в другой фаил
+[[*entities/todo.cljs][entities/todo.cljs]]
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
+**** entities/todo.cljs
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
+ключивой фаил посути посредник между остальными
+содержит все команды
+посути вытаскивает из базы туду
+и производит все действия надним
+действия над базой через
+            [keechma-todomvc.edb :as edb])
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.clj")
+что использует стандартную библиотеку для нормализации даных подкопотом
+  (:require [entitydb.core :as edb])
+оборачивая её вызовы чтоб их можно было передовать
+
+ТОесть этот фаил обёртка вокруг библиотеки работы с атомом аппа
+в нем есть набор команд для всех основных действий с туду
+(defn actions
+  (let [cmd-handlers {:start-edit start-edit
+                      :cancel-edit cancel-edit
+                      :confirm-edit confirm-edit
+                      :create-todo create-todo
+                      :delete-todo delete-todo
+                      :toggle-todo toggle-todo
+                      :toggle-all toggle-all
+                      :delete-completed delete-completed}
+**** :components keechma-todomvc.components/system
+***** def system
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components.cljs")
+(def system
+  {:main app/component
+   :footer (assoc footer/component :topic :todos)
+   :new-todo (assoc new-todo/component :topic :todos)
+   :todo-edit (assoc todo-edit/component :topic :todos)
+   :todo-item (assoc todo-item/component :topic :todos)
+   :todo-list todo-list/component
+   :toggle-todos (assoc toggle-todos/component :topic :todos)})
+
+в которых
+  (:require [keechma-todomvc.components.app :as app]
+            [keechma-todomvc.components.footer :as footer]
+            [keechma-todomvc.components.new-todo :as new-todo]
+            [keechma-todomvc.components.todo-edit :as todo-edit]
+            [keechma-todomvc.components.todo-item :as todo-item]
+            [keechma-todomvc.components.todo-list :as todo-list]
+            [keechma-todomvc.components.toggle-todos :as toggle-todos]))
+***** :main app/component
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/app.cljs")
+похоже он как основу использует 
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
+  для того чтоб подключать другие файлы как встраевуемы компоненты
+
+(def component
+  (<comp :renderer render
+         :component-deps [:new-todo
+                          :toggle-todos
+                          :todo-list
+                          :footer]
+         :subscription-deps [:has-todos?]))
+
+ а потом вытаскивает их по надобности как хикап структуры  в рендерер главного компонета
+
+(defn render
+  [ctx]
+  [:<>
+   [:section.todoapp
+    [:header.header
+     [:h1 "todos"]
+     [comp> ctx :new-todo]]
+    (when (sub> ctx :has-todos?)
+      [:<>
+       [:section.main
+        [comp> ctx :toggle-todos]
+        [comp> ctx :todo-list]]
+       [comp> ctx :footer]])]
+   [:footer.info
+    [:p "Double-click to edit a todo"]
+    [:p
+     [:a {:href "https://keechma.com"} "Keechma"] " "
+     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+интересным явлется пример использования кода прям в структурк интерфейса он проверяет перемунную по подписке и если она тру рисует структуру дел либо нет
+***** keechma-todomvc.ui
+оберта функций
+  (:require [keechma.ui-component :as ui]))
+в более короткий формат c прификсами <  или пофиксом >
+
+(defn <comp
+(defn <cmd
+(defn <url
+(defn comp>
+(defn sub>
+(defn route>
+
+
+
+***** :footer (assoc footer/component :topic :todos)
+***** :new-todo (assoc new-todo/component :topic :todos)
+***** :todo-edit (assoc todo-edit/component :topic :todos)
+***** :todo-item (assoc todo-item/component :topic :todos)
+***** :todo-list todo-list/component
+***** :toggle-todos (assoc toggle-todos/component :topic :todos)})
+**** {:routes [[":status" {:status "all"}]]
+
 ** Keechma Counter
 *** clone
 git clone https://github.com/keechma/keechma-counter.git
-cd keechma-counter
 *** run
+cd keechma-counter
 lein figwheel
 localhost:3449
 *** files
@@ -3364,17 +3579,80 @@ localhost:3449
 
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
 
+подписывает сделанй класс
+у которого есть набор команд который он слушает и выполнят как я понимаю это както сделано через каналы там фигурирую входяшие и исходяшие
+стартуя контролёр в писывает в главный атом :counter по пути [:kv :counter] и делает его значение 0
+(defmethod controller/start Controller
+  [controller params app-db]
+  (assoc-in app-db [:kv :counter] 0))
 
 
+и прописывает набор команд в кинчма хэндлер
+(defmethod controller/handler Controller
+  [controller app-db-atom in-chan out-chan]
+  (controller/dispatcher app-db-atom in-chan
+                         {:inc #(swap! app-db-atom update-in [:kv :counter] inc)
+                          :dec #(swap! app-db-atom update-in [:kv :counter] dec)}))
 
 **** :components {:main (assoc main/component :topic :counter)}
+как я помню по описанию обезательно наличе :main
+видемо это точка для отображения
 :components {:main (assoc keechma-counter.ui.main/component :topic :counter)}
 
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/ui/main.cljs")
+в файле def component
+возврашает
+(keechma.ui-component/constructor { :renderer render
+                                    :subscription-deps [:counter-value]})
 
+constructor получает рендере который запрашивает из полученго параметре :counter-value
+несовсем понятна такое описание но 
 
+(defn render
+  [ctx]
+  (let [counter-sub (keechma.ui-component/subscription ctx :counter-value)]
+
+  после чего возврашает вид страници виде функции
+
+(fn []
+      [:p
+       (str "Clicked: " @counter-sub " times ")
+       [:button {:on-click #(keechma.ui-component/send-command ctx :inc)} "+"] " "
+       [:button {:on-click #(ui/send-command ctx :dec)} "-"] " "
+       [:button {:on-click #(inc-if-odd ctx @counter-sub)} "Increment if odd"] " "
+       [:button {:on-click #(inc-async ctx)} "Increment async"]])
+делает она это через функции keechma.ui-component/subscription чтоб получить подписаный атом
+а через keechma.ui-component/send-command шлёт подписаные команды в файле
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
+команды прописываюся в методе controller/handler класса Controller
+
+интересным явлется то что рендерится структура целеком с изменением атома @counter-sub, тоесть как только он изменится то структура перерендерится. ТОесть не требует не каких дополнительных действий или кода.
 **** :subscriptions {:counter-value counter-value-sub}
+(defn counter-value-sub [app-state]
+  (reagent.ratom/reaction (get-in @app-state [:kv :counter])))
+несовсем понятно который апстей ту и откуда он берётся app-state
+но предполжу что это колбе функция вызывается при :counter-value запросе
+и соответственно
+при :counter-value оно возврашает результат выполения
+(reagent.ratom/reaction (get-in @app-state [:kv :counter]))
+в котором app-state будет заполнен сабскрайбером откудото переданы
+тоесть предположительо гдето есть чтото в форме (def app-state (reagent/atom {:kv {:counter 0}}))
+и снего по :counter-value мы болучает реактивный атом
+
 **** :html-element (.getElementById js/document "app")})
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/resources/public/index.html")
+    <div id="app">
+
+js/document — это способ обратиться к глобальной JS-переменной document.
+(всё, что начинается с js/, — это “мост” к объектам JS из ClojureScript)
+
+.getElementById — это вызов метода у этого объекта.
+Точка перед именем метода (.) — синтаксис вызова JS-методов в ClojureScript.
+
+"app" — аргумент, который передаётся в метод (id элемента).
+
+Результат — это сам DOM-элемент, который можно использовать, например,
+чтобы вмонтировать компонент Reagent или React.
 
 ** noter
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/noter-cljs-project.org")
@@ -4516,14 +4794,7 @@ clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent
 ? или посоветуешь что-то другое?
 
 ** Keechma exampls
-https://keechma.com/annotated/
-Counter
-
-Counter application example.
-
-,* [[https://github.com/keechma/keechma-counter][Source code]]
-,* [[https://keechma.com/annotated/counter/][Annotated source]]
-
+*** todo
 TodoMVC
 
 TodoMVC application example.
@@ -4551,7 +4822,14 @@ Application that shows how to use the [[https://github.com/keechma/forms][Keechm
 
 ,* [[https://github.com/keechma/keechma-forms-example][Source code]]
 ,* [[https://keechma.com/annotated/form-example/][Annotated source]]
+*** done
+https://keechma.com/annotated/
+Counter
 
+Counter application example.
+
+,* [[https://github.com/keechma/keechma-counter][Source code]]
+,* [[https://keechma.com/annotated/counter/][Annotated source]]
 ** Keechma
 *** to
 
