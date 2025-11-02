@@ -1,11 +1,45 @@
 * src worder
 * files worder
-* todo worder
-** сделать отдельный орг
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
-** сделать копию проекта
-* backlog worder
-** заменить в разделе файлов на новый путь
+** files core
+(find-file-other-frame "./src/keechma_todomvc/app.cljs")
+(find-file-other-frame "./src/keechma_todomvc/subscriptions.cljs")
+(find-file-other-frame "./src/keechma_todomvc/ui.cljs")
+(find-file-other-frame "./src/keechma_todomvc/util.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components.cljs")
+(find-file-other-frame "./src/keechma_todomvc/edb.cljs")
+(find-file-other-frame "./src/keechma_todomvc/edb.clj")
+** files components
+(find-file-other-frame "./src/keechma_todomvc/components/app.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/new_todo.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/toggle_todos.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/todo_list.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/todo_item.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/todo_edit.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/footer.cljs")
+** files controler
+(find-file-other-frame "./src/keechma_todomvc/controllers/todos.cljs")
+** files entities
+(find-file-other-frame "./src/keechma_todomvc/entities/todo.cljs")
+** files resurs
+(find-file-other-frame "./resources/public/css/style.css")
+(find-file-other-frame "./resources/public/index.html")
+** files project
+(find-file-other-frame "./project.clj")
+(find-file-other-frame "./target/stale/leiningen.figwheel.clean-on-dependency-change")
+** files other
+find "$PWD" -type f >>filepath.txt
+
+(find-file-other-frame "./README.md")
+(find-file-other-frame "./figwheel_server.log")
+* run worder
+*** run
+lein figwheel
+
+:cljs/quit
+:cljs/restart
+*** clon
+git clone https://github.com/keechma/example-todomvc.git
+* TODO todo worder
 ** запустить копию
 убедится в работо способности
 ** перенести в орг нужные файла для работы
@@ -24,6 +58,7 @@
 [[file:keechma-counter/src/cljs/keechma_counter/ui/main.cljs::\[:button {:on-click #(ui/send-command ctx :dec)} "-"\]]]
 ** показатель последнего замера реакции
 возможно не компонет а просто хикап структура
+* backlog worder
 ** переписать текст под слова в интервейсе
 добовлем слова вместо туду
 видемо вордер
@@ -54,6 +89,11 @@
 ** захостить
 возможно нужна будет помошь Уни
 ** передать вале
+* DONE Done worder
+** DONE сделать отдельный орг
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
+** DONE сделать копию проекта
+** DONE заменить в разделе файлов на новый путь
 * 2025-11-02
 ** file worder-cljs-project.org
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
