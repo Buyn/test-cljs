@@ -40,6 +40,8 @@ from
 
 :header-args: :tangle  "~/INI/hydra-cfg.el"
 * Source files
+** Worder
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
 ** TodoMVC
 *** risoning
 **** index.html
@@ -1935,6 +1937,8 @@ button {
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
 * TODO todo
 ** NEXT програма психологияеская
+*** file
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
 *** переделать тудуер
 
 в измеритель реакций
@@ -1953,8 +1957,13 @@ button {
 передать вале
 *** туду
 **** сделать отдельный орг
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
 **** сделать копию проекта
+**** заменить в разделе файлов на новый путь
+**** запустить копию
+убедится в работо способности
 **** перенести в орг нужные файла для работы
+взять как миннимум один фаил что убедить в работоспособности механизма
 **** компонет измеритель реакции
 нужен новый компонет- кнопка
 может быть в двух состояниях. Состояние нажатое\активное состояни не активное.
@@ -1996,7 +2005,7 @@ button {
 **** сменить цветовую схему
 на автоматическую посмотреть что из этого получится
 **** забилдить для размешения
-**** запостить
+**** захостить
 возможно нужна будет помошь Уни
 **** передать вале
 ** програма измерения прочитанного
@@ -2028,6 +2037,7 @@ button {
 ** TODO Keechma exampls
 *** todo
 https://keechma.com/guides/application-walkthrough/
+https://github.com/keechma/example-place-my-order
 
 Login
 
