@@ -39,6 +39,2784 @@ from
 #+PROPERTY:    tangle ~/INI/hydra-cfg.el
 
 :header-args: :tangle  "~/INI/hydra-cfg.el"
+* Source files
+** TodoMVC
+*** risoning
+**** index.html
+определяет точку в хода в скрипт
+    <script>keechma_todomvc.app.main()</script>
+**** app.cljs
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/app.cljs")
+***** ^:export main
+(defn ^:export main
+  "Called from `index.html` to start the app. Exported because
+  `index.html` refers to it by name even in non-dev builds."
+  []
+  (dev-setup)
+  (start!))
+***** dev-setup
+похоже при наличии гдето переменной включает режим дебага
+поидее если не релиз то переменная влючена
+После вызова (enable-console-print!):
+(println "hello") ;; => в браузерной консоли появится "hello"
+
+(defn dev-setup
+  "Enables console output for dev builds."
+  []
+  (when ^boolean js/goog.DEBUG
+    (enable-console-print!)
+    (println "dev mode")))
+***** (defn start!
+стандартно
+  (reset! running-app (keechma.app-state/start! app-definition)))
+***** (def app-definition
+  {:routes [[":status" {:status "all"}]]
+   :controllers {:todos (keechma-todomvc.controllers.todos/->Controller)}
+   :components keechma-todomvc.components/system
+   :subscriptions keechma-todomvc.subscriptions/subscriptions
+   :html-element (.getElementById js/document "app")})
+стандартно
+    <div id="app"> </div>
+**** :controllers {:todos (keechma-todomvc.controllers.todos/->Controller)}
+***** клоючевое в start Controller
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/controllers/todos.cljs")
+(defmethod controller/start Controller
+  [_ params app-db]
+  (keechma-todomvc.entities.todo/create-todos app-db))
+он запускает todo/create-todos с app-db
+[[*entities/todo.cljs][entities/todo.cljs]]
+
+
+(defmethod controller/handler Controller
+  [_ app-db-atom in-chan _]
+  (controller/dispatcher app-db-atom in-chan (keechma-todomvc.entities.todo/actions)))
+и видемо функция команд в entities.todo/actions
+[[*entities/todo.cljs][entities/todo.cljs]]
+(defn actions
+  (let [cmd-handlers {:start-edit start-edit
+                      :cancel-edit cancel-edit
+                      :confirm-edit confirm-edit
+                      :create-todo create-todo
+                      :delete-todo delete-todo
+                      :toggle-todo toggle-todo
+                      :toggle-all toggle-all
+                      :delete-completed delete-completed}
+***** [[*entities/todo.cljs][entities/todo.cljs]]
+**** :subscriptions keechma-todomvc.subscriptions/subscriptions
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/subscriptions.cljs")
+
+набор подпосок вынесен в другой фаил в целов всё также
+(def subscriptions {:todos-by-status todos-by-status
+                    :count-todos-by-status count-todos-by-status
+                    :has-todos-by-status? has-todos-by-status?
+                    :has-todos? has-todos?
+                    :edit-todo edit-todo})
+
+подписки врашаются в основном вокруг получения реактивного атома
+но часть действий вынесана в другой фаил
+[[*entities/todo.cljs][entities/todo.cljs]]
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
+**** entities/todo.cljs
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
+ключивой фаил посути посредник между остальными
+содержит все команды
+посути вытаскивает из базы туду
+и производит все действия надним
+действия над базой через
+            [keechma-todomvc.edb :as edb])
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.clj")
+что использует стандартную библиотеку для нормализации даных подкопотом
+  (:require [entitydb.core :as edb])
+оборачивая её вызовы чтоб их можно было передовать
+
+ТОесть этот фаил обёртка вокруг библиотеки работы с атомом аппа
+в нем есть набор команд для всех основных действий с туду
+(defn actions
+  (let [cmd-handlers {:start-edit start-edit
+                      :cancel-edit cancel-edit
+                      :confirm-edit confirm-edit
+                      :create-todo create-todo
+                      :delete-todo delete-todo
+                      :toggle-todo toggle-todo
+                      :toggle-all toggle-all
+                      :delete-completed delete-completed}
+**** :components keechma-todomvc.components/system
+***** def system
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components.cljs")
+(def system
+  {:main app/component
+   :footer (assoc footer/component :topic :todos)
+   :new-todo (assoc new-todo/component :topic :todos)
+   :todo-edit (assoc todo-edit/component :topic :todos)
+   :todo-item (assoc todo-item/component :topic :todos)
+   :todo-list todo-list/component
+   :toggle-todos (assoc toggle-todos/component :topic :todos)})
+
+в которых
+  (:require [keechma-todomvc.components.app :as app]
+            [keechma-todomvc.components.footer :as footer]
+            [keechma-todomvc.components.new-todo :as new-todo]
+            [keechma-todomvc.components.todo-edit :as todo-edit]
+            [keechma-todomvc.components.todo-item :as todo-item]
+            [keechma-todomvc.components.todo-list :as todo-list]
+            [keechma-todomvc.components.toggle-todos :as toggle-todos]))
+***** :main app/component
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/app.cljs")
+похоже он как основу использует 
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
+  для того чтоб подключать другие файлы как встраевуемы компоненты
+
+(def component
+  (<comp :renderer render
+         :component-deps [:new-todo
+                          :toggle-todos
+                          :todo-list
+                          :footer]
+         :subscription-deps [:has-todos?]))
+
+ а потом вытаскивает их по надобности как хикап структуры  в рендерер главного компонета
+
+(defn render
+  [ctx]
+  [:<>
+   [:section.todoapp
+    [:header.header
+     [:h1 "todos"]
+     [comp> ctx :new-todo]]
+    (when (sub> ctx :has-todos?)
+      [:<>
+       [:section.main
+        [comp> ctx :toggle-todos]
+        [comp> ctx :todo-list]]
+       [comp> ctx :footer]])]
+   [:footer.info
+    [:p "Double-click to edit a todo"]
+    [:p
+     [:a {:href "https://keechma.com"} "Keechma"] " "
+     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+интересным явлется пример использования кода прям в структурк интерфейса он проверяет перемунную по подписке и если она тру рисует структуру дел либо нет
+***** keechma-todomvc.ui
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/ui.cljs")
+оберта функций
+  (:require [keechma.ui-component :as ui]))
+в более короткий формат c прификсами <  или пофиксом >
+
+(defn <comp
+(defn <cmd
+(defn <url
+(defn comp>
+(defn sub>
+(defn route>
+
+***** :new-todo (assoc new-todo/component :topic :todos)
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/new_todo.cljs")
+  (let [new-title (reagent/atom "")]
+    (fn []
+      [:input.new-todo
+       {:placeholder "What needs to be done?"
+        :value @new-title
+        :auto-focus true
+        :on-change #(reset! new-title (.. % -target -value))
+        :on-key-down #(when (is-enter? (.-keyCode %))
+                        (<cmd ctx :create-todo @new-title)
+                        (reset! new-title ""))}])))
+  замечательный пример использования функций прям в структуре хикапа передовая их как лямбдо функции
+это делается для того чтоб получить локальный атом прямо внутри компонента
+тоесть он будет существовать всё время пока существует компонет поскольку создан за пределами структуры
+струкртура перересовывается при каздом рендере и если обект создовался внутри него и создовался он бы при каждом рендере.
+
+для определения нажатия энтера используется 
+            [keechma-todomvc.util :refer [is-enter?]]
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/util.cljs")
+
+(defn is-enter? [key-code]
+  (= key-code 13))
+
+(defn is-esc? [key-code]
+  (= key-code 27))
+
+создание нового туду происходит по команде
+                        (<cmd ctx :create-todo @new-title)
+
+(defn create-todo
+  "If `title` is valid, creates a new `todo` and inserts it at the
+  beginning of the `todo` list."
+  [app-db title]
+  (if (valid-title? title)
+    (let [todo {:id (str "todo" (id))
+                :completed false
+                :title title}]
+      (edb/prepend-collection app-db :todos :list [todo]))
+    app-db))
+
+***** :toggle-todos (assoc toggle-todos/component :topic :todos)})
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/toggle_todos.cljs")
+элимент перет полем импута включаюший и выключаюший все тудушки
+красивая механика развново поведения от учёта наличия тудушо и их отсутвия
+
+***** :todo-list todo-list/component
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_list.cljs")
+****** (def component
+  (<comp :renderer render
+         :component-deps [:todo-item]
+         :subscription-deps [:todos-by-status
+                             :edit-todo]))
+
+Необычным есть зависимоть от другово компонента [:todo-item]
+****** render
+
+блогодоря этому компонеты заполняются li для ul таблицы
+[:ul.todo-list
+     (doall (map todo-item (sub> ctx :todos-by-status route-status)))]
+
+основа реакт атом todos-by-status возврашаюший меп тудушек на основе текущего статус
+     (doall (map todo-item (sub> ctx :todos-by-status route-status)))]))
+doall заставляет map реально вычислиться (иначе map в Clojure ленивый)
+
+(defn todos-by-status
+  "Returns a `reaction` on the list of `todos` with a `status`."
+  [app-db status]
+  (reaction
+   (todo/todos-by-status @app-db status)))
+
+который сылается на ентити функцию
+(defn todos-by-status
+  "Returns all `todos` with a `status`."
+  [app-db status]
+  (let [todos (edb/get-collection app-db :todos :list)]
+    (case status
+      :completed (filter :completed todos)
+      :active (filter (complement :completed) todos)
+      :all todos)))
+простая функция получает мапу всех тудушек потом просто запускает один из 3х фильтров
+
+****** Структура данных в Keechma EntityDB
+
+Keechma внутри использует EntityDB — это не обычный map, а система хранения данных с "нормализованными" сущностями, как в базе данных.
+
+Примерно так в памяти может выглядеть app-db:
+
+{:edb {:todos
+       {:entities {1 {:id 1 :title "Buy milk" :status :active}
+                   2 {:id 2 :title "Hack the planet" :status :completed}}
+        :lists {:list [1 2]}}}}
+
+
+Теперь:
+
+:todos — это “таблица” (entity type)
+
+:entities — все объекты этого типа
+
+:lists — это “представления” (view) или “коллекции” (например, список ID-шников)
+
+🔹 Что делает get-collection
+
+Когда ты вызываешь:
+
+(edb/get-collection app-db :todos :list)
+
+
+EntityDB делает следующее:
+
+Берёт из :edb таблицу :todos
+
+Находит коллекцию :list (список ID-шников)
+
+Подставляет к каждому ID соответствующую сущность
+
+Возвращает вектор полных записей.
+
+Результат будет примерно таким:
+
+[{:id 1 :title "Buy milk" :status :active}
+ {:id 2 :title "Hack the planet" :status :completed}]
+
+****** получившуюся мапу тудушек разбирает функция
+        todo-item (fn [{id :id :as todo}]
+                    ^{:key id} [comp> ctx :todo-item todo (is-editing? id)])]
+она преобразовывает мапу тудушек в мапу li строк таблици.
+
+А что делает ^{:key id} ?
+Это реагентовская метка, аналог React’овского key.
+Она помогает Reagent (а значит и React под капотом) отслеживать, какие элементы списка изменились, а какие нет —
+чтобы не перерисовывать всё целиком.
+****** :todo-item (assoc todo-item/component :topic :todos)
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_item.cljs")
+******* (defn render
+  [ctx todo is-editing?]
+  [:li {:class [(when is-editing? :editing)
+                (when (:completed todo) :completed)]}
+   [:div.view {:on-double-click #(<cmd ctx :start-edit todo)}
+    [:input.toggle {:type :checkbox
+                    :checked (:completed todo)
+                    :on-change #(<cmd ctx :toggle-todo todo)}]
+    [:label (:title todo)]
+    [:button.destroy {:on-click #(<cmd ctx :delete-todo todo)}]]
+   (when is-editing?
+     [comp> ctx :todo-edit])])
+
+вызвается компонент с 3 параметрами - контекст, мапа туду и стату редактируется
+******* преобразует пришетший туду в хикап структуру из
+- a `checkbox` for toggling `:completed`
+- a `label` displaying the `:title`
+- a `button` to delete the item
+******* заисключением случая когда туду редактируется
+тогда вызывается компонет :todo-edit
+******* on-double-click
+при двой ном клике посуте простосто помешает создаёт перменую :editing-id по пути :kv помешая в неё id текушей туду для редактирования.
+   [:div.view {:on-double-click #(<cmd ctx :start-edit todo)}
+:start-edit
+  "Sets state: this `todo` is currently being edited."
+  [app-db {:keys [id] :as todo}]
+  (assoc-in app-db [:kv :editing-id] id))
+
+******* input.toggle :type :checkbox
+    [:input.toggle {:type :checkbox
+                    :checked (:completed todo)
+                    :on-change #(<cmd ctx :toggle-todo todo)}]
+
+за даём что состояние определяетя полем :completed из todo
+:checked (:completed todo)
+Компонент ([:input.toggle {...}]) — просто функция, возвращающая структуру данных (Hiccup).
+Каждый раз, когда Reagent решает “перерисовать” компонент (из-за того, что изменился атом, подписка и т. д.), он заново вызывает эту функцию. и все функции в нутри
+
+
+:on-change #(<cmd ctx :toggle-todo todo)
+Вот это — реакция на пользовательский клик.
+Когда юзер щёлкает чекбокс, вызывается обработчик.
+******* (<cmd ctx :toggle-todo todo)}
+отпраляет даные в главную перменную
+и уже зфиксировав измение реагент вызывает перерендкр компонента
+иуже рендерит его с пометкой
+(defn toggle-todo
+  "Toggles the `:completed` status of a saved `todo`."
+  [app-db todo]
+  (update-todo app-db (update todo :completed not)))
+
+(defn update-todo
+  "Merges new data into a `todo`. `patch-todo` must have an `:id`
+  value that is the `id` of the `todo` to be updated."
+  [app-db {:keys [id] :as patch-todo}]
+  (assert id)
+  (edb/insert-item app-db :todos patch-todo))
+
+******* [:button.destroy {:on-click #(<cmd ctx :delete-todo todo)}]]
+(defn delete-todo
+  "Removes a `todo` from the EntityDB."
+  [app-db {:keys [id] :as todo}]
+  (edb/remove-item app-db :todos id))
+
+******* is-editing?
+ставит свойстов
+  [:li {:class [(when is-editing? :editing)
+      (when (:completed todo) :completed)]}
+******* :todo-edit (assoc todo-edit/component :topic :todos)
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_edit.cljs")
+******** defn form-3-render
+  [ctx]
+  (let [edit-todo (sub> ctx :edit-todo)
+        todo-title (reagent/atom (:title edit-todo))
+        handle-change #(reset! todo-title (.. % -target -value))
+        update #(<cmd ctx :confirm-edit (assoc edit-todo :title @todo-title))
+        cancel #(<cmd ctx :cancel-edit)
+        handle-key-down #(let [key-code (.-keyCode %)]
+                           (when (is-enter? key-code) (update))
+                           (when (is-esc? key-code) (cancel)))
+        render (fn []
+                 [:input.edit {:value @todo-title
+                               :on-blur update
+                               :on-change handle-change
+                               :on-key-down handle-key-down}])
+        focus-input #(let [node (reagent/dom-node %)
+                           length (count (.-value node))]
+                       (.focus node)
+                       (.setSelectionRange node length length))]
+    (reagent/create-class
+     {:display-name "todo-edit"
+      :reagent-render render
+      :component-did-mount focus-input})))
+
+******** зачем форма 3
+Отличный, *по-взрослому архитектурный* вопрос.
+Ты прямо вышел на грань между декларативным миром Reagent и его более низкоуровневым API — и именно там начинается настоящая гибкость UI в ClojureScript.
+
+Разберём спокойно и по шагам:
+
+---
+
+## 💡 В чём принципиальная разница
+
+В обычном (form-2) компоненте ты возвращаешь **hiccup-вектор**, и Reagent сам создаёт React-класс за тебя под капотом.
+Это просто и декларативно, но:
+
+  * У тебя **нет доступа к lifecycle hooks** (`component-did-mount`, `should-component-update`, и т. д.)
+  * Ты **не можешь напрямую работать с DOM-нодой** компонента (например, поставить фокус, измерить высоту и т.д.)
+  * Всё, что нужно хранить — ты держишь в реактивных атомах.
+
+---
+
+## 🧩 Form-3 — ручной контроль
+
+Когда ты создаёшь компонент через `reagent/create-class`, ты **сам формируешь React-класс** и можешь явно указать:
+
+```clojure
+(reagent/create-class
+ {:display-name "todo-edit"
+  :reagent-render render
+  :component-did-mount focus-input
+  :component-will-unmount cleanup
+  ...})
+```
+
+Тут ты берёшь на себя больше ответственности, но и получаешь *полный контроль над жизненным циклом*.
+Ты можешь:
+
+  * выполнить код **после монтирования** (`:component-did-mount`) — как раз здесь ставится фокус;
+  * сделать очистку перед удалением (`:component-will-unmount`);
+  * оптимизировать перерисовку (`:should-component-update`);
+  * хранить собственное локальное состояние без атомов.
+
+---
+
+## 🎯 Почему именно здесь form-3
+
+В `todo-edit` есть поведение, которое **невозможно корректно реализовать просто hiccup-вектором**:
+
+  * Нужно поставить курсор в конец поля при рендере (`focus-input`).
+  * Это действие требует **доступа к реальной DOM-ноде**, а она существует только *после монтирования* компонента.
+
+Form-2 (функция, возвращающая вектор) не предоставляет тебе точку, где гарантировано доступен DOM.
+А form-3 — предоставляет через `:component-did-mount`.
+
+---
+
+## 🧠 Когда стоит использовать form-3
+
+Используй form-3, если тебе нужно:
+
+| Ситуация                                         | Почему нужен form-3                        |
+| ------------------------------------------------ | ------------------------------------------ |
+| Установить фокус / позицию курсора               | Нужен доступ к DOM-ноде                    |
+| Использовать сторонние JS-библиотеки             | Нужно инициализировать их при монтировании |
+| Делать анимации, измерения, observer-ы           | Нужен жизненный цикл                       |
+| Настраивать оптимизацию обновлений               | Нужен `should-component-update`            |
+| Кешировать внутреннее состояние без reagent.atom | Можно хранить его прямо в классе           |
+
+---
+
+## 🔬 Когда *не стоит*
+
+Если компонент просто отображает данные или реагирует на атомы — **form-2 достаточно**.
+Каждый form-3 — это чуть больше кода и ответственности.
+
+---
+
+## ✨ Резюме
+
+| Форма      | Что возвращает               | Когда использовать                          |
+| ---------- | ---------------------------- | ------------------------------------------- |
+| **form-1** | hiccup-вектор                | статический компонент                       |
+| **form-2** | функция, возвращающая hiccup | когда нужно локальное состояние             |
+| **form-3** | `reagent/create-class`       | когда нужен доступ к жизненному циклу и DOM |
+
+---
+
+Хочешь, я покажу сравнение — тот же компонент `todo-edit`, но переписанный как form-2 (без `create-class`), и объясню, почему там ломается автофокус?
+
+
+******** todo-title (reagent/atom (:title edit-todo))
+
+  (let [edit-todo (sub> ctx :edit-todo)
+        todo-title (reagent/atom (:title edit-todo))
+
+(defn edit-todo
+  "Returns a `reaction` on the `todo` that is being edited."
+  [app-db]
+  (reaction
+   (todo/edit-todo @app-db)))
+
+мы делаес специально локальный атом для этого копонета некак несвязаный с оригиналом, полоучаюшим тольео его значени в качестн инициализации
+******** update #
+        update #(<cmd ctx :confirm-edit (assoc edit-todo :title @todo-title))
+
+(defn confirm-edit
+  "Updates `todo` if `new-todo` has a valid `title`."
+  [app-db {:keys [id title] :as new-todo}]
+  (assert id)
+  (if (valid-title? title)
+    (-> app-db
+        (cancel-edit)
+        (edb/insert-item :todos new-todo))
+    app-db))
+
+******** cancel #
+        cancel #(<cmd ctx :cancel-edit)
+
+(defn cancel-edit
+  "Clears state: no `todo` is currently being edited."
+  [app-db]
+  (assoc-in app-db [:kv :editing-id] nil))
+
+******** render (fn []
+                 [:input.edit {:value @todo-title
+                               :on-blur update
+                               :on-change handle-change
+                               :on-key-down handle-key-down}])
+
+что делает свойство :on-blur update?
+Это событие в браузере, которое происходит, когда пользователь уходит с формы:
+кликает в другое место
+нажимает Tab
+закрывает редактирование кликом
+
+        handle-key-down #(let [key-code (.-keyCode %)]
+                           (when (is-enter? key-code) (update))
+                           (when (is-esc? key-code) (cancel)))
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/util.cljs")
+(defn is-enter? [key-code]
+  (= key-code 13))
+(defn is-esc? [key-code]
+  (= key-code 27))
+
+******** (reagent/dom-node this)
+    (reagent/create-class
+     {:display-name "todo-edit"
+      :reagent-render render
+      :component-did-mount focus-input})))
+
+        focus-input #(let [node (reagent/dom-node %)
+(reagent/dom-node this)
+и получить ровно ту же ноду, которую вернул бы document.querySelector(...), только безопасно и правильно в контексте Reagent/React.
+Когда Reagent вызывает :component-did-mount, он передаёт в него аргумент — сам экземпляр компонента (аналог this в React).
+А reagent/dom-node принимает этот экземпляр и возвращает его реальную HTML-ноду.
+Компонент todo-edit отрендерился и React вставил <input> в DOM.
+Reagent вызывает твой focus-input с this как аргументом.
+(reagent/dom-node this) → возвращает HTMLInputElement, тот самый <input class="edit"> в документе.
+
+
+***** :footer (assoc footer/component :topic :todos)
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/footer.cljs")
+****** (defn render
+  [ctx]
+  (let [route-status (keyword (route> ctx :status))
+        filter-item (fn [status label]
+                      [:li>a
+                       {:href (<url ctx :status (name status))
+                        :class (when (= status route-status) "selected")}
+                       label])
+        active-count (sub> ctx :count-todos-by-status :active)
+        count-label (str " item" ({1 ""} active-count "s") " left")]
+    [:footer.footer
+     [:span.todo-count
+      [:strong active-count] count-label]
+     [:ul.filters
+      (filter-item :all "All")
+      (filter-item :active "Active")
+      (filter-item :completed "Completed")]
+     (when (sub> ctx :has-todos-by-status? :completed)
+       [:button.clear-completed
+        {:on-click #(<cmd ctx :delete-completed)}
+        "Clear completed"])]))
+****** url
+пременяет команду урл длая смены статуса на кнопках
+                       {:href (<url ctx :status (name status))
+
+
+        filter-item (fn [status label]
+                      [:li>a
+                       {:href (<url ctx :status (name status))
+                        :class (when (= status route-status) "selected")}
+                       label])
+
+      (filter-item :all "All")
+      (filter-item :active "Active")
+      (filter-item :completed "Completed")]
+
+и выставлетя клас селектет для имя которого совподает с путём
+****** для множественного числа
+выражение ({1 ""} active-count "s")
+В Clojure, если ты вызываешь map как функцию с двумя аргументами,
+второй аргумент используется как значение по умолчанию,
+если ключ не найден.
+****** button.clear-completed
+     (when (sub> ctx :has-todos-by-status? :completed)
+       [:button.clear-completed
+        {:on-click #(<cmd ctx :delete-completed)}
+        "Clear completed"])]))
+
+:delete-completed
+
+(defn delete-completed
+  "Removes all completed `todos` from the EntityDB."
+  [app-db]
+  (reduce (fn [acc {:keys [id]}]
+            (edb/remove-item acc :todos id))
+          app-db
+          (todos-by-status app-db :completed)))
+
+**** {:routes [[":status" {:status "all"}]]
+означает установить как основной ключь для ротинка ключь :status
+устанавливает дефалтное состояние для all как рут \ в переменой статус
+***** 💯 Точно в яблочко
+💯 Точно в яблочко — ты уже почти идеально всё описал, нужно лишь чуть уточнить детали формулировки, чтобы понимать механику на 100%.
+
+---
+
+### 🔹 Что делает вот это:
+
+```clojure
+:routes [[":status" {:status "all"}]]
+```
+
+Keechma (через библиотеку [bide](https://github.com/funcool/bide)) описывает маршруты (routes) приложения.
+Это не просто “URL-ы”, а **способ связать URL с данными** (картой параметров).
+
+---
+
+## 🧭 Разбор по частям
+
+### 1. Внешний вектор `[":status" {:status "all"}]`
+
+Это **одна запись маршрута**, состоящая из:
+
+  * `"pattern"` — строка, описывающая, как парсить URL (в данном случае `":status"`).
+  * `{:status "all"}` — карта **дефолтных параметров** для этого маршрута.
+
+---
+
+### 2. `"pattern" → ":status"`
+
+  * Двоеточие `:` обозначает **переменную часть URL**.
+  То есть `":status"` означает:
+  “возьми кусок URL и положи его в ключ `:status`”.
+
+  * Пример:
+
+  ```
+  /active     → {:status "active"}
+  /completed  → {:status "completed"}
+  ```
+
+  А если просто `/`, то Keechma возьмёт **дефолт**, см. пункт ниже 👇
+
+---
+
+### 3. `{:status "all"}` — дефолтные значения
+
+Эта карта указывает:
+
+> если URL не содержит переменную `:status`,
+> то считать, что `:status` = `"all"`.
+
+То есть по сути:
+
+  * `/` → `{:status "all"}`
+  * `/active` → `{:status "active"}`
+  * `/completed` → `{:status "completed"}`
+
+---
+
+### 4. Как Keechma это использует
+
+Keechma берёт активный URL, парсит его через `:routes`,
+и сохраняет результат в `app-db` под `[:route :data]`.
+
+Например:
+
+```clojure
+(route> ctx :status)
+;; => "all"
+```
+
+(если ты на `/`)
+или
+
+```clojure
+(route> ctx :status)
+;; => "completed"
+```
+
+(если ты на `/completed`)
+
+---
+
+### 🧩 Коротко:
+
+| Что                  | Значит                                    |
+| -------------------- | ----------------------------------------- |
+| `":status"`          | шаблон, где `status` — переменная из URL  |
+| `{:status "all"}`    | дефолтное значение, если ничего нет в URL |
+| `/active`            | даёт `{:status "active"}`                 |
+| `/`                  | даёт `{:status "all"}`                    |
+| `route> ctx :status` | достаёт текущее значение маршрута         |
+
+---
+
+То есть да, ты совершенно прав:
+
+> Это устанавливает ключ `:status` как основной параметр маршрута
+> и задаёт `"all"` как дефолтное значение, если URL пустой (корень `/`).
+
+---
+
+Хочешь, я покажу, как добавить **второй параметр**, например `:filter` или `:id`,
+чтобы маршрут выглядел как `/all/42` и из него Keechma доставала два значения?
+***** нет, не напрямую.
+Отличный вопрос — и ты прямо попал в суть механизма Keechma routing 💡
+
+Ответ: **нет, не напрямую.**
+Если ты просто изменишь значение в `app-db` под `[:route :data]`, путь **не изменится автоматически**, потому что Keechma не отслеживает двустороннюю синхронизацию этого ключа — он обновляет `app-db` **в ответ** на изменение URL, но не наоборот.
+
+### Как это устроено
+
+Keechma router — это односторонний поток данных:
+
+```
+URL → route → app-db
+```
+
+Каждый раз, когда URL изменяется (например, пользователь кликает по ссылке или ты вызываешь `(dispatch! ctx :router :navigate ...)`), Keechma:
+
+1. парсит путь согласно `:routes`;
+2. записывает разобранные данные в `[:route :data]`.
+
+---
+
+### Если хочешь изменить URL изнутри приложения
+
+Ты должен **использовать команду маршрутизатора**, а не напрямую менять `app-db`.
+Пример:
+
+```clojure
+(cmd> ctx :router :navigate {:status "completed"})
+```
+
+Или, в Keechma старого формата:
+
+```clojure
+(dispatch! ctx :router :navigate {:status "completed"})
+```
+
+Тогда Keechma:
+
+  * обновит URL (например `/completed`);
+  * перезапишет `[:route :data]` на `{:status "completed"}`;
+  * вызовет подписки/рендеры, как положено.
+
+---
+
+### Если изменить вручную (например `(assoc-in app-db [:route :data] {:status "completed"})`)
+
+То:
+
+  * URL не изменится;
+  * и, наоборот, при следующем событии от маршрутизатора это изменение просто перезапишется.
+
+---
+
+Хочешь — я покажу, как можно сделать *обратную синхронизацию*, чтобы изменение `app-db` само вызывало смену маршрута (например через middleware или наблюдатель)? 
+***** 404
+🔥 Очень точный вопрос — и ты снова попал в одну из тонких сторон Keechma Routing!
+
+---
+
+### 💡 Кратко:
+
+В Keechma маршруты задаются через `:routes`, и **"неизвестный путь" (404)** можно обрабатывать через **“catch-all” маршрут**, который ловит всё, что не подходит под другие шаблоны.
+
+---
+
+### 📘 Пример
+
+```clojure
+{:routes
+ [["" {:status "all"}]
+  [":status" {:status "filter"}]
+  ["*" {:status "not-found"}]]}
+```
+
+📍 В этом случае:
+
+| URL                  | Что произойдет                    |
+| -------------------- | --------------------------------- |
+| `/`                  | попадёт в `{:status "all"}`       |
+| `/completed`         | попадёт в `{:status "filter"}`    |
+| `/что-угодно-другое` | попадёт в `{:status "not-found"}` |
+
+---
+
+### ⚙️ Что произойдёт внутри
+
+Keechma, когда не найдёт подходящего шаблона для пути, попробует последовательно все.
+`"*"`, в конце списка, поймает всё, что не подошло под предыдущие маршруты.
+
+В `app-db` появится:
+
+```clojure
+{:route {:data {:status "not-found"}}}
+```
+
+---
+
+### 💻 В компоненте (например в `main` view)
+
+Ты просто проверяешь:
+
+```clojure
+(let [status (:status (sub> ctx :route))]
+  (case status
+    "not-found" [comp> ctx :not-found-page]
+    "all" [comp> ctx :todos-list]
+    "filter" [comp> ctx :filtered-list]
+    [comp> ctx :default]))
+```
+
+---
+
+### 🧠 Альтернатива: Обработка на уровне контроллера
+
+Если хочешь централизовать логику:
+
+```clojure
+(defcontroller router
+  {:params true}
+  (start [ctrl params app-db]
+    (if (= (:status params) "not-found")
+      (assoc app-db :error "Page not found")
+      app-db)))
+```
+
+---
+
+Хочешь — покажу, как сделать красивую страницу `404` с анимацией (например через `reagent` и CSS transitions)? 
+
+*** files
+**** src core
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/app.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/subscriptions.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/ui.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/util.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.clj")
+**** src components
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/app.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/new_todo.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/toggle_todos.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_list.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_item.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_edit.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/footer.cljs")
+**** src controler
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/controllers/todos.cljs")
+**** src entities
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
+**** resurs
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/resources/public/css/style.css")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/resources/public/index.html")
+**** project
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/project.clj")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/target/stale/leiningen.figwheel.clean-on-dependency-change")
+**** other
+find "$PWD" -type f >>filepath.txt
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/README.md")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/figwheel_server.log")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/file_path.txt")
+*** run
+cd example-todomvc && lein figwheel
+
+cd example-todomvc
+lein figwheel
+
+:cljs/quit
+:cljs/restart
+*** clon
+git clone https://github.com/keechma/example-todomvc.git
+*** ИИ вопрос
+**** 2025-10-28 17:00:45
+есть два такие куски для рендера через в спомогательную функци
+(defn render
+  [ctx]
+  [:<>
+   [:section.todoapp
+    [:header.header
+     [:h1 "todos"]
+     [comp> ctx :new-todo]]
+    (when (sub> ctx :has-todos?)
+      [:<>
+       [:section.main
+        [comp> ctx :toggle-todos]
+        [comp> ctx :todo-list]]
+       [comp> ctx :footer]])]
+   [:footer.info
+    [:p "Double-click to edit a todo"]
+    [:p
+     [:a {:href "https://keechma.com"} "Keechma"] " "
+     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+
+(def component
+  (<comp :renderer render
+         :component-deps [:new-todo
+                          :toggle-todos
+                          :todo-list
+                          :footer]
+         :subscription-deps [:has-todos?]))
+
+
+(defn form-2-render
+  [ctx]
+  (let [new-title (reagent/atom "")]
+    (fn []
+      [:input.new-todo
+       {:placeholder "What needs to be done?"
+        :value @new-title
+        :auto-focus true
+        :on-change #(reset! new-title (.. % -target -value))
+        :on-key-down #(when (is-enter? (.-keyCode %))
+                        (<cmd ctx :create-todo @new-title)
+                        (reset! new-title ""))}])))
+
+(def component
+  (<comp :renderer form-2-render))
+
+
+(defn <comp
+  "Constructs a Keechma `component`. Args can be a `map` or inline
+  `keys` and `values`."
+  ([kvs]
+   (ui/constructor kvs))
+  ([k v & {:as kvs}]
+   (<comp (assoc kvs k v))))
+  
+но в одном это вектор а в другом это анониманя функция?
+как он понимает и вкаком случае что использовать и почему?
+
+** Keechma Counter
+*** files
+
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/core.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/ui/main.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/resources/public/index.html")
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/figwheel_server.log")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/project.clj")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/README.md")
+*** risoning
+**** src/cljs/keechma_counter/core.cljs
+(restart-app!)
+
+который
+
+    (if @running-app
+      (keechma.app-state/stop! @running-app start-app!)
+      (start-app!))))
+где
+(defonce running-app (clojure.core/atom nil))
+
+а
+(defn start-app!
+  (reset! running-app (keechma.app-state/start! app-definition)))
+
+**** (keechma.app-state/start! app-definition)
+тоесть всё сводится к (keechma.app-state/start! app-definition)
+
+в котором всё преложение описано в app-definition
+**** def app-definition
+  {:controllers {:counter (counter/->Controller)}
+   :components {:main (assoc main/component :topic :counter)}
+   :subscriptions {:counter-value counter-value-sub}
+   :html-element (.getElementById js/document "app")})
+**** :controllers {:counter (counter/->Controller)}
+:controllers {:counter (keechma-counter.controllers.counter/->Controller)}
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
+
+подписывает сделанй класс
+у которого есть набор команд который он слушает и выполнят как я понимаю это както сделано через каналы там фигурирую входяшие и исходяшие
+стартуя контролёр в писывает в главный атом :counter по пути [:kv :counter] и делает его значение 0
+(defmethod controller/start Controller
+  [controller params app-db]
+  (assoc-in app-db [:kv :counter] 0))
+
+
+и прописывает набор команд в кинчма хэндлер
+(defmethod controller/handler Controller
+  [controller app-db-atom in-chan out-chan]
+  (controller/dispatcher app-db-atom in-chan
+                         {:inc #(swap! app-db-atom update-in [:kv :counter] inc)
+                          :dec #(swap! app-db-atom update-in [:kv :counter] dec)}))
+
+**** :components {:main (assoc main/component :topic :counter)}
+как я помню по описанию обезательно наличе :main
+видемо это точка для отображения
+:components {:main (assoc keechma-counter.ui.main/component :topic :counter)}
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/ui/main.cljs")
+в файле def component
+возврашает
+(keechma.ui-component/constructor { :renderer render
+                                    :subscription-deps [:counter-value]})
+
+constructor получает рендере который запрашивает из полученго параметре :counter-value
+несовсем понятна такое описание но 
+
+(defn render
+  [ctx]
+  (let [counter-sub (keechma.ui-component/subscription ctx :counter-value)]
+
+  после чего возврашает вид страници виде функции
+
+(fn []
+      [:p
+       (str "Clicked: " @counter-sub " times ")
+       [:button {:on-click #(keechma.ui-component/send-command ctx :inc)} "+"] " "
+       [:button {:on-click #(ui/send-command ctx :dec)} "-"] " "
+       [:button {:on-click #(inc-if-odd ctx @counter-sub)} "Increment if odd"] " "
+       [:button {:on-click #(inc-async ctx)} "Increment async"]])
+делает она это через функции keechma.ui-component/subscription чтоб получить подписаный атом
+а через keechma.ui-component/send-command шлёт подписаные команды в файле
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
+команды прописываюся в методе controller/handler класса Controller
+
+интересным явлется то что рендерится структура целеком с изменением атома @counter-sub, тоесть как только он изменится то структура перерендерится. ТОесть не требует не каких дополнительных действий или кода.
+**** :subscriptions {:counter-value counter-value-sub}
+(defn counter-value-sub [app-state]
+  (reagent.ratom/reaction (get-in @app-state [:kv :counter])))
+несовсем понятно который апстей ту и откуда он берётся app-state
+но предполжу что это колбе функция вызывается при :counter-value запросе
+и соответственно
+при :counter-value оно возврашает результат выполения
+(reagent.ratom/reaction (get-in @app-state [:kv :counter]))
+в котором app-state будет заполнен сабскрайбером откудото переданы
+тоесть предположительо гдето есть чтото в форме (def app-state (reagent/atom {:kv {:counter 0}}))
+и снего по :counter-value мы болучает реактивный атом
+
+**** :html-element (.getElementById js/document "app")})
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/resources/public/index.html")
+    <div id="app">
+
+js/document — это способ обратиться к глобальной JS-переменной document.
+(всё, что начинается с js/, — это “мост” к объектам JS из ClojureScript)
+
+.getElementById — это вызов метода у этого объекта.
+Точка перед именем метода (.) — синтаксис вызова JS-методов в ClojureScript.
+
+"app" — аргумент, который передаётся в метод (id элемента).
+
+Результат — это сам DOM-элемент, который можно использовать, например,
+чтобы вмонтировать компонент Reagent или React.
+
+*** run
+cd keechma-counter
+lein figwheel
+localhost:3449
+
+
+:cljs/quit
+:cljs/restart
+*** clone
+git clone https://github.com/keechma/keechma-counter.git
+
+** кинчма ТТС кард компонентс
+*** ИИ
+если мне интересно сделать компонент для настолькной игры
+например игральная карта. Тоесть основной её функцикй будет возможность перетегивания, при зажатой левой кноаке.
+как можно былобы это проще реализовть?
+*** код ИИ
+Перетаскиваемая карта — это классический **интерактивный компонент**.
+И можно сделать его **очень просто** в Reagent/ClojureScript — без тяжёлых библиотек.
+
+Вот визуально, о чём речь:
+
+---
+
+## ✅ Самый простой путь: HTML5 Drag & Drop + Reagent
+
+### 🔹 Карта как React/Reagent компонент
+
+```clojure
+(ns game.components.card
+  (:require [reagent.core :as r]))
+
+(defn card [{:keys [id suit rank]}]
+  [:div.card
+   {:draggable true
+    :on-drag-start #(js/console.log "drag start" id)}
+   (str rank " " suit)])
+```
+
+ВСЁ ✅
+Уже перетаскивается!
+Пока что без логики — просто событие.
+
+---
+
+## ➕ Чтобы **карта могла менять своё положение** на столе
+
+Мы храним позицию карты в **atom**:
+
+```clojure
+(defonce positions (r/atom {}))
+
+(defn set-position! [id x y]
+  (swap! positions assoc id {:x x :y y}))
+```
+
+---
+
+## 🔥 Карта с абсолютным позиционированием и поведением drag-move
+
+```clojure
+(defn draggable-card [{:keys [id suit rank]}]
+  (let [{:keys [x y]} (get @positions id {:x 100 :y 100})]
+    [:div.card
+     {:style {:position "absolute"
+              :cursor "grab"
+              :left x
+              :top y}
+      :on-mouse-down
+      (fn [e]
+        (let [start-x (.-clientX e)
+              start-y (.-clientY e)
+              on-move
+              (fn [e2]
+                (set-position! id
+                               (+ x (- (.-clientX e2) start-x))
+                               (+ y (- (.-clientY e2) start-y))))
+              on-up
+              (fn [_]
+                (.removeEventListener js/window "mousemove" on-move)
+                (.removeEventListener js/window "mouseup" on-up))]
+
+          (.addEventListener js/window "mousemove" on-move)
+          (.addEventListener js/window "mouseup" on-up)))}]
+     (str rank " " suit)]))
+```
+
+---
+
+### ✅ Что умеет эта версия
+
+✔ Берём карту мышкой
+✔ Тянем — карта двигается под курсором
+✔ Отпустили — карта остаётся на своём новом месте
+
+Никаких зависимостей!
+Просто Reagent + DOM events.
+
+---
+
+## 🚀 Улучшения, которые легко добавить
+
+| Возможность                | Как сделать                    |
+| -------------------------- | ------------------------------ |
+| Слои (карта поверх других) | z-index, счётчик слоёв         |
+| Повороты                   | CSS transform: rotate          |
+| Перетаскивание в зоны      | Проверять координаты drop      |
+| Touch-поддержка            | on-touch-start / on-touch-move |
+| Анимация движения          | Position → CSS transition      |
+
+Хочешь — сделаю **красивый UI** с бейсами карт 🎨
+
+---
+
+## ❓ Спрошу на будущее:
+
+Какую конкретно игру ты планируешь?
+
+1️⃣ Карточная (пасьянс, MTG, Uno …)?
+2️⃣ Настольная (плитки, фишки, поля)?
+3️⃣ Пошаговая стратегия?
+
+И сколько карт может быть одновременно на столе?
+
+Если расскажешь — спроектирую **правильную архитектуру** (Keystates, Event-bus, FSM для правил, стеки действий).
+
+---
+
+Хочешь — давай сделаем **рабочий прототип прямо здесь** 🧠⚡
+С тебя идея игры — с меня код и анимации 💜
+
+** noter
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/noter-cljs-project.org")
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter-cljs-project.org")
+** Group Chat
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat-cljs-project.org")
+** Sorce files project ferst
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** deps.edn
+:PROPERTIES:
+:header-args: :tangle  deps.edn
+:END:
+#+begin_src edn
+{:deps {org.clojure/clojurescript {:mvn/version "1.10.773"}}
+ :paths ["src"]
+:aliases
+  {:dev {:main-opts ["-m" "cljs.main"
+                     "--compile" "my-cljs-project.core"
+                     "--repl"]}}}
+#+end_src
+*** src/my_cljs_project/core.cljs
+:PROPERTIES:
+:header-args: :tangle  src/my_cljs_project/core.cljs
+:END:
+#+begin_src clojure
+(ns my-cljs-project.core)                                  ;; <1>
+
+(js/alert "Hello World!")                                   ;; <2>
+#+end_src
+*** index.html
+:PROPERTIES:
+:header-args: :tangle  index.html
+:END:
+#+begin_src edn
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+  </head>
+  <body>
+    <script src="out/main.js" type="text/javascript"></script>
+  </body>
+</html>
+#+end_src
+** weather
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** core.cljs
+:PROPERTIES:
+:header-args: :tangle  weather/src/learn_cljs/weather.cljs
+:END:
+**** link
+[[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
+**** ns
+#+begin_src clojure
+(ns ^:figwheel-hooks learn-cljs.weather                    ;; <1>
+  (:require
+   [goog.dom :as gdom]
+   [reagent.dom :as rdom]
+   [reagent.core :as r]
+   [ajax.core :as ajax]))
+#+end_src
+**** defonce
+#+begin_src clojure
+(defonce app-state (r/atom {:title "WhichWeather"
+                            :postal-code ""
+                            :api-key ""
+                            :temperatures {:today {:label "Today"
+                                                   :value nil}
+                                           :tomorrow {:label "Tomorrow"
+                                                      :value nil}}}))
+#+end_src
+**** ajax get forecast
+***** handle-response
+#+begin_src clojure
+(defn handle-response [resp]
+  (let [today (get-in resp ["list" 0 "main" "temp"])       ;; <1>
+        tomorrow (get-in resp ["list" 8 "main" "temp"])]
+    (swap! app-state                                       ;; <2>
+        update-in [:temperatures :today :value] (constantly today))
+    (swap! app-state
+        update-in [:temperatures :tomorrow :value] (constantly tomorrow))))
+#+end_src
+***** get-forecast!
+#+begin_src clojure
+(defn get-forecast! []
+  (let [postal-code (:postal-code @app-state)]             ;; <1>
+    (ajax/GET "http://api.openweathermap.org/data/2.5/forecast"
+         {:params {"q" postal-code
+                   "appid" "12b0904cfab748cbcb6e98a5dc7c7ac4"
+                   "units" "imperial"}
+          :handler handle-response})))                     ;; <2>
+#+end_src
+**** structur
+#+begin_src clojure
+(defn title []
+  [:h1 (:title @app-state)])
+
+(defn temperature [temp]                                   ;; <1>
+  [:div {:class "temperature"}
+   [:div {:class "value"}
+    (:value temp)]
+   [:h2 (:label temp)]])
+
+(defn postal-code []
+  [:div {:class "postal-code"}
+    [:h3 "Enter your postal code"]
+    [:input {:type "text"
+          :placeholder "api-key"
+          :value (:api-key @app-state)
+          :on-change #(swap! app-state assoc :api-key (-> % .-target .-value))}]
+    [:input {:type "text"
+          :placeholder "Postal Code"
+          :value (:postal-code @app-state)
+          :on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
+    [:button {:on-click get-forecast!} "Go"]])
+
+(defn app []
+  [:div {:class "app"}
+   [title]                                                 ;; <2>
+   [:div {:class "temperatures"}
+    (for [temp (vals (:temperatures @app-state))]          ;; <3>
+      [temperature temp])]
+   [postal-code]])
+
+#+end_src
+**** render
+#+begin_src clojure
+(defn mount-app-element []                                 ;; <4>
+  (rdom/render [app] (gdom/getElement "app")))
+
+(mount-app-element)
+
+(defn ^:after-load on-reload []                            ;; <4>
+  (mount-app-element))
+#+end_src
+
+*** dev.cljs.edn
+:PROPERTIES:
+:header-args: :tangle  weather/dev.cljs.edn
+:END:
+[[file:weather/dev.cljs.edn::^{:watch-dirs \["test" "src"\]]]
+#+begin_src clojure
+^{:watch-dirs ["src"]
+  :css-dirs ["resources/public/css"]
+  :auto-testing true
+   }
+{:main learn-cljs.weather}
+#+end_src
+
+*** deps.edn
+:PROPERTIES:
+:header-args: :tangle  weather/deps.edn
+:END:
+[[file:weather/deps.edn::{:deps {org.clojure/clojure {:mvn/version "1.10.0"}]]
+#+begin_src clojure
+{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.4"}
+        cljsjs/react {:mvn/version "17.0.2-0"}
+        cljsjs/react-dom {:mvn/version "17.0.2-0"}
+        reagent/reagent {:mvn/version "1.1.1" }
+        cljs-ajax {:mvn/version "0.8.1"} ;; Added
+        }
+ :paths ["src" "resources"]
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  org.slf4j/slf4j-nop {:mvn/version "1.7.30"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.17"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
+#+end_src
+
+*** style.css
+:PROPERTIES:
+:header-args: :tangle  weather/resources/public/css/style.css
+:END:
+[[file:weather/resources/public/css/style.css::/* some style */]]
+#+begin_src css
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  background-color: #02a4ff;
+  color: #ffffff;
+}
+
+h1 {
+  font-weight: 300;
+}
+
+button {
+  border-left: none;
+  border-top-right-radius: 5px;
+  border-bottom-right-radius: 5px;
+  background: #205184;
+  border: none;
+  line-height: 20px;
+  color: #fff;
+  padding: 2px 12px;
+  font-weight: bold;
+}
+
+.temperatures {
+  display: flex;
+}
+
+.temperatures > .temperature {
+  margin-right: 20px;
+  background: #fff;
+  color: #333;
+  text-align: center;
+  flex-basis: 150px;
+  border-radius: 10px;
+  
+  display: flex;
+  flex-direction: column;
+}
+
+.temperatures > .temperature > .value {
+  font-size: 130%;
+  font-weight: lighter;
+  padding: 4px;
+  flex-basis: 26px;
+}
+
+.temperatures > .temperature > h2 {
+  margin: 0;
+  background-color: #69C9FF;
+  color: #ffffff;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+}
+#+end_src
+** starbase
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** starbase.cljs
+:PROPERTIES:
+:header-args: :tangle  starbase/src/learn_cljs/starbase.cljs
+:END:
+[[file:starbase/src/learn_cljs/starbase.cljs::(ns learn-cljs.starbase]]
+**** ns
+#+begin_src clojure
+(ns learn-cljs.starbase
+  (:require [bterm.core :as bterm]
+            [bterm.io :as io]
+            [learn-cljs.starbase.data :as data]
+            [goog.dom :as gdom]))
+
+(enable-console-print!)
+
+(def term
+  (bterm/attach (gdom/getElement "app")
+                {:prompt "=> "
+                 :font-size 14}))
+
+(declare on-answer)
+
+(defn prompt [game current]                                ;; <1>
+  (let [scene (get game current)                           ;; <2>
+        type (:type scene)]
+    (io/clear term)
+    (when (or (= :win type)                                ;; <3>
+              (= :lose type))
+      (io/print term
+                (if (= :win type)                          ;; <4>
+                    "You've Won! "
+                    "Game Over ")))
+    (io/println term (:title scene))                       ;; <5>
+    (io/println term (:dialog scene))
+    (io/read term #(on-answer game current %))))           ;; <6>
+
+#+end_src
+**** answer
+#+begin_src clojure
+(defn on-answer [game current answer]
+  (let [scene (get game current)
+        next (if (= :skip (:type scene))
+               (:on-continue scene)
+               (if (= "yes" answer)
+                 (get-in scene [:transitions "yes"])
+                 (get-in scene [:transitions "no"])))]
+    (prompt game next)))
+#+end_src
+**** start
+#+begin_src clojure
+(prompt data/game :start)
+#+end_src
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/starbase/src/learn_cljs/starbase.cljs
+** starbase_E
+[[file:starbase_E/src/learn_cljs/starbase.cljs::(ns learn-cljs.starbase][starbase.cljs]]
+** doing-io
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** doing-io.cljs
+:PROPERTIES:
+:header-args: :tangle  doing-io/src/learn_cljs/doing-io.cljs
+:END:
+**** file
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing_io.cljs")
+
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing-io.cljs
+**** all
+#+begin_src clojure
+(ns ^:figwheel-hooks learn-cljs.doing-io
+  (:require
+   [goog.dom :as gdom]))
+
+(println "This text is printed from src/learn_cljs/doing_io.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+#+end_src
+***** 
+** contacts
+:PROPERTIES:
+:header-args: :mkdirp yes
+:END:
+*** contacts.cljs
+:PROPERTIES:
+:header-args: :tangle  contacts/src/learn_cljs/contacts.cljs
+:END:
+**** file
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
+
+**** # origin comented
+#+begin_src clojure :tangle no
+(ns ^:figwheel-hooks learn-cljs.contacts
+  (:require
+   [goog.dom :as gdom]))
+
+(println "This text is printed from src/learn_cljs/contacts.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+#+end_src
+**** src
+***** ns
+# (ns ^:figwheel-hooks learn-cljs.contacts
+# (require '[clojure.string :as str])
+# (require '[goog.events :as gevents])
+#+begin_src clojure
+(ns learn-cljs.contacts                 ;
+  (:require
+    [goog.dom :as gdom]
+    [hiccups.runtime]
+    [goog.events :as gevents]
+    [clojure.string :as str])
+  (:require-macros [hiccups.core :as hiccups]))
+
+(declare refresh! Set-app-html!)
+#+end_src
+***** Models and State
+****** contact-list
+#+begin_src clojure
+(def contact-list [
+                   {:first-name "Phillip"
+                    :last-name "Jordan"
+                    :email "phil.j@hotmail.com"
+                    :address {:street "523 Sunny Hills Cir."
+                              :city "Springfield"
+                              :state "MI"
+                              :postal "11111"
+                              :country "USA"}}])
+
+
+#+end_src
+****** make-contact
+#+begin_src clojure
+(defn make-address [address]
+  (select-keys address [:street :city :state :country]))
+
+(defn maybe-set-address [contact]                          ;; <1>
+  (if (:address contact)
+    (update contact :address make-address)
+    contact))
+
+(defn make-contact [contact]
+  (-> contact                                              ;; <2>
+      (select-keys [:first-name :last-name :email])
+      (maybe-set-address)))
+
+(defn add-contact [contact-list input]
+  (conj contact-list
+        (make-contact input)))
+
+(defn remove-contact [contact-list idx]
+  (vec                                                     ;; <1>
+    (concat                                                ;; <2>
+      (subvec contact-list 0 idx)                          ;; <3>
+      (subvec contact-list (inc idx)))))
+
+(defn replace-contact [contact-list idx input]
+  (assoc contact-list idx (make-contact input)))
+#+end_src
+****** initial-state
+#+begin_src clojure
+(def initial-state
+  {:contacts contact-list
+   :selected nil
+   :editing? false})
+#+end_src
+****** declare refresh!
+#+begin_src clojure
+(def app-container (gdom/getElement "app"))
+#+end_src
+
+***** UI
+****** top-bar
+#+begin_src clojure
+(def top-bar
+  [:div {:class "navbar has-shadow"}
+   [:div {:class "container"}
+    [:div {:class "navbar-brand"}
+     [:span {:class "navbar-item"}
+      "ClojureScript Contacts"]]]])
+
+        
+#+end_src
+
+****** render-contact-details
+#+begin_src clojure
+(defn form-field                                           ;; <1>
+  ([id value label] (form-field id value label "text"))
+  ([id value label type]
+   [:div {:class "field"}
+     [:label {:class "label"} label]
+     [:div {:class "control"}
+       [:input {:id id
+                :value value
+                :type type
+                :class "input"}]]]))
+
+(defn render-contact-details [contact]
+  (let [address (get contact :address {})]                 ;; <2>
+    [:div {:id "contact-form" :class "contact-form"}
+      (form-field "input-first-name" (:first-name contact) "First Name")
+      (form-field "input-last-name" (:last-name contact) "Last Name")
+      (form-field "input-email" (:email contact) "Email" "email")
+      [:fieldset
+        [:legend "Address"]
+        (form-field "input-street" (:street address) "Street")
+        (form-field "input-city" (:city address) "City")
+        (form-field "input-state" (:state address) "State")
+        (form-field "input-postal" (:postal address) "Postal Code")
+        (form-field "input-country" (:country address) "Country")]]))
+#+end_src
+****** section-header
+#+begin_src clojure
+(defn action-button [id text icon-class]
+  [:button {:id id
+            :class "button is-primary is-light"}
+    [:span {:class (str "mu " icon-class)}]
+    (str " " text)])
+
+(def save-button (action-button "save-contact" "Save" "mu-file"))
+(def cancel-button (action-button "cancel-edit" "Cancel" "mu-cancel"))
+(def add-button (action-button "add-contact" "Add" "mu-plus"))
+
+(defn section-header [editing?]
+  [:div {:class "section-header"}
+    [:div {:class "level"}
+      [:div {:class "level-left"}
+        [:div {:class "level-item"}
+          [:h1 {:class "subtitle"}
+            [:span {:class "mu mu-user"}]
+            "Edit Contact"]]]
+      [:div {:class "level-right"}
+        (if editing?
+          [:div {:class "buttons"} cancel-button save-button]
+          add-button)]]])
+#+end_src
+****** Rendering Contacts
+#+begin_src clojure
+(defn format-name [contact]                                ;; <1>
+  (->> contact                                             ;; <2>
+       ((juxt :first-name :last-name))                     ;; <3>
+       (str/join " ")))
+
+(defn delete-icon [idx]
+  [:span {:class "delete-icon"
+          :data-idx idx}
+    [:span {:class "mu mu-delete"}]])
+
+(defn render-contact-list-item [idx contact selected?]
+  [:div {:class (str "card contact-summary" (when selected? " selected"))
+         :data-idx idx}                                    ;; <4>
+    [:div {:class "card-content"}
+      [:div {:class "level"}
+        [:div {:class "level-left"}
+          [:div {:class "level-item"}
+            (delete-icon idx)
+            (format-name contact)]]
+        [:div {:class "level-right"}
+          [:span {:class "mu mu-right"}]]]]])
+
+(defn render-contact-list [state]
+  (let [{:keys [:contacts :selected]} state]
+    [:div {:class "contact-list column is-4 hero is-fullheight"}
+      (map-indexed (fn [idx contact]
+                     (render-contact-list-item idx contact (= idx selected)))
+                   contacts)]))
+
+#+end_src
+****** render-app!
+#+begin_src clojure
+(defn render-app! [state]
+  (set-app-html!
+    (hiccups/html
+      [:div {:class "app-main"}
+        top-bar
+        [:div {:class "columns"}
+          (render-contact-list state)
+          [:div {:class "contact-details column is-8"}
+            (section-header (:editing? state))
+            [:div {:class "hero is-fullheight"}
+              (if (:editing? state)
+                (render-contact-details (get-in state [:contacts (:selected state)] {}))
+                no-contact-details)]]]])))
+
+#+end_src
+
+***** Adding Interactions
+****** on-open-contact
+#+begin_src clojure
+(defn on-open-contact [e state]
+  (refresh!
+    (let [idx (int (.. e -currentTarget -dataset -idx))]
+      (assoc state :selected idx
+                   :editing? true))))
+
+(def no-contact-details   [:p {:class "notice"}    "No contact selected"])
+#+end_src
+****** adding or updating a contact
+#+begin_src clojure
+(defn get-field-value [id]
+  (let [value (.-value (gdom/getElement id))]
+    (when (not (empty? value)) value)))
+
+(defn get-contact-form-data []
+  {:first-name (get-field-value "input-first-name")
+   :last-name (get-field-value "input-last-name")
+   :email (get-field-value "input-email")
+   :address {:street (get-field-value "input-street")
+             :city (get-field-value "input-city")
+             :state (get-field-value "input-state")
+             :postal (get-field-value "input-postal")
+             :country (get-field-value "input-country")}})
+
+(defn on-save-contact [state]
+  (refresh!
+    (let [contact (get-contact-form-data)
+          idx (:selected state)
+          state (dissoc state :selected :editing?)]        ;; <1>
+      (if idx
+        (update state :contacts                            ;; <2>
+                replace-contact idx contact)
+        (update state :contacts
+                add-contact contact)))))
+
+(defn on-add-contact [state]
+  (refresh! (-> state
+                (assoc :editing? true)
+                (dissoc :selected))))
+
+(defn replace-contact [contact-list idx input]
+  (assoc contact-list idx (make-contact input)))
+
+(defn on-save-contact [state]
+  (refresh!
+    (let [contact (get-contact-form-data)
+          idx (:selected state)
+          state (dissoc state :selected :editing?)]
+      (if idx
+        (update state :contacts replace-contact idx contact)
+        (update state :contacts add-contact contact)))))
+
+(defn on-cancel-edit [state]
+  (refresh! (dissoc state :selected :editing?)))
+
+(defn on-delete-contact [e state]
+  (.stopPropagation e)
+  (let [idx (int (.. e -currentTarget -dataset -idx))]
+    (refresh! (-> state
+                  (update :contacts remove-contact idx)
+                  (cond-> (= idx (:selected state))
+                    (dissoc :selected :editing?))))))
+
+#+end_src
+****** attach-event-handlers!
+#+begin_src clojure
+(defn attach-event-handlers! [state]
+  (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
+    (gevents/listen elem "click"
+      (fn [e] (on-open-contact e state))))
+
+  (doseq [elem (array-seq (gdom/getElementsByClass "delete-icon"))]
+    (gevents/listen elem "click"
+      (fn [e] (on-delete-contact e state))))
+
+  (when-let [add-button (gdom/getElement "add-contact")]
+    (gevents/listen add-button "click"
+      (fn [_] (on-add-contact state))))
+
+  (when-let [save-button (gdom/getElement "save-contact")]
+    (gevents/listen save-button "click"
+      (fn [_] (on-save-contact state))))
+
+  (when-let [cancel-button (gdom/getElement "cancel-edit")]
+    (gevents/listen cancel-button "click"
+      (fn [_] (on-cancel-edit state)))))
+
+
+#+end_src
+
+***** refresh!
+#+begin_src clojure 
+(defn set-app-html! [html-str]
+  (set! (.-innerHTML app-container) html-str))
+
+(defn refresh! [state]                                     ;; <3>
+  (render-app! state)
+  (attach-event-handlers! state))
+
+(refresh! initial-state)                                   ;; <4>
+#+end_src
+***** # after-load not use
+#+begin_src clojure :tangle no 
+(defn ^:after-load on-reload []
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+#+end_src
+*** deps.edn
+:PROPERTIES:
+:header-args: :tangle  contacts/deps.edn
+:END:
+**** file
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/deps.edn
+**** src
+#+begin_src clojure
+{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.4"}
+        hiccups/hiccups {:mvn/version "0.3.0"}}
+ :paths ["src" "resources"]
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  org.slf4j/slf4j-nop {:mvn/version "1.7.30"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.17"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
+#+end_src
+*** contacts_test.cljs
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
+* TODO todo
+** NEXT програма психологияеская
+*** переделать тудуер
+
+в измеритель реакций
+добовлем слова вместо туду
+у каждого туду кнопка замерить и результат последнего замера
+добавить кнопки
+сохранить слова с результатами в текстовый фаил
+    может в цсв
+сохранить только завершоные
+сохранить только не завершоные
+загрузить список слов
+сменить цветовую схему
+на автоматическую посмотреть что из этого получится
+
+запостить
+передать вале
+*** туду
+**** сделать отдельный орг
+**** сделать копию проекта
+**** перенести в орг нужные файла для работы
+**** компонет измеритель реакции
+нужен новый компонет- кнопка
+может быть в двух состояниях. Состояние нажатое\активное состояни не активное.
+это кнопка сикундомера.
+в активном она запоминает состояние в котором она была нажата
+и активирует второй компонет который выводит количество прошедших секунд.
+при деактивации оно высчитвает сколько секунд прошло и запоминает это значение в переменную
+
+посуте это пример каунтера
+много можно взять оттуда
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/ui/main.cljs")
+[[file:keechma-counter/src/cljs/keechma_counter/ui/main.cljs::\[:button {:on-click #(ui/send-command ctx :dec)} "-"\]]]
+**** показатель последнего замера реакции
+возможно не компонет а просто хикап структура
+**** переписать текст под слова в интервейсе
+добовлем слова вместо туду
+видемо вордер
+**** переписать текст под слова в коде
+повозможно везде по коду
+**** добавить компонент замера в туду-итемс
+у каждого туду кнопка замерить и результат последнего замера
+**** добавить кнопки сохранить слова 
+возможно только сразу все в текст
+с результатами в текстовый фаил
+сохранить только завершоные
+сохранить только не завершоные
+сохронять те что в даный момент отфильтрованы
+тоесть кнопка "сохранить активные as .txt"
+тоесть либо все либо завершоные либо не завершоные
+**** добавить кнопки сохранить слова в цсв
+возможно только сразу все в цсв
+с результатами 
+сохранить только завершоные
+сохранить только не завершоные
+сохронять те что в даный момент отфильтрованы
+тоесть кнопка "сохранить активные as .csv"
+тоесть либо все либо завершоные либо не завершоные
+**** загрузить список слов
+**** сменить цветовую схему
+на автоматическую посмотреть что из этого получится
+**** забилдить для размешения
+**** запостить
+возможно нужна будет помошь Уни
+**** передать вале
+** програма измерения прочитанного
+*** продумать интерфейс
+*** реализовать
+*** список фич
+**** сохранение в текст для редактирования
+может в цсв
+**** начать таймер
+**** выбрать книгу
+**** список книг
+**** добавить новую книгу
+возможность выбрать обложку
+и заднее изображение
+**** редактировать в ручную
+добавить минут
+убрать минут
+**** плашки и бейджики
+сейчас читаю книгу
+прочитала книг в год
+      неделю
+      месяц
+
+**** соревноватся с другими
+челенджи
+
+**** раздел личных достижений
+
+** TODO Keechma exampls
+*** todo
+https://keechma.com/guides/application-walkthrough/
+
+Login
+
+Application that implements the login workflow.
+
+,* [[https://github.com/keechma/keechma-login][Source code]]
+,* [[https://keechma.com/annotated/login/][Annotated source]]
+
+Graph data
+
+Application that shows how to render the graph data in Keechma.
+
+,* [[https://github.com/keechma/keechma-graph-data][Source code]]
+,* [[https://keechma.com/annotated/graph-data/][Annotated source]]
+
+Forms
+
+Application that shows how to use the [[https://github.com/keechma/forms][Keechma Forms]] Library.
+
+,* [[https://github.com/keechma/keechma-forms-example][Source code]]
+,* [[https://keechma.com/annotated/form-example/][Annotated source]]
+*** done
+TodoMVC
+
+TodoMVC application example.
+
+,* [[https://github.com/keechma/keechma-todomvc][Source code]]
+,* [[https://keechma.com/annotated/todomvc/][Annotated source]]
+
+https://keechma.com/annotated/
+Counter
+
+Counter application example.
+
+,* [[https://github.com/keechma/keechma-counter][Source code]]
+,* [[https://keechma.com/annotated/counter/][Annotated source]]
+** DONE Keechma
+*** to
+
+
+https://keechma.com/guides/application-walkthrough/
+
+https://github.com/keechma/keechma
+https://keechma.com/api/index.html
+
+
+
+*** done
+https://keechma.com/guides/introduction/
+
+https://keechma.com/guides/
+https://keechma.com/guides/ui-system/
+https://keechma.com/guides/gluing/
+https://keechma.com/guides/entitydb/
+https://keechma.com/guides/controllers/
+https://keechma.com/guides/router/
+** reagent-material-ui
+*** use
+https://github.com/DaveWM/reagent-material-u
+https://github.com/arttuka/reagent-material-ui
+*** mui helps
+https://mui.com/material-ui/getting-started/supported-components/
+https://mui.com/material-ui/getting-started
+https://m1.material.io/material-design/introduction.html#
+
+** cljs-firebase-client
+
+Используй cljs-firebase-client: Эта библиотека упростит интеграцию с Firebase в ClojureScript.
+
+
+MVP	Каталог книг (json или Firestore)	всё локально
+1	Корзина, хранение заказов	Firestore
+2	Авторизация пользователей	Firebase Auth
+3	Деплой	Firebase Hosting
+4	Красота и метаданные	SEO, OpenGraph, manifest.json
+
+** прочитать
+https://clojurescript.org/guides/quick-start
+
+https://habr.com/ru/articles/705448/
+** figwheel
+https://figwheel.org/tutorial
+https://figwheel.org/docs/
+https://clojurescript.org/tools/testin
+https://figwheel.org/docs/testing.htmlg
+http://figwheel.org/docs/reloadable_cod
+http://rigsomelight.com/2014/05/01/interactive-programming-flappy-bird-clojurescript.html
+https://www.youtube.com/watch?v=j-kj2qwJa_E
+https://www.youtube.com/watch?v=KZjFVdU8VLI
+https://github.com/bhauman/figwheel-main
+
+** сделать тестовый проект магазина орг
+** TODO Структура приложения
+
+Главная страница: Приветствие, информация о кофейне и книжном магазине.
+Каталог книг: Список доступных книг с фильтрацией и поиском.
+Корзина: Возможность добавления книг в корзину и оформления заказа.
+Аутентификация: Регистрация и вход пользователей (если требуется).
+найти нас
+сделать и оплатить заказ кофе
+меню
+вызвать официанат
+** reagent-figwheel
+https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
+темплат похоже заточен под рефрейм стоит промониторить
+может это вполне путь для ознакомления
+
+** ИИ
+Чтожь это выглядит как план.
+взять знакомые технологии.
+кложур скрипт + reagent + figwheel.
+и добавить не знакомые но не слишком переусложнёные.
+cljs-firebase-client(или похожее для firebase) - незнаю пока как сложно будет добавить, но оно может взять насеб огромный кусок других головных болей если получится. Потому нужно взять эго за основу
+вокруг него проложить
+Keechma - даст структуру для разработы не слишком переуслажнёную. требуется немного поизучать но вроде не черезмерно.
+и уже внешнее оформить через.  Главное он дружис figwheel что не потребует изучения пока шадовкложура. 
+reagent-material-ui - поскольку позволит сильно упрастить разработку через готовые компоненыт орентированые на мобильные устройства. Вроде не требует сильного изучения. добавил и вперёд строй из компонетов
+из минусов есть ошушение что это всё устаревшие технологии. как почти всё основаное на figwheel. Но зато позволит быстро всё собрать. И уже потом по мере необходимости заменять на новые технологии.
+Выглядит вроде подёмно.
+посоветуешь с каково теплата начать при таких вводных?
+стандартное 
+clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent"]'
+? или посоветуешь что-то другое?
+** изучить shadow-cljs
+*** читать
+https://shadow-cljs.github.io/docs/UsersGuide.html
+*** сделать туриал проект
+*** собрать его в релизный вариант
+** Изучить рефрейм
+*** читать
+https://day8.github.io/re-frame/dominoes-30k/
+*** сделать теплат
+https://github.com/Day8/re-frame-template
+*** почитать ре-фрейм сайт?
+*** поискать туториал по ре-фрейму?
+открыть это всё можно в имаксе на ноуте
+и как минимум час вполне можно читать
+можно найти пдф и читать больше
+также вариант планшет + бтарея
+** kee-frame
+вроде это рефрейм но унего нет проблем с фигвилом
+
+https://cljdoc.org/d/kee-frame/kee-frame/0.3.4-SNAPSHOT/doc/readme
+
+https://github.com/ingesolvoll/kee-frame
+** CANCELED semantic‑ui‑reagent 
+https://react.semantic-ui.com/
+https://github.com/toyokumo/semantic-ui-reagent
+
+** DONE понять какой проеkт темплат взять за основу
+*** 01
+clj -X:new :template figwheel-main :name learn-cljs/notes :args '["+deps" "--reagent"]'
+clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent"]'
+clj -X:new :template re-frame :name freeman/tolk :args '["+deps" "+re-com" "+10x"]'
+
+clj -Tnew create :template figwheel-main :name freeman/tolk :args '["--reagent"]'
+
+clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent" "+re-com" "+10x"]'
+
+deps.edn:
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojurescript {:mvn/version "1.11.132"}
+        reagent/reagent {:mvn/version "1.2.0"}
+        re-frame/re-frame {:mvn/version "1.4.3"}
+        re-com/re-com {:mvn/version "2.13.2"}
+        day8.re-frame/tracing {:mvn/version "0.6.2"}}
+ :aliases
+ {:fig {:extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.18"}
+                     com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+        :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}}}
+
+
+И создай dev.cljs.edn:
+{:main freeman.tolk.core
+ :output-to "resources/public/js/app.js"
+ :output-dir "resources/public/js/out"
+ :asset-path "js/out"
+ :preloads [day8.re-frame-10x.preload]
+ :infer-externs true}
+*** figwheel-main
+
+2. Рекомендованная база — figwheel-main template
+
+Шаг, который даст тебе чистый, deps.edn-проект с Figwheel и возможностью добавить re-frame вручную:
+
+clj -Tnew create :template figwheel-main :name freeman/tolk :args '["--reagent"]'
+
+
+⚡ --reagent уже создаёт точку входа с Reagent-компонентом и hot-reload через Figwheel.
+Отсюда ты легко добавишь re-frame + re-com вручную, без теней шаблона.
+
+🧩 3. Добавляем зависимости вручную
+
+В deps.edn:
+
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojurescript {:mvn/version "1.11.132"}
+        reagent/reagent           {:mvn/version "1.2.0"}
+        re-frame/re-frame         {:mvn/version "1.4.3"}
+        re-com/re-com             {:mvn/version "2.13.2"}
+        com.bhauman/figwheel-main {:mvn/version "0.2.18"}
+        com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+ :aliases
+ {:dev {:main-opts ["-m" "figwheel.main" "--build" "dev" "--repl"]}}}
+
+🔧 4. Настройки Figwheel
+
+Создай dev.cljs.edn:
+
+^{:auto-bundle :webpack
+  :watch-dirs ["src"]
+  :css-dirs ["resources/public/css"]}
+{:main freeman.tolk.core}
+
+🌱 5. Минимальный src/freeman/tolk/core.cljs
+(ns freeman.tolk.core
+  (:require [reagent.dom :as rdom]
+            [re-frame.core :as rf]
+            [re-com.core :as rc]))
+
+;; --- Ре-фрейм база ---
+(rf/reg-event-db
+ :initialize
+ (fn [_ _]
+   {:count 0}))
+
+(rf/reg-sub
+ :count
+ (fn [db _] (:count db)))
+
+(rf/reg-event-db
+ :inc
+ (fn [db _] (update db :count inc)))
+
+(defn counter []
+  [rc/v-box
+   :children [[rc/label :label "Book counter"]
+              [rc/button :label "Add Book"
+                         :on-click #(rf/dispatch [:inc])]
+              [rc/label :label @(rf/subscribe [:count])]]])
+
+(defn mount-root []
+  (rf/dispatch-sync [:initialize])
+  (rdom/render [counter] (js/document.getElementById "app")))
+
+(defn ^:after-load reload [] (mount-root))
+
+(defn ^:export init [] (mount-root))
+
+🚀 6. Запуск
+clj -M:dev
+
+
+Figwheel поднимет REPL, откроет браузер и будет делать hot reload.
+Ты уже сможешь править UI и видеть результат мгновенно ⚡
+
+💡 Альтернатива
+
+Если ты всё же хочешь сразу готовый шаблон с re-frame, можно взять Day8/re-frame-template
+ и заставить его работать с deps.edn, но это немного «хакерски» (он всё ещё больше под Lein).
+Так что для лёгкого старта — Figwheel + deps.edn + ручное добавление re-frame — это чисто, прозрачно и под полным твоим контролем.
+
+Хочешь, я соберу тебе готовый минимальный zip-шаблон (со всеми этими файлами, deps.edn и html), который можно просто распаковать и clj -M:dev — всё взлетит?
+*** +firebase +keechma
+(setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+
+ Reagent-figwheel: client-side template with lots of options (cider, devcards, firebase, petrol, keechma, etc.)
+
+ 
+To add a profile to the base template, just append the profile name (let's use +routes as an example):
+
+lein new reagent-figwheel <project-name> +routes
+
+Any combinations of profiles can be added at once, for example:
+
+lein new reagent-figwheel <project-name> +cider +test +garden +less +routes +re-frisk
+
+
+https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
+
+Reagent-figwheel is a client-side, leiningen template for reagent + figwheel. The available profiles include:
+
+CSS: +garden (Generate CSS with Clojure) +less (Less css compiler plugin for the leiningen (clojure) build tool)
+
+Development: +test (doo is a library and lein plugin to run cljs.test on different js environments.) +devcards (Devcards aims to provide a visual REPL experience for ClojureScript)
+
+Editor: +cider (The Clojure Interactive Development Environment that Rocks for Emacs)
+
+Persistence: +firebase (Matchbox, a Firebase client for Clojure(Script))
+
+Routing: +routes (Secretary, a client-side router for ClojureScript.)
+
+Frameworks: +petrol (A simple event-handling framework for ClojureScript projects.) +keechma (Micro frontend framework for ClojureScript and Reagent)
+
+Q: How is this different than reagent-template? A: Reagent-template is fantastic, production ready, and should be used too! However, reagent-template is a little heavy and includes clojure as a backend. Reagent-figwheel focuses on being light-weight by default, and is only client-side.
+
+Q: Why don't you have re-frame? A: I recommend using re-frame-template instead (https://github.com/Day8/re-frame-template)
+
+** 
+** DONE [[file:noter/noter-cljs-project.org::*начать вносить измения по книге][начать вносить измения по книге]]
+** DONE [[file:noter/noter-cljs-project.org::*поэксперементировать с каналами][поэксперементировать с каналами]]
+** DONE [[file:noter/noter-cljs-project.org::*запустить собраное][запустить собраное]]
+* DONE arhiv
+** DONE Осмотрет проект на котором остановился
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/Group-Chat-cljs-project.org")
+** DONE сделать папку
+** DONE нету нечего кроме орга
+** DONE сделать новый проект
+[[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*new project][new project]]
+clj -X:new :template figwheel-main :name learn-cljs/group-chat :args '["+deps" "--reagent"]'
+из папки за пределам груп чата
+возможно будет ошибка что папка уже существует
+** DONE Исправить ошибку Танглинга
+*** открыть настройки кложура
+*** спросить ии
+есть проблема при танглинге добовляются строки которые отсутсвую в сорблоке
+*** group_chat.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/group_chat.cljs
+:END:
+*** file
+(find-file-other-frame "./group-chat/src/learn_cljs/group_chat.cljs")
+*** src core.cljs
+**** ns
+#+begin_src clojure :results output silent
+(ns ^:figwheel-hooks learn-cljs.group-chat
+  (:require
+    [goog.dom :as gdom]
+    [reagent.core :as reagent :refer [atom]]
+    [reagent.dom :as rdom]))
+#+end_src
+**** println
+
+(println "Test text")
+
+#+begin_src clojure :results output silent
+
+(println "This text is printed from src/learn_cljs/group_chat.cljs. Go ahead and edit it and see reloading in action.")
+#+end_src
+**** test
+#+begin_src clojure :results output silent
+
+(defn multiply [a b] (* a b))
+#+end_src
+
+**** defonce
+#+begin_src clojure :results output silent
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+#+end_src
+
+**** render
+#+begin_src clojure :results output silent
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+(defn hello-world []
+  [:div
+   [:h1 (:text @app-state)]
+   [:h3 "Edit this in src/learn_cljs/group_chat.cljs and watch it change!!"]])
+
+(defn mount [el]
+  (rdom/render [hello-world] el))
+
+(defn mount-app-element []
+  (when-let [el (get-app-element)]
+    (mount el)))
+
+;; conditionally start your application based on the presence of an "app" element
+;; this is particularly helpful for testing this ns without launching the app
+(mount-app-element)
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  (mount-app-element)
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+  )
+#+end_src
+*** это танглется без изменений
+*** но
+*** state.cljs
+:PROPERTIES:
+:header-args: :tangle  group-chat/src/learn_cljs/chat/state.cljs
+:END:
+**** file
+(find-file-other-frame "group-chat/src/learn_cljs/chat/state.cljs")
+**** src
+#+begin_src clojure
+(ns learn-cljs.chat.state)
+
+(def initial-state                                         ;; <1>
+  {:rooms []
+   :people []
+   :messages []
+   :current-user nil})
+
+(defonce app-state (atom initial-state))                   ;; <2>
+
+#+end_src
+*** строки прерашаются в 
+(prn (binding [*out* (java.io.StringWriter.)](ns learn-cljs.chat.state)
+
+(def initial-state                                         ;; <1>
+  {:rooms []
+   :people []
+   :messages []
+   :current-user nil})
+
+(defonce app-state (atom initial-state))                   ;; <2>))
+*** вот мои настройки кложура в имаксе
+
+(load (expand-file-name "INI/dev/clojure-cfg.el" user-emacs-directory))
+*** src
+#+begin_src elisp
+;; * CLOJURE-MODE CUSTOMIZATION
+;; --------------------------------------
+;; ** clojure-mode
+(use-package clojure-mode
+  :defer t
+  ;; :disabled
+  :ensure t
+  :config
+ (setq clojure-indent-style 'align-arguments)
+ (setq clojure-indent-keyword-style 'align-arguments)
+  )
+;; ** ob-clojur-mode
+(use-package ob-clojure
+  ;; :disabled
+  :defer t
+  ;; :ensure t
+  :config
+    (setq org-babel-clojure-backend 'cider)
+  ;; (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
+  ;; (custom-theme-set-faces
+  ;;  'material
+  ;;  `(rainbow-delimiters-depth-1-face ((t
+  ;;      (:foreground ,"aquamarine"))))
+  ;;  )
+  )
+;; ** use-package cider:
+(use-package cider
+  :defer t
+  :ensure t
+  :after clojure-mode
+  :config
+  ;; (set-lookup-handlers! 'cider-mode nil) ; doom option 
+  ;; (setq lsp-enable-completion-at-point nil) ; use cider completion
+  (setq cider-eldoc-display-for-symbol-at-point nil) ; disable cider showing eldoc during symbol at point
+  )
+
+;; ** clj-refactor
+(use-package clj-refactor
+  :defer t
+  :ensure t
+  :after clojure-mode
+  :config
+  ;; (set-lookup-handlers! 'clj-refactor-mode nil) ; doom option 
+  (setq cljr-add-ns-to-blank-clj-files nil) ; disable clj-refactor adding ns to blank files
+  )
+;; ** Leiningen
+
+;; ** --------------------------------------
+;; * LSP-MODE CUSTOMIZATION
+;; --------------------------------------
+;; ** use-package lsp-mode:
+(use-package lsp-mode
+  :defer t
+  :ensure t
+  :init
+  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
+  (setq lsp-keymap-prefix "C-c l")
+  :hook
+  (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
+    (clojure-mode-hook . lsp)
+    (clojurescript-mode-hook . lsp)
+    (clojurec-mode-hook . lsp)
+    ;; (XXX-mode . lsp)
+    ;; if you want which-key integration
+    (lsp-mode . lsp-enable-which-key-integration))
+  :commands lsp
+  :config
+  (setq gc-cons-threshold (* 100 1024 1024)
+        read-process-output-max (* 1024 1024)
+        treemacs-space-between-root-nodes nil
+        company-minimum-prefix-length 1)
+  )
+
+;; ** use-package lsp-ui:
+(use-package lsp-ui
+  :defer t
+  :ensure t
+  :commands lsp-ui-mode)
+;; ;; if you are helm user
+;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
+;; if you are ivy user
+;; ** use-package lsp-ivy:
+(use-package lsp-ivy
+  :defer t
+  :ensure t
+  :commands lsp-ivy-workspace-symbol)
+;; ** lsp-treemacs:
+(use-package lsp-treemacs
+  :disabled
+  :defer t
+  :ensure t
+  :commands lsp-treemacs-errors-list)
+
+;; ** --------------------------------------
+;; * use-package dap-mode:
+;; optionally if you want to use debugger
+;; (use-package dap-mode)
+
+
+;; (use-package dap-LANGUAGE) to load the dap adapter for your language
+;; ** --------------------------------------
+#+end_src
+
+*** какие идеи?
+
+*** 
+
+*** 
+Да это интересно наблюдение, но это пологаю ошибка\сиптом, а несама причина 
+:results output silent
+поскольку раньше тогово не было мне кажет это появилось после обновления емакса
+и нет ты не правла :results silent
+и :results none
+не помагает и строки вставляются
+возможно это более комплексная ошибка
+*** разобратся с выполнением шел блока
+может это ошибка с вязана с другой
+если уменя блок назвать sh и cmd или eshell
+то при создании новой строки внутри этого блока он пытается его выполнить
+будто туда послали энтер
+eshell
+тоесть он это привратит
+#+begin_src eshell
+#+end_src
+в это
+#+begin_src eshell
+
+Welcome to the Emacs shell
+
+~/Dev/ClojureScript/tutorials/my-cljs-project $ 
+
+#+end_src
+как будто это не шелл блок а терменал
+повторное нажатие новой строки в этом блоке
+
+#+begin_src eshell
+
+
+Welcome to the Emacs shell
+
+~/Dev/ClojureScript/tutorials/my-cljs-project $ 
+
+Welcome to the Emacs shell
+
+~/Dev/ClojureScript/tutorials/my-cljs-project $ 
+#+end_src
+
+** DONE сделать структуру в орге
+** DONE попровать запустить
+** DONE поправить ошибку
+Помоги поравить ошибку
+*** clojure -M:fig:build
+
+[Figwheel] Validating figwheel-main.edn
+[Figwheel] figwheel-main.edn is valid \(ツ)/
+[Figwheel] Compiling build dev to "target/public/cljs-out/dev-main.js"
+[Figwheel] Failed to compile build dev in 1.394 seconds.
+[Figwheel:WARNING] Compile Exception   src/learn_cljs/chat/message_bus.cljs   line:2  column:14
+
+  No such namespace: cljs.core.async, could not locate cljs/core/async.cljs, cljs/core/async.cljc, or JavaScript source providing "cljs.core.async" in file src/learn_cljs/chat/message_bus.cljs
+
+  1  (ns learn-cljs.chat.message-bus
+  2    (:require [cljs.core.async :refer [go-loop pub sub chan <! put!]]))
+                  ^---
+  3  
+  4  (def msg-ch (chan 1))                                      ;; <1>
+  5  (def msg-bus (pub msg-ch ::type))                          ;; <2>
+  6  
+  7  (defn dispatch!                                            ;; <3>
+
+[Figwheel:SEVERE] failed compiling file:src/learn_cljs/chat/message_bus.cljs
+[Figwheel] Starting Server at http://localhost:9500
+[Figwheel] Starting REPL
+Prompt will show when REPL connects to evaluation environment (i.e. a REPL hosting webpage)
+Figwheel Main Controls:
+          (figwheel.main/stop-builds id ...)  ;; stops Figwheel autobuilder for ids
+          (figwheel.main/start-builds id ...) ;; starts autobuilder focused on ids
+          (figwheel.main/reset)               ;; stops, cleans, reloads config, and starts autobuilder
+          (figwheel.main/build-once id ...)   ;; builds source one time
+          (figwheel.main/clean id ...)        ;; deletes compiled cljs target files
+          (figwheel.main/status)              ;; displays current state of system
+Figwheel REPL Controls:
+          (figwheel.repl/conns)               ;; displays the current connections
+          (figwheel.repl/focus session-name)  ;; choose which session name to focus on
+In the cljs.user ns, controls can be called without ns ie. (conns) instead of (figwheel.repl/conns)
+    Docs: (doc function-name-here)
+    Exit: :cljs/quit
+ Results: Stored in vars *1, *2, *3, *e holds last exception object
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by org.fusesource.hawtjni.runtime.Library in an unnamed module (file:/home/buyn/.m2/repository/org/fusesource/jansi/jansi/1.16/jansi-1.16.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+[Rebel readline] Type :repl/help for online help info
+Opening URL http://localhost:9500
+~/Dev/ClojureScript/tutorials/my-cljs-project/group-chat [130] $ 
+clojure -M:fig:build
+
+[Figwheel] Validating figwheel-main.edn
+[Figwheel] figwheel-main.edn is valid \(ツ)/
+[Figwheel] Compiling build dev to "target/public/cljs-out/dev-main.js"
+[Figwheel] Failed to compile build dev in 1.374 seconds.
+[Figwheel:WARNING] Compile Exception   src/learn_cljs/chat/message_bus.cljs   line:2  column:14
+
+  No such namespace: cljs.core.async, could not locate cljs/core/async.cljs, cljs/core/async.cljc, or JavaScript source providing "cljs.core.async" in file src/learn_cljs/chat/message_bus.cljs
+
+  1  (ns learn-cljs.chat.message-bus
+  2    (:require [cljs.core.async :refer [go-loop pub sub chan <! put!]]))
+                  ^---
+  3  
+  4  (def msg-ch (chan 1))                                      ;; <1>
+  5  (def msg-bus (pub msg-ch ::type))                          ;; <2>
+  6  
+  7  (defn dispatch!                                            ;; <3>
+
+[Figwheel:SEVERE] failed compiling file:src/learn_cljs/chat/message_bus.cljs
+[Figwheel] Starting Server at http://localhost:9500
+[Figwheel] Starting REPL
+Prompt will show when REPL connects to evaluation environment (i.e. a REPL hosting webpage)
+Figwheel Main Controls:
+          (figwheel.main/stop-builds id ...)  ;; stops Figwheel autobuilder for ids
+          (figwheel.main/start-builds id ...) ;; starts autobuilder focused on ids
+          (figwheel.main/reset)               ;; stops, cleans, reloads config, and starts autobuilder
+          (figwheel.main/build-once id ...)   ;; builds source one time
+          (figwheel.main/clean id ...)        ;; deletes compiled cljs target files
+          (figwheel.main/status)              ;; displays current state of system
+Figwheel REPL Controls:
+          (figwheel.repl/conns)               ;; displays the current connections
+          (figwheel.repl/focus session-name)  ;; choose which session name to focus on
+In the cljs.user ns, controls can be called without ns ie. (conns) instead of (figwheel.repl/conns)
+    Docs: (doc function-name-here)
+    Exit: :cljs/quit
+ Results: Stored in vars *1, *2, *3, *e holds last exception object
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by org.fusesource.hawtjni.runtime.Library in an unnamed module (file:/home/buyn/.m2/repository/org/fusesource/jansi/jansi/1.16/jansi-1.16.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+[Rebel readline] Type :repl/help for online help info
+Opening URL http://localhost:9500
+*** 
+(find-file-other-frame "group-chat/deps.edn")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/deps.edn
+*** src
+
+#+begin_src clojure :no-expand t
+{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.132"}
+        org.clojure/data.json {:mvn/version "2.5.1"}
+        cljsjs/react {:mvn/version "18.3.1-1"}
+        cljsjs/react-dom {:mvn/version "18.3.1-1"}
+        org.clojure/core.async {:mvn/version "1.6.681"}
+        reagent/reagent {:mvn/version "1.2.0" }}
+ :paths ["src" "resources"]
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
+                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
+#+end_src
+** DONE внести первые измение
+[[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
+** CANCELED сделать рабочую версию
+[[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
+** CANCELED сделать оканчательную версию
+[[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
+** DONE понять в чём разница
+открыть в двух rangers
+** DONE запустить програму из книги
+CLOSED: [2025-05-01 Thu 19:05]
+тоесть мз папкм книгии
+** DONE как запустить репл
+CLOSED: [2025-05-01 Thu 19:05]
+** DONE add line for open console
+CLOSED: [2024-08-14 Wed 09:18]
+to projet root
+** DONE eshell package for send rigeon to eshell
+CLOSED: [2025-04-30 Wed 21:31]
+** DONE auto save bookmarks
+CLOSED: [2025-04-30 Wed 21:31]
+** DONE geting error
+CLOSED: [2024-08-18 Sun 11:11]
+~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
+Please install rlwrap for command editing or use "clojure" instead.
+
+* project comands
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+** save буфер фреймы проекта
+#+begin_src emacs-lisp  :results output silent
+(use-package burly
+ :ensure t
+ ;; :config
+  )
+;; (burly-bookmark-frames "weather buffers")
+(bookmark-save nil "/home/buyn/temp/bookmarks")
+(burly-bookmark-frames "buffers LAST SAVE")
+(bookmark-save nil "/home/buyn/temp/bookmarks")
+#+end_src
+** save буфер фреймы clojure
+#+begin_src emacs-lisp  :results output silent
+(use-package burly
+ :ensure t
+ ;; :config
+  )
+;; (burly-bookmark-frames "weather buffers")
+(bookmark-save nil "/home/buyn/temp/bookmarks")
+(burly-bookmark-frames "buffers clojure")
+(bookmark-save nil "/home/buyn/temp/bookmarks")
+#+end_src
+** new project
+clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
+$ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
+** run console in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
+
+** repl
+*** run eshell in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+#+begin_src elisp :results output silent
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+
+      ;; (execute-kbd-macro "A \C-m")
+*** run repl
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+:cljs/quit
+:cljs/restart
+#+begin_src eshell
+clj -m cljs.main --compile my-cljs-project.core --repl
+
+
+#+end_src
+
+#+RESULTS:
+*** repl commands
+:cljs/quit
+
+** cider
+If you have a Clojure project in your file system and want CIDER to launch an nREPL session for it, simply visit a file that belongs to the project, and type M-x cider-jack-in RET.[1] CIDER will start an nREPL server and automatically connect to it.
+  In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
+
+** run console with command
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole -e /bin/bash --rcfile <(clj -M:dev)")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
+
 * docs all in brain
 ** all in brain
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
@@ -3315,1116 +6093,6 @@ clj -A:fig:build                                         # <2>
 **** comannds
 clj -A:fig:build
 (js/alert "Am I connected?")
-* Source files
-** TodoMVC
-*** clon
-git clone https://github.com/keechma/example-todomvc.git
-cd example-todomvc
-*** run
-lein figwheel
-*** files
-**** src core
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/app.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/subscriptions.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/ui.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/util.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.clj")
-**** src components
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_edit.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_item.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_list.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/toggle_todos.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/app.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/footer.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/new_todo.cljs")
-**** src controler
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/controllers/todos.cljs")
-**** src entities
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
-**** resurs
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/resources/public/css/style.css")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/resources/public/index.html")
-**** project
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/project.clj")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/target/stale/leiningen.figwheel.clean-on-dependency-change")
-**** other
-find "$PWD" -type f >>filepath.txt
-
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/README.md")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/figwheel_server.log")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/file_path.txt")
-*** risoning
-**** index.html
-определяет точку в хода в скрипт
-    <script>keechma_todomvc.app.main()</script>
-**** app.cljs
-***** ^:export main
-(defn ^:export main
-  "Called from `index.html` to start the app. Exported because
-  `index.html` refers to it by name even in non-dev builds."
-  []
-  (dev-setup)
-  (start!))
-***** dev-setup
-похоже при наличии гдето переменной включает режим дебага
-поидее если не релиз то переменная влючена
-После вызова (enable-console-print!):
-(println "hello") ;; => в браузерной консоли появится "hello"
-
-(defn dev-setup
-  "Enables console output for dev builds."
-  []
-  (when ^boolean js/goog.DEBUG
-    (enable-console-print!)
-    (println "dev mode")))
-***** (defn start!
-стандартно
-  (reset! running-app (keechma.app-state/start! app-definition)))
-***** (def app-definition
-  {:routes [[":status" {:status "all"}]]
-   :controllers {:todos (keechma-todomvc.controllers.todos/->Controller)}
-   :components keechma-todomvc.components/system
-   :subscriptions keechma-todomvc.subscriptions/subscriptions
-   :html-element (.getElementById js/document "app")})
-стандартно
-    <div id="app"> </div>
-**** :controllers {:todos (keechma-todomvc.controllers.todos/->Controller)}
-***** клоючевое в start Controller
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/controllers/todos.cljs")
-(defmethod controller/start Controller
-  [_ params app-db]
-  (keechma-todomvc.entities.todo/create-todos app-db))
-он запускает todo/create-todos с app-db
-[[*entities/todo.cljs][entities/todo.cljs]]
-
-
-(defmethod controller/handler Controller
-  [_ app-db-atom in-chan _]
-  (controller/dispatcher app-db-atom in-chan (keechma-todomvc.entities.todo/actions)))
-и видемо функция команд в entities.todo/actions
-[[*entities/todo.cljs][entities/todo.cljs]]
-(defn actions
-  (let [cmd-handlers {:start-edit start-edit
-                      :cancel-edit cancel-edit
-                      :confirm-edit confirm-edit
-                      :create-todo create-todo
-                      :delete-todo delete-todo
-                      :toggle-todo toggle-todo
-                      :toggle-all toggle-all
-                      :delete-completed delete-completed}
-***** [[*entities/todo.cljs][entities/todo.cljs]]
-**** :subscriptions keechma-todomvc.subscriptions/subscriptions
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/subscriptions.cljs")
-
-набор подпосок вынесен в другой фаил в целов всё также
-(def subscriptions {:todos-by-status todos-by-status
-                    :count-todos-by-status count-todos-by-status
-                    :has-todos-by-status? has-todos-by-status?
-                    :has-todos? has-todos?
-                    :edit-todo edit-todo})
-
-подписки врашаются в основном вокруг получения реактивного атома
-но часть действий вынесана в другой фаил
-[[*entities/todo.cljs][entities/todo.cljs]]
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
-**** entities/todo.cljs
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
-ключивой фаил посути посредник между остальными
-содержит все команды
-посути вытаскивает из базы туду
-и производит все действия надним
-действия над базой через
-            [keechma-todomvc.edb :as edb])
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/edb.clj")
-что использует стандартную библиотеку для нормализации даных подкопотом
-  (:require [entitydb.core :as edb])
-оборачивая её вызовы чтоб их можно было передовать
-
-ТОесть этот фаил обёртка вокруг библиотеки работы с атомом аппа
-в нем есть набор команд для всех основных действий с туду
-(defn actions
-  (let [cmd-handlers {:start-edit start-edit
-                      :cancel-edit cancel-edit
-                      :confirm-edit confirm-edit
-                      :create-todo create-todo
-                      :delete-todo delete-todo
-                      :toggle-todo toggle-todo
-                      :toggle-all toggle-all
-                      :delete-completed delete-completed}
-**** :components keechma-todomvc.components/system
-***** def system
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components.cljs")
-(def system
-  {:main app/component
-   :footer (assoc footer/component :topic :todos)
-   :new-todo (assoc new-todo/component :topic :todos)
-   :todo-edit (assoc todo-edit/component :topic :todos)
-   :todo-item (assoc todo-item/component :topic :todos)
-   :todo-list todo-list/component
-   :toggle-todos (assoc toggle-todos/component :topic :todos)})
-
-в которых
-  (:require [keechma-todomvc.components.app :as app]
-            [keechma-todomvc.components.footer :as footer]
-            [keechma-todomvc.components.new-todo :as new-todo]
-            [keechma-todomvc.components.todo-edit :as todo-edit]
-            [keechma-todomvc.components.todo-item :as todo-item]
-            [keechma-todomvc.components.todo-list :as todo-list]
-            [keechma-todomvc.components.toggle-todos :as toggle-todos]))
-***** :main app/component
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/app.cljs")
-похоже он как основу использует 
-  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
-  для того чтоб подключать другие файлы как встраевуемы компоненты
-
-(def component
-  (<comp :renderer render
-         :component-deps [:new-todo
-                          :toggle-todos
-                          :todo-list
-                          :footer]
-         :subscription-deps [:has-todos?]))
-
- а потом вытаскивает их по надобности как хикап структуры  в рендерер главного компонета
-
-(defn render
-  [ctx]
-  [:<>
-   [:section.todoapp
-    [:header.header
-     [:h1 "todos"]
-     [comp> ctx :new-todo]]
-    (when (sub> ctx :has-todos?)
-      [:<>
-       [:section.main
-        [comp> ctx :toggle-todos]
-        [comp> ctx :todo-list]]
-       [comp> ctx :footer]])]
-   [:footer.info
-    [:p "Double-click to edit a todo"]
-    [:p
-     [:a {:href "https://keechma.com"} "Keechma"] " "
-     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
-интересным явлется пример использования кода прям в структурк интерфейса он проверяет перемунную по подписке и если она тру рисует структуру дел либо нет
-***** keechma-todomvc.ui
-оберта функций
-  (:require [keechma.ui-component :as ui]))
-в более короткий формат c прификсами <  или пофиксом >
-
-(defn <comp
-(defn <cmd
-(defn <url
-(defn comp>
-(defn sub>
-(defn route>
-
-
-
-***** :footer (assoc footer/component :topic :todos)
-***** :new-todo (assoc new-todo/component :topic :todos)
-***** :todo-edit (assoc todo-edit/component :topic :todos)
-***** :todo-item (assoc todo-item/component :topic :todos)
-***** :todo-list todo-list/component
-***** :toggle-todos (assoc toggle-todos/component :topic :todos)})
-**** {:routes [[":status" {:status "all"}]]
-
-** Keechma Counter
-*** clone
-git clone https://github.com/keechma/keechma-counter.git
-*** run
-cd keechma-counter
-lein figwheel
-localhost:3449
-*** files
-
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/figwheel_server.log")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/project.clj")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/README.md")
-
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/core.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/ui/main.cljs")
-
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/resources/public/index.html")
-*** risoning
-**** src/cljs/keechma_counter/core.cljs
-(restart-app!)
-
-который
-
-    (if @running-app
-      (keechma.app-state/stop! @running-app start-app!)
-      (start-app!))))
-где
-(defonce running-app (clojure.core/atom nil))
-
-а
-(defn start-app!
-  (reset! running-app (keechma.app-state/start! app-definition)))
-
-**** (keechma.app-state/start! app-definition)
-тоесть всё сводится к (keechma.app-state/start! app-definition)
-
-в котором всё преложение описано в app-definition
-**** def app-definition
-  {:controllers {:counter (counter/->Controller)}
-   :components {:main (assoc main/component :topic :counter)}
-   :subscriptions {:counter-value counter-value-sub}
-   :html-element (.getElementById js/document "app")})
-**** :controllers {:counter (counter/->Controller)}
-:controllers {:counter (keechma-counter.controllers.counter/->Controller)}
-
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
-
-подписывает сделанй класс
-у которого есть набор команд который он слушает и выполнят как я понимаю это както сделано через каналы там фигурирую входяшие и исходяшие
-стартуя контролёр в писывает в главный атом :counter по пути [:kv :counter] и делает его значение 0
-(defmethod controller/start Controller
-  [controller params app-db]
-  (assoc-in app-db [:kv :counter] 0))
-
-
-и прописывает набор команд в кинчма хэндлер
-(defmethod controller/handler Controller
-  [controller app-db-atom in-chan out-chan]
-  (controller/dispatcher app-db-atom in-chan
-                         {:inc #(swap! app-db-atom update-in [:kv :counter] inc)
-                          :dec #(swap! app-db-atom update-in [:kv :counter] dec)}))
-
-**** :components {:main (assoc main/component :topic :counter)}
-как я помню по описанию обезательно наличе :main
-видемо это точка для отображения
-:components {:main (assoc keechma-counter.ui.main/component :topic :counter)}
-
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/ui/main.cljs")
-в файле def component
-возврашает
-(keechma.ui-component/constructor { :renderer render
-                                    :subscription-deps [:counter-value]})
-
-constructor получает рендере который запрашивает из полученго параметре :counter-value
-несовсем понятна такое описание но 
-
-(defn render
-  [ctx]
-  (let [counter-sub (keechma.ui-component/subscription ctx :counter-value)]
-
-  после чего возврашает вид страници виде функции
-
-(fn []
-      [:p
-       (str "Clicked: " @counter-sub " times ")
-       [:button {:on-click #(keechma.ui-component/send-command ctx :inc)} "+"] " "
-       [:button {:on-click #(ui/send-command ctx :dec)} "-"] " "
-       [:button {:on-click #(inc-if-odd ctx @counter-sub)} "Increment if odd"] " "
-       [:button {:on-click #(inc-async ctx)} "Increment async"]])
-делает она это через функции keechma.ui-component/subscription чтоб получить подписаный атом
-а через keechma.ui-component/send-command шлёт подписаные команды в файле
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/src/cljs/keechma_counter/controllers/counter.cljs")
-команды прописываюся в методе controller/handler класса Controller
-
-интересным явлется то что рендерится структура целеком с изменением атома @counter-sub, тоесть как только он изменится то структура перерендерится. ТОесть не требует не каких дополнительных действий или кода.
-**** :subscriptions {:counter-value counter-value-sub}
-(defn counter-value-sub [app-state]
-  (reagent.ratom/reaction (get-in @app-state [:kv :counter])))
-несовсем понятно который апстей ту и откуда он берётся app-state
-но предполжу что это колбе функция вызывается при :counter-value запросе
-и соответственно
-при :counter-value оно возврашает результат выполения
-(reagent.ratom/reaction (get-in @app-state [:kv :counter]))
-в котором app-state будет заполнен сабскрайбером откудото переданы
-тоесть предположительо гдето есть чтото в форме (def app-state (reagent/atom {:kv {:counter 0}}))
-и снего по :counter-value мы болучает реактивный атом
-
-**** :html-element (.getElementById js/document "app")})
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/keechma-counter/resources/public/index.html")
-    <div id="app">
-
-js/document — это способ обратиться к глобальной JS-переменной document.
-(всё, что начинается с js/, — это “мост” к объектам JS из ClojureScript)
-
-.getElementById — это вызов метода у этого объекта.
-Точка перед именем метода (.) — синтаксис вызова JS-методов в ClojureScript.
-
-"app" — аргумент, который передаётся в метод (id элемента).
-
-Результат — это сам DOM-элемент, который можно использовать, например,
-чтобы вмонтировать компонент Reagent или React.
-
-** noter
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter/noter-cljs-project.org")
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/noter-cljs-project.org")
-** Group Chat
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/Group-Chat-cljs-project.org")
-** Sorce files project ferst
-:PROPERTIES:
-:header-args: :mkdirp yes
-:END:
-*** deps.edn
-:PROPERTIES:
-:header-args: :tangle  deps.edn
-:END:
-#+begin_src edn
-{:deps {org.clojure/clojurescript {:mvn/version "1.10.773"}}
- :paths ["src"]
-:aliases
-  {:dev {:main-opts ["-m" "cljs.main"
-                     "--compile" "my-cljs-project.core"
-                     "--repl"]}}}
-#+end_src
-*** src/my_cljs_project/core.cljs
-:PROPERTIES:
-:header-args: :tangle  src/my_cljs_project/core.cljs
-:END:
-#+begin_src clojure
-(ns my-cljs-project.core)                                  ;; <1>
-
-(js/alert "Hello World!")                                   ;; <2>
-#+end_src
-*** index.html
-:PROPERTIES:
-:header-args: :tangle  index.html
-:END:
-#+begin_src edn
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8">
-  </head>
-  <body>
-    <script src="out/main.js" type="text/javascript"></script>
-  </body>
-</html>
-#+end_src
-** weather
-:PROPERTIES:
-:header-args: :mkdirp yes
-:END:
-*** core.cljs
-:PROPERTIES:
-:header-args: :tangle  weather/src/learn_cljs/weather.cljs
-:END:
-**** link
-[[file:weather/src/learn_cljs/weather.cljs::(ns ^:figwheel-hooks learn-cljs.weather]]
-**** ns
-#+begin_src clojure
-(ns ^:figwheel-hooks learn-cljs.weather                    ;; <1>
-  (:require
-   [goog.dom :as gdom]
-   [reagent.dom :as rdom]
-   [reagent.core :as r]
-   [ajax.core :as ajax]))
-#+end_src
-**** defonce
-#+begin_src clojure
-(defonce app-state (r/atom {:title "WhichWeather"
-                            :postal-code ""
-                            :api-key ""
-                            :temperatures {:today {:label "Today"
-                                                   :value nil}
-                                           :tomorrow {:label "Tomorrow"
-                                                      :value nil}}}))
-#+end_src
-**** ajax get forecast
-***** handle-response
-#+begin_src clojure
-(defn handle-response [resp]
-  (let [today (get-in resp ["list" 0 "main" "temp"])       ;; <1>
-        tomorrow (get-in resp ["list" 8 "main" "temp"])]
-    (swap! app-state                                       ;; <2>
-        update-in [:temperatures :today :value] (constantly today))
-    (swap! app-state
-        update-in [:temperatures :tomorrow :value] (constantly tomorrow))))
-#+end_src
-***** get-forecast!
-#+begin_src clojure
-(defn get-forecast! []
-  (let [postal-code (:postal-code @app-state)]             ;; <1>
-    (ajax/GET "http://api.openweathermap.org/data/2.5/forecast"
-         {:params {"q" postal-code
-                   "appid" "12b0904cfab748cbcb6e98a5dc7c7ac4"
-                   "units" "imperial"}
-          :handler handle-response})))                     ;; <2>
-#+end_src
-**** structur
-#+begin_src clojure
-(defn title []
-  [:h1 (:title @app-state)])
-
-(defn temperature [temp]                                   ;; <1>
-  [:div {:class "temperature"}
-   [:div {:class "value"}
-    (:value temp)]
-   [:h2 (:label temp)]])
-
-(defn postal-code []
-  [:div {:class "postal-code"}
-    [:h3 "Enter your postal code"]
-    [:input {:type "text"
-          :placeholder "api-key"
-          :value (:api-key @app-state)
-          :on-change #(swap! app-state assoc :api-key (-> % .-target .-value))}]
-    [:input {:type "text"
-          :placeholder "Postal Code"
-          :value (:postal-code @app-state)
-          :on-change #(swap! app-state assoc :postal-code (-> % .-target .-value))}]
-    [:button {:on-click get-forecast!} "Go"]])
-
-(defn app []
-  [:div {:class "app"}
-   [title]                                                 ;; <2>
-   [:div {:class "temperatures"}
-    (for [temp (vals (:temperatures @app-state))]          ;; <3>
-      [temperature temp])]
-   [postal-code]])
-
-#+end_src
-**** render
-#+begin_src clojure
-(defn mount-app-element []                                 ;; <4>
-  (rdom/render [app] (gdom/getElement "app")))
-
-(mount-app-element)
-
-(defn ^:after-load on-reload []                            ;; <4>
-  (mount-app-element))
-#+end_src
-
-*** dev.cljs.edn
-:PROPERTIES:
-:header-args: :tangle  weather/dev.cljs.edn
-:END:
-[[file:weather/dev.cljs.edn::^{:watch-dirs \["test" "src"\]]]
-#+begin_src clojure
-^{:watch-dirs ["src"]
-  :css-dirs ["resources/public/css"]
-  :auto-testing true
-   }
-{:main learn-cljs.weather}
-#+end_src
-
-*** deps.edn
-:PROPERTIES:
-:header-args: :tangle  weather/deps.edn
-:END:
-[[file:weather/deps.edn::{:deps {org.clojure/clojure {:mvn/version "1.10.0"}]]
-#+begin_src clojure
-{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
-        org.clojure/clojurescript {:mvn/version "1.11.4"}
-        cljsjs/react {:mvn/version "17.0.2-0"}
-        cljsjs/react-dom {:mvn/version "17.0.2-0"}
-        reagent/reagent {:mvn/version "1.1.1" }
-        cljs-ajax {:mvn/version "0.8.1"} ;; Added
-        }
- :paths ["src" "resources"]
- :aliases {:fig {:extra-deps
-                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
-                  org.slf4j/slf4j-nop {:mvn/version "1.7.30"}
-                  com.bhauman/figwheel-main {:mvn/version "0.2.17"}}
-                 :extra-paths ["target" "test"]}
-           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
-           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
-           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
-#+end_src
-
-*** style.css
-:PROPERTIES:
-:header-args: :tangle  weather/resources/public/css/style.css
-:END:
-[[file:weather/resources/public/css/style.css::/* some style */]]
-#+begin_src css
-body {
-  font-family: Helvetica, Arial, sans-serif;
-  background-color: #02a4ff;
-  color: #ffffff;
-}
-
-h1 {
-  font-weight: 300;
-}
-
-button {
-  border-left: none;
-  border-top-right-radius: 5px;
-  border-bottom-right-radius: 5px;
-  background: #205184;
-  border: none;
-  line-height: 20px;
-  color: #fff;
-  padding: 2px 12px;
-  font-weight: bold;
-}
-
-.temperatures {
-  display: flex;
-}
-
-.temperatures > .temperature {
-  margin-right: 20px;
-  background: #fff;
-  color: #333;
-  text-align: center;
-  flex-basis: 150px;
-  border-radius: 10px;
-  
-  display: flex;
-  flex-direction: column;
-}
-
-.temperatures > .temperature > .value {
-  font-size: 130%;
-  font-weight: lighter;
-  padding: 4px;
-  flex-basis: 26px;
-}
-
-.temperatures > .temperature > h2 {
-  margin: 0;
-  background-color: #69C9FF;
-  color: #ffffff;
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-}
-#+end_src
-** starbase
-:PROPERTIES:
-:header-args: :mkdirp yes
-:END:
-*** starbase.cljs
-:PROPERTIES:
-:header-args: :tangle  starbase/src/learn_cljs/starbase.cljs
-:END:
-[[file:starbase/src/learn_cljs/starbase.cljs::(ns learn-cljs.starbase]]
-**** ns
-#+begin_src clojure
-(ns learn-cljs.starbase
-  (:require [bterm.core :as bterm]
-            [bterm.io :as io]
-            [learn-cljs.starbase.data :as data]
-            [goog.dom :as gdom]))
-
-(enable-console-print!)
-
-(def term
-  (bterm/attach (gdom/getElement "app")
-                {:prompt "=> "
-                 :font-size 14}))
-
-(declare on-answer)
-
-(defn prompt [game current]                                ;; <1>
-  (let [scene (get game current)                           ;; <2>
-        type (:type scene)]
-    (io/clear term)
-    (when (or (= :win type)                                ;; <3>
-              (= :lose type))
-      (io/print term
-                (if (= :win type)                          ;; <4>
-                    "You've Won! "
-                    "Game Over ")))
-    (io/println term (:title scene))                       ;; <5>
-    (io/println term (:dialog scene))
-    (io/read term #(on-answer game current %))))           ;; <6>
-
-#+end_src
-**** answer
-#+begin_src clojure
-(defn on-answer [game current answer]
-  (let [scene (get game current)
-        next (if (= :skip (:type scene))
-               (:on-continue scene)
-               (if (= "yes" answer)
-                 (get-in scene [:transitions "yes"])
-                 (get-in scene [:transitions "no"])))]
-    (prompt game next)))
-#+end_src
-**** start
-#+begin_src clojure
-(prompt data/game :start)
-#+end_src
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/starbase/src/learn_cljs/starbase.cljs
-** starbase_E
-[[file:starbase_E/src/learn_cljs/starbase.cljs::(ns learn-cljs.starbase][starbase.cljs]]
-** doing-io
-:PROPERTIES:
-:header-args: :mkdirp yes
-:END:
-*** doing-io.cljs
-:PROPERTIES:
-:header-args: :tangle  doing-io/src/learn_cljs/doing-io.cljs
-:END:
-**** file
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing_io.cljs")
-
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/doing-io/src/learn_cljs/doing-io.cljs
-**** all
-#+begin_src clojure
-(ns ^:figwheel-hooks learn-cljs.doing-io
-  (:require
-   [goog.dom :as gdom]))
-
-(println "This text is printed from src/learn_cljs/doing_io.cljs. Go ahead and edit it and see reloading in action.")
-
-(defn multiply [a b] (* a b))
-
-;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:text "Hello world!"}))
-
-(defn get-app-element []
-  (gdom/getElement "app"))
-
-
-
-;; specify reload hook with ^:after-load metadata
-(defn ^:after-load on-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
-#+end_src
-***** 
-** contacts
-:PROPERTIES:
-:header-args: :mkdirp yes
-:END:
-*** contacts.cljs
-:PROPERTIES:
-:header-args: :tangle  contacts/src/learn_cljs/contacts.cljs
-:END:
-**** file
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
-
-**** # origin comented
-#+begin_src clojure :tangle no
-(ns ^:figwheel-hooks learn-cljs.contacts
-  (:require
-   [goog.dom :as gdom]))
-
-(println "This text is printed from src/learn_cljs/contacts.cljs. Go ahead and edit it and see reloading in action.")
-
-(defn multiply [a b] (* a b))
-
-;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:text "Hello world!"}))
-
-(defn get-app-element []
-  (gdom/getElement "app"))
-
-
-
-;; specify reload hook with ^:after-load metadata
-(defn ^:after-load on-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
-#+end_src
-**** src
-***** ns
-# (ns ^:figwheel-hooks learn-cljs.contacts
-# (require '[clojure.string :as str])
-# (require '[goog.events :as gevents])
-#+begin_src clojure
-(ns learn-cljs.contacts                 ;
-  (:require
-    [goog.dom :as gdom]
-    [hiccups.runtime]
-    [goog.events :as gevents]
-    [clojure.string :as str])
-  (:require-macros [hiccups.core :as hiccups]))
-
-(declare refresh! Set-app-html!)
-#+end_src
-***** Models and State
-****** contact-list
-#+begin_src clojure
-(def contact-list [
-                   {:first-name "Phillip"
-                    :last-name "Jordan"
-                    :email "phil.j@hotmail.com"
-                    :address {:street "523 Sunny Hills Cir."
-                              :city "Springfield"
-                              :state "MI"
-                              :postal "11111"
-                              :country "USA"}}])
-
-
-#+end_src
-****** make-contact
-#+begin_src clojure
-(defn make-address [address]
-  (select-keys address [:street :city :state :country]))
-
-(defn maybe-set-address [contact]                          ;; <1>
-  (if (:address contact)
-    (update contact :address make-address)
-    contact))
-
-(defn make-contact [contact]
-  (-> contact                                              ;; <2>
-      (select-keys [:first-name :last-name :email])
-      (maybe-set-address)))
-
-(defn add-contact [contact-list input]
-  (conj contact-list
-        (make-contact input)))
-
-(defn remove-contact [contact-list idx]
-  (vec                                                     ;; <1>
-    (concat                                                ;; <2>
-      (subvec contact-list 0 idx)                          ;; <3>
-      (subvec contact-list (inc idx)))))
-
-(defn replace-contact [contact-list idx input]
-  (assoc contact-list idx (make-contact input)))
-#+end_src
-****** initial-state
-#+begin_src clojure
-(def initial-state
-  {:contacts contact-list
-   :selected nil
-   :editing? false})
-#+end_src
-****** declare refresh!
-#+begin_src clojure
-(def app-container (gdom/getElement "app"))
-#+end_src
-
-***** UI
-****** top-bar
-#+begin_src clojure
-(def top-bar
-  [:div {:class "navbar has-shadow"}
-   [:div {:class "container"}
-    [:div {:class "navbar-brand"}
-     [:span {:class "navbar-item"}
-      "ClojureScript Contacts"]]]])
-
-        
-#+end_src
-
-****** render-contact-details
-#+begin_src clojure
-(defn form-field                                           ;; <1>
-  ([id value label] (form-field id value label "text"))
-  ([id value label type]
-   [:div {:class "field"}
-     [:label {:class "label"} label]
-     [:div {:class "control"}
-       [:input {:id id
-                :value value
-                :type type
-                :class "input"}]]]))
-
-(defn render-contact-details [contact]
-  (let [address (get contact :address {})]                 ;; <2>
-    [:div {:id "contact-form" :class "contact-form"}
-      (form-field "input-first-name" (:first-name contact) "First Name")
-      (form-field "input-last-name" (:last-name contact) "Last Name")
-      (form-field "input-email" (:email contact) "Email" "email")
-      [:fieldset
-        [:legend "Address"]
-        (form-field "input-street" (:street address) "Street")
-        (form-field "input-city" (:city address) "City")
-        (form-field "input-state" (:state address) "State")
-        (form-field "input-postal" (:postal address) "Postal Code")
-        (form-field "input-country" (:country address) "Country")]]))
-#+end_src
-****** section-header
-#+begin_src clojure
-(defn action-button [id text icon-class]
-  [:button {:id id
-            :class "button is-primary is-light"}
-    [:span {:class (str "mu " icon-class)}]
-    (str " " text)])
-
-(def save-button (action-button "save-contact" "Save" "mu-file"))
-(def cancel-button (action-button "cancel-edit" "Cancel" "mu-cancel"))
-(def add-button (action-button "add-contact" "Add" "mu-plus"))
-
-(defn section-header [editing?]
-  [:div {:class "section-header"}
-    [:div {:class "level"}
-      [:div {:class "level-left"}
-        [:div {:class "level-item"}
-          [:h1 {:class "subtitle"}
-            [:span {:class "mu mu-user"}]
-            "Edit Contact"]]]
-      [:div {:class "level-right"}
-        (if editing?
-          [:div {:class "buttons"} cancel-button save-button]
-          add-button)]]])
-#+end_src
-****** Rendering Contacts
-#+begin_src clojure
-(defn format-name [contact]                                ;; <1>
-  (->> contact                                             ;; <2>
-       ((juxt :first-name :last-name))                     ;; <3>
-       (str/join " ")))
-
-(defn delete-icon [idx]
-  [:span {:class "delete-icon"
-          :data-idx idx}
-    [:span {:class "mu mu-delete"}]])
-
-(defn render-contact-list-item [idx contact selected?]
-  [:div {:class (str "card contact-summary" (when selected? " selected"))
-         :data-idx idx}                                    ;; <4>
-    [:div {:class "card-content"}
-      [:div {:class "level"}
-        [:div {:class "level-left"}
-          [:div {:class "level-item"}
-            (delete-icon idx)
-            (format-name contact)]]
-        [:div {:class "level-right"}
-          [:span {:class "mu mu-right"}]]]]])
-
-(defn render-contact-list [state]
-  (let [{:keys [:contacts :selected]} state]
-    [:div {:class "contact-list column is-4 hero is-fullheight"}
-      (map-indexed (fn [idx contact]
-                     (render-contact-list-item idx contact (= idx selected)))
-                   contacts)]))
-
-#+end_src
-****** render-app!
-#+begin_src clojure
-(defn render-app! [state]
-  (set-app-html!
-    (hiccups/html
-      [:div {:class "app-main"}
-        top-bar
-        [:div {:class "columns"}
-          (render-contact-list state)
-          [:div {:class "contact-details column is-8"}
-            (section-header (:editing? state))
-            [:div {:class "hero is-fullheight"}
-              (if (:editing? state)
-                (render-contact-details (get-in state [:contacts (:selected state)] {}))
-                no-contact-details)]]]])))
-
-#+end_src
-
-***** Adding Interactions
-****** on-open-contact
-#+begin_src clojure
-(defn on-open-contact [e state]
-  (refresh!
-    (let [idx (int (.. e -currentTarget -dataset -idx))]
-      (assoc state :selected idx
-                   :editing? true))))
-
-(def no-contact-details   [:p {:class "notice"}    "No contact selected"])
-#+end_src
-****** adding or updating a contact
-#+begin_src clojure
-(defn get-field-value [id]
-  (let [value (.-value (gdom/getElement id))]
-    (when (not (empty? value)) value)))
-
-(defn get-contact-form-data []
-  {:first-name (get-field-value "input-first-name")
-   :last-name (get-field-value "input-last-name")
-   :email (get-field-value "input-email")
-   :address {:street (get-field-value "input-street")
-             :city (get-field-value "input-city")
-             :state (get-field-value "input-state")
-             :postal (get-field-value "input-postal")
-             :country (get-field-value "input-country")}})
-
-(defn on-save-contact [state]
-  (refresh!
-    (let [contact (get-contact-form-data)
-          idx (:selected state)
-          state (dissoc state :selected :editing?)]        ;; <1>
-      (if idx
-        (update state :contacts                            ;; <2>
-                replace-contact idx contact)
-        (update state :contacts
-                add-contact contact)))))
-
-(defn on-add-contact [state]
-  (refresh! (-> state
-                (assoc :editing? true)
-                (dissoc :selected))))
-
-(defn replace-contact [contact-list idx input]
-  (assoc contact-list idx (make-contact input)))
-
-(defn on-save-contact [state]
-  (refresh!
-    (let [contact (get-contact-form-data)
-          idx (:selected state)
-          state (dissoc state :selected :editing?)]
-      (if idx
-        (update state :contacts replace-contact idx contact)
-        (update state :contacts add-contact contact)))))
-
-(defn on-cancel-edit [state]
-  (refresh! (dissoc state :selected :editing?)))
-
-(defn on-delete-contact [e state]
-  (.stopPropagation e)
-  (let [idx (int (.. e -currentTarget -dataset -idx))]
-    (refresh! (-> state
-                  (update :contacts remove-contact idx)
-                  (cond-> (= idx (:selected state))
-                    (dissoc :selected :editing?))))))
-
-#+end_src
-****** attach-event-handlers!
-#+begin_src clojure
-(defn attach-event-handlers! [state]
-  (doseq [elem (array-seq (gdom/getElementsByClass "contact-summary"))]
-    (gevents/listen elem "click"
-      (fn [e] (on-open-contact e state))))
-
-  (doseq [elem (array-seq (gdom/getElementsByClass "delete-icon"))]
-    (gevents/listen elem "click"
-      (fn [e] (on-delete-contact e state))))
-
-  (when-let [add-button (gdom/getElement "add-contact")]
-    (gevents/listen add-button "click"
-      (fn [_] (on-add-contact state))))
-
-  (when-let [save-button (gdom/getElement "save-contact")]
-    (gevents/listen save-button "click"
-      (fn [_] (on-save-contact state))))
-
-  (when-let [cancel-button (gdom/getElement "cancel-edit")]
-    (gevents/listen cancel-button "click"
-      (fn [_] (on-cancel-edit state)))))
-
-
-#+end_src
-
-***** refresh!
-#+begin_src clojure 
-(defn set-app-html! [html-str]
-  (set! (.-innerHTML app-container) html-str))
-
-(defn refresh! [state]                                     ;; <3>
-  (render-app! state)
-  (attach-event-handlers! state))
-
-(refresh! initial-state)                                   ;; <4>
-#+end_src
-***** # after-load not use
-#+begin_src clojure :tangle no 
-(defn ^:after-load on-reload []
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-)
-#+end_src
-*** deps.edn
-:PROPERTIES:
-:header-args: :tangle  contacts/deps.edn
-:END:
-**** file
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/deps.edn
-**** src
-#+begin_src clojure
-{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
-        org.clojure/clojurescript {:mvn/version "1.11.4"}
-        hiccups/hiccups {:mvn/version "0.3.0"}}
- :paths ["src" "resources"]
- :aliases {:fig {:extra-deps
-                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
-                  org.slf4j/slf4j-nop {:mvn/version "1.7.30"}
-                  com.bhauman/figwheel-main {:mvn/version "0.2.17"}}
-                 :extra-paths ["target" "test"]}
-           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
-           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
-           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
-#+end_src
-*** contacts_test.cljs
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
-* project comands
-:PROPERTIES:
-:header-args: :tangle no
-:END:
-** save буфер фреймы проекта
-#+begin_src emacs-lisp  :results output silent
-(use-package burly
- :ensure t
- ;; :config
-  )
-;; (burly-bookmark-frames "weather buffers")
-(bookmark-save nil "/home/buyn/temp/bookmarks")
-(burly-bookmark-frames "buffers LAST SAVE")
-(bookmark-save nil "/home/buyn/temp/bookmarks")
-#+end_src
-** save буфер фреймы clojure
-#+begin_src emacs-lisp  :results output silent
-(use-package burly
- :ensure t
- ;; :config
-  )
-;; (burly-bookmark-frames "weather buffers")
-(bookmark-save nil "/home/buyn/temp/bookmarks")
-(burly-bookmark-frames "buffers clojure")
-(bookmark-save nil "/home/buyn/temp/bookmarks")
-#+end_src
-** new project
-clj -X:new :template figwheel-main :name learn-cljs/weather :args '["+deps" "--reagent"]'
-$ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
-** run console in org root
-clj -M:dev
-clojure -m cljs.main --compile my-cljs-project.core --repl
-#+begin_src elisp :results output silent
-(buyn-shell-start "konsole")
-(evil-previous-line)
-(org-cycle)
-(delete-other-windows)
-#+end_src
-
-** repl
-*** run eshell in org root
-clj -M:dev
-clojure -m cljs.main --compile my-cljs-project.core --repl
-#+begin_src elisp :results output silent
-(evil-previous-line)
-(org-cycle)
-(delete-other-windows)
-(let (buffer-name-to-close (buffer-name))
-        (evil-window-split)
-        (eshell)
-        (evil-quit)
-        (switch-to-buffer-other-frame buffer-name-to-close))
-#+end_src
-
-      ;; (execute-kbd-macro "A \C-m")
-*** run repl
-clj -M:dev
-clojure -m cljs.main --compile my-cljs-project.core --repl
-:cljs/quit
-:cljs/restart
-#+begin_src eshell
-clj -m cljs.main --compile my-cljs-project.core --repl
-
-
-#+end_src
-
-#+RESULTS:
-*** repl commands
-:cljs/quit
-
-** cider
-If you have a Clojure project in your file system and want CIDER to launch an nREPL session for it, simply visit a file that belongs to the project, and type M-x cider-jack-in RET.[1] CIDER will start an nREPL server and automatically connect to it.
-  In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
-
-** run console with command
-#+begin_src elisp :results output silent
-(buyn-shell-start "konsole -e /bin/bash --rcfile <(clj -M:dev)")
-(evil-previous-line)
-(org-cycle)
-(delete-other-windows)
-#+end_src
-
 * get info
 :PROPERTIES:
 :header-args: :tangle no
@@ -4774,723 +6442,6 @@ tree -a
 #+begin_src eshell
 tree -a ../..
 #+end_src
-
-* TODO todo
-** ИИ
-Чтожь это выглядит как план.
-взять знакомые технологии.
-кложур скрипт + reagent + figwheel.
-и добавить не знакомые но не слишком переусложнёные.
-cljs-firebase-client(или похожее для firebase) - незнаю пока как сложно будет добавить, но оно может взять насеб огромный кусок других головных болей если получится. Потому нужно взять эго за основу
-вокруг него проложить
-Keechma - даст структуру для разработы не слишком переуслажнёную. требуется немного поизучать но вроде не черезмерно.
-и уже внешнее оформить через.  Главное он дружис figwheel что не потребует изучения пока шадовкложура. 
-reagent-material-ui - поскольку позволит сильно упрастить разработку через готовые компоненыт орентированые на мобильные устройства. Вроде не требует сильного изучения. добавил и вперёд строй из компонетов
-из минусов есть ошушение что это всё устаревшие технологии. как почти всё основаное на figwheel. Но зато позволит быстро всё собрать. И уже потом по мере необходимости заменять на новые технологии.
-Выглядит вроде подёмно.
-посоветуешь с каково теплата начать при таких вводных?
-стандартное 
-clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent"]'
-? или посоветуешь что-то другое?
-
-** Keechma exampls
-*** todo
-TodoMVC
-
-TodoMVC application example.
-
-,* [[https://github.com/keechma/keechma-todomvc][Source code]]
-,* [[https://keechma.com/annotated/todomvc/][Annotated source]]
-
-Login
-
-Application that implements the login workflow.
-
-,* [[https://github.com/keechma/keechma-login][Source code]]
-,* [[https://keechma.com/annotated/login/][Annotated source]]
-
-Graph data
-
-Application that shows how to render the graph data in Keechma.
-
-,* [[https://github.com/keechma/keechma-graph-data][Source code]]
-,* [[https://keechma.com/annotated/graph-data/][Annotated source]]
-
-Forms
-
-Application that shows how to use the [[https://github.com/keechma/forms][Keechma Forms]] Library.
-
-,* [[https://github.com/keechma/keechma-forms-example][Source code]]
-,* [[https://keechma.com/annotated/form-example/][Annotated source]]
-*** done
-https://keechma.com/annotated/
-Counter
-
-Counter application example.
-
-,* [[https://github.com/keechma/keechma-counter][Source code]]
-,* [[https://keechma.com/annotated/counter/][Annotated source]]
-** Keechma
-*** to
-
-
-https://keechma.com/guides/application-walkthrough/
-
-https://github.com/keechma/keechma
-https://keechma.com/api/index.html
-
-
-
-*** done
-https://keechma.com/guides/introduction/
-
-https://keechma.com/guides/
-https://keechma.com/guides/ui-system/
-https://keechma.com/guides/gluing/
-https://keechma.com/guides/entitydb/
-https://keechma.com/guides/controllers/
-https://keechma.com/guides/router/
-** прочитать
-https://clojurescript.org/guides/quick-start
-
-https://habr.com/ru/articles/705448/
-** reagent-material-ui
-*** use
-https://github.com/DaveWM/reagent-material-u
-https://github.com/arttuka/reagent-material-ui
-*** mui helps
-https://mui.com/material-ui/getting-started/supported-components/
-https://mui.com/material-ui/getting-started
-https://m1.material.io/material-design/introduction.html#
-
-** figwheel
-https://figwheel.org/tutorial
-https://figwheel.org/docs/
-https://clojurescript.org/tools/testin
-https://figwheel.org/docs/testing.htmlg
-http://figwheel.org/docs/reloadable_cod
-http://rigsomelight.com/2014/05/01/interactive-programming-flappy-bird-clojurescript.html
-https://www.youtube.com/watch?v=j-kj2qwJa_E
-https://www.youtube.com/watch?v=KZjFVdU8VLI
-https://github.com/bhauman/figwheel-main
-
-** сделать тестовый проект магазина орг
-** понять какой проеkт темплат взять за основу
-*** 01
-clj -X:new :template figwheel-main :name learn-cljs/notes :args '["+deps" "--reagent"]'
-clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent"]'
-clj -X:new :template re-frame :name freeman/tolk :args '["+deps" "+re-com" "+10x"]'
-
-clj -Tnew create :template figwheel-main :name freeman/tolk :args '["--reagent"]'
-
-clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent" "+re-com" "+10x"]'
-
-deps.edn:
-{:paths ["src" "resources"]
- :deps {org.clojure/clojurescript {:mvn/version "1.11.132"}
-        reagent/reagent {:mvn/version "1.2.0"}
-        re-frame/re-frame {:mvn/version "1.4.3"}
-        re-com/re-com {:mvn/version "2.13.2"}
-        day8.re-frame/tracing {:mvn/version "0.6.2"}}
- :aliases
- {:fig {:extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.18"}
-                     com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
-        :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}}}
-
-
-И создай dev.cljs.edn:
-{:main freeman.tolk.core
- :output-to "resources/public/js/app.js"
- :output-dir "resources/public/js/out"
- :asset-path "js/out"
- :preloads [day8.re-frame-10x.preload]
- :infer-externs true}
-*** figwheel-main
-
-2. Рекомендованная база — figwheel-main template
-
-Шаг, который даст тебе чистый, deps.edn-проект с Figwheel и возможностью добавить re-frame вручную:
-
-clj -Tnew create :template figwheel-main :name freeman/tolk :args '["--reagent"]'
-
-
-⚡ --reagent уже создаёт точку входа с Reagent-компонентом и hot-reload через Figwheel.
-Отсюда ты легко добавишь re-frame + re-com вручную, без теней шаблона.
-
-🧩 3. Добавляем зависимости вручную
-
-В deps.edn:
-
-{:paths ["src" "resources"]
- :deps {org.clojure/clojurescript {:mvn/version "1.11.132"}
-        reagent/reagent           {:mvn/version "1.2.0"}
-        re-frame/re-frame         {:mvn/version "1.4.3"}
-        re-com/re-com             {:mvn/version "2.13.2"}
-        com.bhauman/figwheel-main {:mvn/version "0.2.18"}
-        com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
- :aliases
- {:dev {:main-opts ["-m" "figwheel.main" "--build" "dev" "--repl"]}}}
-
-🔧 4. Настройки Figwheel
-
-Создай dev.cljs.edn:
-
-^{:auto-bundle :webpack
-  :watch-dirs ["src"]
-  :css-dirs ["resources/public/css"]}
-{:main freeman.tolk.core}
-
-🌱 5. Минимальный src/freeman/tolk/core.cljs
-(ns freeman.tolk.core
-  (:require [reagent.dom :as rdom]
-            [re-frame.core :as rf]
-            [re-com.core :as rc]))
-
-;; --- Ре-фрейм база ---
-(rf/reg-event-db
- :initialize
- (fn [_ _]
-   {:count 0}))
-
-(rf/reg-sub
- :count
- (fn [db _] (:count db)))
-
-(rf/reg-event-db
- :inc
- (fn [db _] (update db :count inc)))
-
-(defn counter []
-  [rc/v-box
-   :children [[rc/label :label "Book counter"]
-              [rc/button :label "Add Book"
-                         :on-click #(rf/dispatch [:inc])]
-              [rc/label :label @(rf/subscribe [:count])]]])
-
-(defn mount-root []
-  (rf/dispatch-sync [:initialize])
-  (rdom/render [counter] (js/document.getElementById "app")))
-
-(defn ^:after-load reload [] (mount-root))
-
-(defn ^:export init [] (mount-root))
-
-🚀 6. Запуск
-clj -M:dev
-
-
-Figwheel поднимет REPL, откроет браузер и будет делать hot reload.
-Ты уже сможешь править UI и видеть результат мгновенно ⚡
-
-💡 Альтернатива
-
-Если ты всё же хочешь сразу готовый шаблон с re-frame, можно взять Day8/re-frame-template
- и заставить его работать с deps.edn, но это немного «хакерски» (он всё ещё больше под Lein).
-Так что для лёгкого старта — Figwheel + deps.edn + ручное добавление re-frame — это чисто, прозрачно и под полным твоим контролем.
-
-Хочешь, я соберу тебе готовый минимальный zip-шаблон (со всеми этими файлами, deps.edn и html), который можно просто распаковать и clj -M:dev — всё взлетит?
-*** +firebase +keechma
-(setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
-
- Reagent-figwheel: client-side template with lots of options (cider, devcards, firebase, petrol, keechma, etc.)
-
- 
-To add a profile to the base template, just append the profile name (let's use +routes as an example):
-
-lein new reagent-figwheel <project-name> +routes
-
-Any combinations of profiles can be added at once, for example:
-
-lein new reagent-figwheel <project-name> +cider +test +garden +less +routes +re-frisk
-
-
-https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
-
-Reagent-figwheel is a client-side, leiningen template for reagent + figwheel. The available profiles include:
-
-CSS: +garden (Generate CSS with Clojure) +less (Less css compiler plugin for the leiningen (clojure) build tool)
-
-Development: +test (doo is a library and lein plugin to run cljs.test on different js environments.) +devcards (Devcards aims to provide a visual REPL experience for ClojureScript)
-
-Editor: +cider (The Clojure Interactive Development Environment that Rocks for Emacs)
-
-Persistence: +firebase (Matchbox, a Firebase client for Clojure(Script))
-
-Routing: +routes (Secretary, a client-side router for ClojureScript.)
-
-Frameworks: +petrol (A simple event-handling framework for ClojureScript projects.) +keechma (Micro frontend framework for ClojureScript and Reagent)
-
-Q: How is this different than reagent-template? A: Reagent-template is fantastic, production ready, and should be used too! However, reagent-template is a little heavy and includes clojure as a backend. Reagent-figwheel focuses on being light-weight by default, and is only client-side.
-
-Q: Why don't you have re-frame? A: I recommend using re-frame-template instead (https://github.com/Day8/re-frame-template)
-
-** Структура приложения
-
-Главная страница: Приветствие, информация о кофейне и книжном магазине.
-
-Каталог книг: Список доступных книг с фильтрацией и поиском.
-
-Корзина: Возможность добавления книг в корзину и оформления заказа.
-
-Аутентификация: Регистрация и вход пользователей (если требуется).
-
-найти нас
-
-сделать и оплатить заказ кофе
-
-меню
-
-вызвать официанат
-** cljs-firebase-client
-
-Используй cljs-firebase-client: Эта библиотека упростит интеграцию с Firebase в ClojureScript.
-
-
-MVP	Каталог книг (json или Firestore)	всё локально
-1	Корзина, хранение заказов	Firestore
-2	Авторизация пользователей	Firebase Auth
-3	Деплой	Firebase Hosting
-4	Красота и метаданные	SEO, OpenGraph, manifest.json
-
-** reagent-figwheel
-https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
-темплат похоже заточен под рефрейм стоит промониторить
-может это вполне путь для ознакомления
-
-** изучить shadow-cljs
-*** читать
-https://shadow-cljs.github.io/docs/UsersGuide.html
-*** сделать туриал проект
-*** собрать его в релизный вариант
-** Изучить рефрейм
-*** читать
-https://day8.github.io/re-frame/dominoes-30k/
-*** сделать теплат
-https://github.com/Day8/re-frame-template
-*** почитать ре-фрейм сайт?
-*** поискать туториал по ре-фрейму?
-открыть это всё можно в имаксе на ноуте
-и как минимум час вполне можно читать
-можно найти пдф и читать больше
-также вариант планшет + бтарея
-** kee-frame
-вроде это рефрейм но унего нет проблем с фигвилом
-
-https://cljdoc.org/d/kee-frame/kee-frame/0.3.4-SNAPSHOT/doc/readme
-
-https://github.com/ingesolvoll/kee-frame
-** CANCELED semantic‑ui‑reagent 
-https://react.semantic-ui.com/
-https://github.com/toyokumo/semantic-ui-reagent
-
-** 
-** DONE [[file:noter/noter-cljs-project.org::*начать вносить измения по книге][начать вносить измения по книге]]
-** DONE [[file:noter/noter-cljs-project.org::*поэксперементировать с каналами][поэксперементировать с каналами]]
-** DONE [[file:noter/noter-cljs-project.org::*запустить собраное][запустить собраное]]
-* arhiv
-** DONE Осмотрет проект на котором остановился
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/Group-Chat-cljs-project.org")
-** DONE сделать папку
-** DONE нету нечего кроме орга
-** DONE сделать новый проект
-[[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*new project][new project]]
-clj -X:new :template figwheel-main :name learn-cljs/group-chat :args '["+deps" "--reagent"]'
-из папки за пределам груп чата
-возможно будет ошибка что папка уже существует
-** DONE Исправить ошибку Танглинга
-*** открыть настройки кложура
-*** спросить ии
-есть проблема при танглинге добовляются строки которые отсутсвую в сорблоке
-*** group_chat.cljs
-:PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/group_chat.cljs
-:END:
-*** file
-(find-file-other-frame "./group-chat/src/learn_cljs/group_chat.cljs")
-*** src core.cljs
-**** ns
-#+begin_src clojure :results output silent
-(ns ^:figwheel-hooks learn-cljs.group-chat
-  (:require
-    [goog.dom :as gdom]
-    [reagent.core :as reagent :refer [atom]]
-    [reagent.dom :as rdom]))
-#+end_src
-**** println
-
-(println "Test text")
-
-#+begin_src clojure :results output silent
-
-(println "This text is printed from src/learn_cljs/group_chat.cljs. Go ahead and edit it and see reloading in action.")
-#+end_src
-**** test
-#+begin_src clojure :results output silent
-
-(defn multiply [a b] (* a b))
-#+end_src
-
-**** defonce
-#+begin_src clojure :results output silent
-
-;; define your app data so that it doesn't get over-written on reload
-(defonce app-state (atom {:text "Hello world!"}))
-#+end_src
-
-**** render
-#+begin_src clojure :results output silent
-
-(defn get-app-element []
-  (gdom/getElement "app"))
-
-(defn hello-world []
-  [:div
-   [:h1 (:text @app-state)]
-   [:h3 "Edit this in src/learn_cljs/group_chat.cljs and watch it change!!"]])
-
-(defn mount [el]
-  (rdom/render [hello-world] el))
-
-(defn mount-app-element []
-  (when-let [el (get-app-element)]
-    (mount el)))
-
-;; conditionally start your application based on the presence of an "app" element
-;; this is particularly helpful for testing this ns without launching the app
-(mount-app-element)
-
-;; specify reload hook with ^:after-load metadata
-(defn ^:after-load on-reload []
-  (mount-app-element)
-  ;; optionally touch your app-state to force rerendering depending on
-  ;; your application
-  ;; (swap! app-state update-in [:__figwheel_counter] inc)
-  )
-#+end_src
-*** это танглется без изменений
-*** но
-*** state.cljs
-:PROPERTIES:
-:header-args: :tangle  group-chat/src/learn_cljs/chat/state.cljs
-:END:
-**** file
-(find-file-other-frame "group-chat/src/learn_cljs/chat/state.cljs")
-**** src
-#+begin_src clojure
-(ns learn-cljs.chat.state)
-
-(def initial-state                                         ;; <1>
-  {:rooms []
-   :people []
-   :messages []
-   :current-user nil})
-
-(defonce app-state (atom initial-state))                   ;; <2>
-
-#+end_src
-*** строки прерашаются в 
-(prn (binding [*out* (java.io.StringWriter.)](ns learn-cljs.chat.state)
-
-(def initial-state                                         ;; <1>
-  {:rooms []
-   :people []
-   :messages []
-   :current-user nil})
-
-(defonce app-state (atom initial-state))                   ;; <2>))
-*** вот мои настройки кложура в имаксе
-
-(load (expand-file-name "INI/dev/clojure-cfg.el" user-emacs-directory))
-*** src
-#+begin_src elisp
-;; * CLOJURE-MODE CUSTOMIZATION
-;; --------------------------------------
-;; ** clojure-mode
-(use-package clojure-mode
-  :defer t
-  ;; :disabled
-  :ensure t
-  :config
- (setq clojure-indent-style 'align-arguments)
- (setq clojure-indent-keyword-style 'align-arguments)
-  )
-;; ** ob-clojur-mode
-(use-package ob-clojure
-  ;; :disabled
-  :defer t
-  ;; :ensure t
-  :config
-    (setq org-babel-clojure-backend 'cider)
-  ;; (add-hook 'prog-mode-hook 'rainbow-delimiters-mode)
-  ;; (custom-theme-set-faces
-  ;;  'material
-  ;;  `(rainbow-delimiters-depth-1-face ((t
-  ;;      (:foreground ,"aquamarine"))))
-  ;;  )
-  )
-;; ** use-package cider:
-(use-package cider
-  :defer t
-  :ensure t
-  :after clojure-mode
-  :config
-  ;; (set-lookup-handlers! 'cider-mode nil) ; doom option 
-  ;; (setq lsp-enable-completion-at-point nil) ; use cider completion
-  (setq cider-eldoc-display-for-symbol-at-point nil) ; disable cider showing eldoc during symbol at point
-  )
-
-;; ** clj-refactor
-(use-package clj-refactor
-  :defer t
-  :ensure t
-  :after clojure-mode
-  :config
-  ;; (set-lookup-handlers! 'clj-refactor-mode nil) ; doom option 
-  (setq cljr-add-ns-to-blank-clj-files nil) ; disable clj-refactor adding ns to blank files
-  )
-;; ** Leiningen
-
-;; ** --------------------------------------
-;; * LSP-MODE CUSTOMIZATION
-;; --------------------------------------
-;; ** use-package lsp-mode:
-(use-package lsp-mode
-  :defer t
-  :ensure t
-  :init
-  ;; set prefix for lsp-command-keymap (few alternatives - "C-l", "C-c l")
-  (setq lsp-keymap-prefix "C-c l")
-  :hook
-  (;; replace XXX-mode with concrete major-mode(e. g. python-mode)
-    (clojure-mode-hook . lsp)
-    (clojurescript-mode-hook . lsp)
-    (clojurec-mode-hook . lsp)
-    ;; (XXX-mode . lsp)
-    ;; if you want which-key integration
-    (lsp-mode . lsp-enable-which-key-integration))
-  :commands lsp
-  :config
-  (setq gc-cons-threshold (* 100 1024 1024)
-        read-process-output-max (* 1024 1024)
-        treemacs-space-between-root-nodes nil
-        company-minimum-prefix-length 1)
-  )
-
-;; ** use-package lsp-ui:
-(use-package lsp-ui
-  :defer t
-  :ensure t
-  :commands lsp-ui-mode)
-;; ;; if you are helm user
-;; (use-package helm-lsp :commands helm-lsp-workspace-symbol)
-;; if you are ivy user
-;; ** use-package lsp-ivy:
-(use-package lsp-ivy
-  :defer t
-  :ensure t
-  :commands lsp-ivy-workspace-symbol)
-;; ** lsp-treemacs:
-(use-package lsp-treemacs
-  :disabled
-  :defer t
-  :ensure t
-  :commands lsp-treemacs-errors-list)
-
-;; ** --------------------------------------
-;; * use-package dap-mode:
-;; optionally if you want to use debugger
-;; (use-package dap-mode)
-
-
-;; (use-package dap-LANGUAGE) to load the dap adapter for your language
-;; ** --------------------------------------
-#+end_src
-
-*** какие идеи?
-
-*** 
-
-*** 
-Да это интересно наблюдение, но это пологаю ошибка\сиптом, а несама причина 
-:results output silent
-поскольку раньше тогово не было мне кажет это появилось после обновления емакса
-и нет ты не правла :results silent
-и :results none
-не помагает и строки вставляются
-возможно это более комплексная ошибка
-*** разобратся с выполнением шел блока
-может это ошибка с вязана с другой
-если уменя блок назвать sh и cmd или eshell
-то при создании новой строки внутри этого блока он пытается его выполнить
-будто туда послали энтер
-eshell
-тоесть он это привратит
-#+begin_src eshell
-#+end_src
-в это
-#+begin_src eshell
-
-Welcome to the Emacs shell
-
-~/Dev/ClojureScript/tutorials/my-cljs-project $ 
-
-#+end_src
-как будто это не шелл блок а терменал
-повторное нажатие новой строки в этом блоке
-
-#+begin_src eshell
-
-
-Welcome to the Emacs shell
-
-~/Dev/ClojureScript/tutorials/my-cljs-project $ 
-
-Welcome to the Emacs shell
-
-~/Dev/ClojureScript/tutorials/my-cljs-project $ 
-#+end_src
-
-** DONE сделать структуру в орге
-** DONE попровать запустить
-** DONE поправить ошибку
-Помоги поравить ошибку
-*** clojure -M:fig:build
-
-[Figwheel] Validating figwheel-main.edn
-[Figwheel] figwheel-main.edn is valid \(ツ)/
-[Figwheel] Compiling build dev to "target/public/cljs-out/dev-main.js"
-[Figwheel] Failed to compile build dev in 1.394 seconds.
-[Figwheel:WARNING] Compile Exception   src/learn_cljs/chat/message_bus.cljs   line:2  column:14
-
-  No such namespace: cljs.core.async, could not locate cljs/core/async.cljs, cljs/core/async.cljc, or JavaScript source providing "cljs.core.async" in file src/learn_cljs/chat/message_bus.cljs
-
-  1  (ns learn-cljs.chat.message-bus
-  2    (:require [cljs.core.async :refer [go-loop pub sub chan <! put!]]))
-                  ^---
-  3  
-  4  (def msg-ch (chan 1))                                      ;; <1>
-  5  (def msg-bus (pub msg-ch ::type))                          ;; <2>
-  6  
-  7  (defn dispatch!                                            ;; <3>
-
-[Figwheel:SEVERE] failed compiling file:src/learn_cljs/chat/message_bus.cljs
-[Figwheel] Starting Server at http://localhost:9500
-[Figwheel] Starting REPL
-Prompt will show when REPL connects to evaluation environment (i.e. a REPL hosting webpage)
-Figwheel Main Controls:
-          (figwheel.main/stop-builds id ...)  ;; stops Figwheel autobuilder for ids
-          (figwheel.main/start-builds id ...) ;; starts autobuilder focused on ids
-          (figwheel.main/reset)               ;; stops, cleans, reloads config, and starts autobuilder
-          (figwheel.main/build-once id ...)   ;; builds source one time
-          (figwheel.main/clean id ...)        ;; deletes compiled cljs target files
-          (figwheel.main/status)              ;; displays current state of system
-Figwheel REPL Controls:
-          (figwheel.repl/conns)               ;; displays the current connections
-          (figwheel.repl/focus session-name)  ;; choose which session name to focus on
-In the cljs.user ns, controls can be called without ns ie. (conns) instead of (figwheel.repl/conns)
-    Docs: (doc function-name-here)
-    Exit: :cljs/quit
- Results: Stored in vars *1, *2, *3, *e holds last exception object
-WARNING: A restricted method in java.lang.System has been called
-WARNING: java.lang.System::loadLibrary has been called by org.fusesource.hawtjni.runtime.Library in an unnamed module (file:/home/buyn/.m2/repository/org/fusesource/jansi/jansi/1.16/jansi-1.16.jar)
-WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
-WARNING: Restricted methods will be blocked in a future release unless native access is enabled
-
-[Rebel readline] Type :repl/help for online help info
-Opening URL http://localhost:9500
-~/Dev/ClojureScript/tutorials/my-cljs-project/group-chat [130] $ 
-clojure -M:fig:build
-
-[Figwheel] Validating figwheel-main.edn
-[Figwheel] figwheel-main.edn is valid \(ツ)/
-[Figwheel] Compiling build dev to "target/public/cljs-out/dev-main.js"
-[Figwheel] Failed to compile build dev in 1.374 seconds.
-[Figwheel:WARNING] Compile Exception   src/learn_cljs/chat/message_bus.cljs   line:2  column:14
-
-  No such namespace: cljs.core.async, could not locate cljs/core/async.cljs, cljs/core/async.cljc, or JavaScript source providing "cljs.core.async" in file src/learn_cljs/chat/message_bus.cljs
-
-  1  (ns learn-cljs.chat.message-bus
-  2    (:require [cljs.core.async :refer [go-loop pub sub chan <! put!]]))
-                  ^---
-  3  
-  4  (def msg-ch (chan 1))                                      ;; <1>
-  5  (def msg-bus (pub msg-ch ::type))                          ;; <2>
-  6  
-  7  (defn dispatch!                                            ;; <3>
-
-[Figwheel:SEVERE] failed compiling file:src/learn_cljs/chat/message_bus.cljs
-[Figwheel] Starting Server at http://localhost:9500
-[Figwheel] Starting REPL
-Prompt will show when REPL connects to evaluation environment (i.e. a REPL hosting webpage)
-Figwheel Main Controls:
-          (figwheel.main/stop-builds id ...)  ;; stops Figwheel autobuilder for ids
-          (figwheel.main/start-builds id ...) ;; starts autobuilder focused on ids
-          (figwheel.main/reset)               ;; stops, cleans, reloads config, and starts autobuilder
-          (figwheel.main/build-once id ...)   ;; builds source one time
-          (figwheel.main/clean id ...)        ;; deletes compiled cljs target files
-          (figwheel.main/status)              ;; displays current state of system
-Figwheel REPL Controls:
-          (figwheel.repl/conns)               ;; displays the current connections
-          (figwheel.repl/focus session-name)  ;; choose which session name to focus on
-In the cljs.user ns, controls can be called without ns ie. (conns) instead of (figwheel.repl/conns)
-    Docs: (doc function-name-here)
-    Exit: :cljs/quit
- Results: Stored in vars *1, *2, *3, *e holds last exception object
-WARNING: A restricted method in java.lang.System has been called
-WARNING: java.lang.System::loadLibrary has been called by org.fusesource.hawtjni.runtime.Library in an unnamed module (file:/home/buyn/.m2/repository/org/fusesource/jansi/jansi/1.16/jansi-1.16.jar)
-WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
-WARNING: Restricted methods will be blocked in a future release unless native access is enabled
-
-[Rebel readline] Type :repl/help for online help info
-Opening URL http://localhost:9500
-*** 
-(find-file-other-frame "group-chat/deps.edn")
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/deps.edn
-*** src
-
-#+begin_src clojure :no-expand t
-{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
-        org.clojure/clojurescript {:mvn/version "1.11.132"}
-        org.clojure/data.json {:mvn/version "2.5.1"}
-        cljsjs/react {:mvn/version "18.3.1-1"}
-        cljsjs/react-dom {:mvn/version "18.3.1-1"}
-        org.clojure/core.async {:mvn/version "1.6.681"}
-        reagent/reagent {:mvn/version "1.2.0" }}
- :paths ["src" "resources"]
- :aliases {:fig {:extra-deps
-                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
-                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
-                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
-                 :extra-paths ["target" "test"]}
-           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
-           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
-           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
-           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "learn-cljs.test-runner"]}}}
-#+end_src
-** DONE внести первые измение
-[[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
-** CANCELED сделать рабочую версию
-[[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
-** CANCELED сделать оканчательную версию
-[[https://www.learn-clojurescript.com/section-4/lesson-26-capstone-4-group-chat/][Capstone 4 - Group Chat | Lesson 26 | Learn ClojureScript]]
-** DONE понять в чём разница
-открыть в двух rangers
-** DONE запустить програму из книги
-CLOSED: [2025-05-01 Thu 19:05]
-тоесть мз папкм книгии
-** DONE как запустить репл
-CLOSED: [2025-05-01 Thu 19:05]
-** DONE add line for open console
-CLOSED: [2024-08-14 Wed 09:18]
-to projet root
-** DONE eshell package for send rigeon to eshell
-CLOSED: [2025-04-30 Wed 21:31]
-** DONE auto save bookmarks
-CLOSED: [2025-04-30 Wed 21:31]
-** DONE geting error
-CLOSED: [2024-08-18 Sun 11:11]
-~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
-Please install rlwrap for command editing or use "clojure" instead.
 
 * 2024-08-10
 ** Necroteuch.org : 
