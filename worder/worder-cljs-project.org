@@ -108,7 +108,8 @@ git clone https://github.com/keechma/example-todomvc.git
 ** переделать под фигвилл маин
 *** перенести в делейт
 *** сделать темплат
-clj -X:new :template figwheel-main :name learn-cljs/notes :args '["+deps" "--reagent"]'
+clj -X:new :template figwheel-main :name worder/keechma-todomvc :args '["+deps" "--reagent"]'
+clj -X:new :template figwheel-main :name keechma-todomvc/worder :args '["+deps" "--reagent"]'
 *** через темплат
 Переделать **Leiningen + figwheel** → **deps.edn + figwheel-main** — можно ✅
 Но **автоматического конвертера** project.clj → deps.edn **не существует**.

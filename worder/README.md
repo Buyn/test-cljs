@@ -1,45 +1,37 @@
-# example-todomvc
+# worder
 
-TodoMVC application example for the [Keechma framework](http://github.com/keechma/keechma).
+FIXME: Write a one-line description of your library/project.
 
-Read the [annotated source](http://keechma.com/annotated/todomvc.html).
+## Overview
 
-## Setup
+FIXME: Write a paragraph about the library/project and highlight its goals.
 
-Make sure you have [Leiningen](http://leiningen.org/) installed.
-
-Clone the repo:
-
-```
-$ git clone https://github.com/keechma/example-todomvc.git
-$ cd example-todomvc
-```
+## Development
 
 To get an interactive development environment run:
 
-    lein figwheel
+    clojure -A:fig:build
 
-and open your browser at [localhost:3449](http://localhost:3449/).
 This will auto compile and send all changes to the browser without the
 need to reload. After the compilation process is complete, you will
-get a Browser Connected REPL.
+get a Browser Connected REPL. An easy way to try it is:
 
-## Build and view docs
+    (js/alert "Am I connected?")
 
-From within the `example-todomvc` directory:
+and you should see an alert in the browser window.
 
-```
-$ lein marg $(find src -type f | sort)
-$ open docs/uberdoc.html
-```
+To clean all compiled files:
 
-## References
+    rm -rf target/public
 
-- [Keechma Guides](https://keechma.com/guides/)
-- [Creating Reagent Components](https://github.com/reagent-project/reagent/blob/master/doc/CreatingReagentComponents.md)
+To create a production build run:
+
+	rm -rf target/public
+	clojure -A:fig:min
+
 
 ## License
 
-Copyright © 2020 Mihael Konjevic
+Copyright © 2018 FIXME
 
-Distributed under the MIT License.
+Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
