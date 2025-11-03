@@ -14,7 +14,36 @@
 (find-file-other-frame "deps.edn")
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/deps.edn
 **** src
+***** activ
 #+begin_src clojure :no-expand t
+{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.132"}
+        org.clojure/data.json {:mvn/version "2.5.1"}
+        cljsjs/react {:mvn/version "18.3.1-1"}
+        cljsjs/react-dom {:mvn/version "18.3.1-1"}
+        org.clojure/core.async     {:mvn/version "0.7.559"
+                                    :exclusions  [org.clojure/tools.reader]}
+        keechma/keechma            {:mvn/version "0.3.14"
+                                    :exclusions [cljsjs/react-with-addons
+                                                 cljsjs/react-dom
+                                                 cljsjs/react-dom-server]}
+        keechma/entitydb           {:mvn/version "0.1.6"}
+        reagent/reagent {:mvn/version "1.2.0" }}
+
+ :paths ["src" "resources"]
+
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
+                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "keechma-todomvc.test-runner"]}}}
+#+end_src
+***** CANCELED orignl
+#+begin_src clojure :no-expand t :tangle no 
 {:deps {org.clojure/clojure {:mvn/version "1.12.0"}
         org.clojure/clojurescript {:mvn/version "1.11.132"}
         org.clojure/data.json {:mvn/version "2.5.1"}
@@ -32,12 +61,11 @@
            :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
            :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "keechma-todomvc.test-runner"]}}}
 #+end_src
-
 ** src core
 ** src components
 *** components/app.cljs
 :PROPERTIES:
-:header-args: :tangle  ./src/keechma_todomvc/components/app.cljs
+:header-args: :tangle ./src/keechma_todomvc/components/app.cljs
 :END:
 **** file
 (find-file-other-frame "./src/keechma_todomvc/components/app.cljs")
@@ -90,6 +118,64 @@
          :subscription-deps [:has-todos?]))
 #+end_src
 
+*** components/todo_edit.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/keechma_todomvc/components/todo_edit.cljs
+:END:
+**** file
+(find-file-other-frame "./src/keechma_todomvc/components/todo_edit.cljs")
+**** src
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.app
+  "# Main app component"
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
+
+(defn render
+  "## Renders the top level UI
+
+  Some elements are rendered inline, others are implemented as
+  `components`. Each `component` will have its own `context` provided.
+
+### Component Deps
+
+- `:new-todo` top field where new `todos` are entered
+- `:toggle-todos` checkbox to the left of `:new-todo`
+- `:todo-list` main body list of `todos`
+- `:footer` active count, filtering, clearing
+
+### Subscription Deps
+
+- `:has-todos?` returns true if there are any todos in the EntityDB."
+  [ctx]
+  [:<>
+   [:section.todoapp
+    [:header.header
+     [:h1 "Worder"]
+     [comp> ctx :new-todo]]
+    (when (sub> ctx :has-todos?)
+      [:<>
+       [:section.main
+        [comp> ctx :toggle-todos]
+        [comp> ctx :todo-list]]
+       [comp> ctx :footer]])]
+   [:footer.info
+    [:p "Double-click to edit a word"]
+    [:p
+     [:a {:href "https://keechma.com"} "Keechma"] " "
+     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+
+(def component
+  (<comp :renderer render
+         :component-deps [:new-todo
+                          :toggle-todos
+                          :todo-list
+                          :footer]
+         :subscription-deps [:has-todos?]))
+#+end_src
+
+** src resources
+(find-file-other-frame "./resources/public/css/style.css")
+(find-file-other-frame "./resources/public/index.html")
 * files worder
 ** files core
 (find-file-other-frame "./src/keechma_todomvc/app.cljs")
@@ -139,7 +225,7 @@ git clone https://github.com/keechma/example-todomvc.git
 ** DONE перенести в орг нужные файла для работы
 взять как миннимум один фаил что убедить в работоспособности механизма
 ** DONE сделать комит
-** переделать под фигвилл маин
+** NEXT переделать под фигвилл маин
 *** перенести в делейт
 *** сделать темплат
 clj -X:new :template figwheel-main :name keechma-todomvc/worder :args '["+deps" "--reagent"]'
