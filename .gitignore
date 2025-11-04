@@ -3,3 +3,6 @@
 /.clj-kondo/
 /.lsp/
 /keechma-counter/.rebel_readline_history
+/worder/.cpcache/
+/worder/.rebel_readline_history
+/worder/target/public/

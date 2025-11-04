@@ -2117,6 +2117,7 @@ MVP	Каталог книг (json или Firestore)	всё локально
 ** прочитать
 https://clojurescript.org/guides/quick-start
 
+** кложур для андроида
 https://habr.com/ru/articles/705448/
 ** figwheel
 https://figwheel.org/tutorial
@@ -2140,7 +2141,21 @@ https://github.com/bhauman/figwheel-main
 сделать и оплатить заказ кофе
 меню
 вызвать официанат
-** reagent-figwheel
+** Изучить рефрейм
+*** читать
+https://day8.github.io/re-frame/dominoes-30k/
+https://day8.github.io/re-frame/start-coding/
+https://github.com/day8/re-frame/blob/master/docs/External-Resources.md
+https://github.com/day8/re-frame-template/tree/master
+*** сделать теплат
+https://github.com/Day8/re-frame-template
+*** почитать ре-фрейм сайт?
+*** поискать туториал по ре-фрейму?
+открыть это всё можно в имаксе на ноуте
+и как минимум час вполне можно читать
+можно найти пдф и читать больше
+также вариант планшет + бтарея
+*** reagent-figwheel
 https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
 темплат похоже заточен под рефрейм стоит промониторить
 может это вполне путь для ознакомления
@@ -2166,17 +2181,6 @@ clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent
 https://shadow-cljs.github.io/docs/UsersGuide.html
 *** сделать туриал проект
 *** собрать его в релизный вариант
-** Изучить рефрейм
-*** читать
-https://day8.github.io/re-frame/dominoes-30k/
-*** сделать теплат
-https://github.com/Day8/re-frame-template
-*** почитать ре-фрейм сайт?
-*** поискать туториал по ре-фрейму?
-открыть это всё можно в имаксе на ноуте
-и как минимум час вполне можно читать
-можно найти пдф и читать больше
-также вариант планшет + бтарея
 ** kee-frame
 вроде это рефрейм но унего нет проблем с фигвилом
 
