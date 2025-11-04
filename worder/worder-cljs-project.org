@@ -2,11 +2,349 @@
 :header-args: :tangle no :mkdirp yes :results output silent :no-expand t
 :END:
 * src worder
+** src project
+*** other
+(find-file-other-frame "dev.cljs.edn")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/dev.cljs.edn
+(find-file-other-frame "test.cljs.edn")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/test.cljs.edn
+(find-file-other-frame "figwheel-main.edn")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/figwheel-main.edn
+*** deps.edn
+:PROPERTIES:
+:header-args: :tangle deps.edn
+:END:
+**** file
+(find-file-other-frame "deps.edn")
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/deps.edn
+**** src
+***** src deps.edn
+#+begin_src clojure :no-expand t
+{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.132"}
+        org.clojure/data.json {:mvn/version "2.5.1"}
+        cljsjs/react {:mvn/version "18.3.1-1"}
+        cljsjs/react-dom {:mvn/version "18.3.1-1"}
+        org.clojure/core.async     {:mvn/version "0.7.559"
+                                    :exclusions  [org.clojure/tools.reader]}
+        keechma/keechma            {:mvn/version "0.3.14"
+                                    :exclusions [cljsjs/react-with-addons
+                                                 cljsjs/react-dom
+                                                 cljsjs/react-dom-server]}
+        keechma/entitydb           {:mvn/version "0.1.6"}
+        reagent/reagent {:mvn/version "0.9.1" }}
+
+ :paths ["src" "resources"]
+
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
+                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "keechma-todomvc.test-runner"]}}}
+
+#+end_src
+***** CANCELED orignl
+#+begin_src clojure :no-expand t :tangle no 
+{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.132"}
+        org.clojure/data.json {:mvn/version "2.5.1"}
+        cljsjs/react {:mvn/version "18.3.1-1"}
+        cljsjs/react-dom {:mvn/version "18.3.1-1"}
+        reagent/reagent {:mvn/version "1.2.0" }}
+ :paths ["src" "resources"]
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
+                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "keechma-todomvc.test-runner"]}}}
+#+end_src
 ** src core
+*** other
+(find-file-other-frame "./src/keechma_todomvc/subscriptions.cljs")
+(find-file-other-frame "./src/keechma_todomvc/ui.cljs")
+(find-file-other-frame "./src/keechma_todomvc/util.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components.cljs")
+(find-file-other-frame "./src/keechma_todomvc/edb.cljs")
+(find-file-other-frame "./src/keechma_todomvc/edb.clj")
+*** worder.cljs
+:PROPERTIES:
+:header-args: :tangle src/keechma_todomvc/worder.cljs
+:END:
+**** file worder.cljs
+(find-file-other-frame "src/keechma_todomvc/worder.cljs")
+**** src worder.cljs
+***** test version src worder.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns ^:figwheel-hooks keechma-todomvc.worder
+  (:require
+   [keechma-todomvc.components :as components]
+   [keechma-todomvc.controllers.todos :as todos]
+   [keechma-todomvc.subscriptions :as subscriptions]
+   [reagent.core :as reagent :refer [atom]]
+   [keechma.app-state :as app-state]))
+
+(defn multiply [a b] (* a b))
+
+(defonce running-app (atom nil))
+
+(def app-definition
+  {:routes [["/:status" {:status "all"}]]
+   :controllers {:todos (todos/->Controller)}
+   :components components/system
+   :subscriptions subscriptions/subscriptions
+   :html-element (.getElementById js/document "app")})
+
+(defn start! []
+  (reset! running-app (app-state/start! app-definition)))
+
+(defn restart! []
+  (if-let [current @running-app]
+    (app-state/stop! current start!)
+    (start!)))
+
+(defn dev-setup []
+  (when ^boolean js/goog.DEBUG
+    (enable-console-print!)
+    (println "dev mode")))
+
+(defn ^:export main []
+  (dev-setup)
+  (start!))
+
+(defn ^:after-load on-reload []
+  (restart!))
+
+
+#+end_src
+***** keechma version src worder.cljs
+#+begin_src clojure :no-expand t :mkdirp yes :tangle no
+(ns ^:figwheel-hooks keechma-todomvc.worder
+  "# Keechma TodoMVC App"
+  (:require [keechma-todomvc.components :as components]
+            [keechma-todomvc.controllers.todos :as todos]
+            [keechma-todomvc.subscriptions :as subscriptions]
+            [keechma.app-state :as app-state]))
+
+
+(defn multiply [a b] (* a b))
+
+(defonce running-app (atom nil))
+
+;; ;; ## App Definition
+
+(def app-definition
+  "Pulls the app together."
+  {:routes [[":status" {:status "all"}]]
+   :controllers {:todos (todos/->Controller)}
+   :components components/system
+   :subscriptions subscriptions/subscriptions
+   :html-element (.getElementById js/document "app")})
+
+;; ## App Lifecycle
+
+(defn start!
+  "Starts the app."
+  []
+  (reset! running-app (app-state/start! app-definition)))
+
+(defn restart!
+  "Restarts the app. `project.clj` contains a config setting for
+  `figwheel` requesting a call to this function whenever the code is
+  reloaded."
+  []
+  (if-let [current @running-app]
+    (app-state/stop! current start!)
+    (start!)))
+
+(defn dev-setup
+  "Enables console output for dev builds."
+  []
+  (when ^boolean js/goog.DEBUG
+    (enable-console-print!)
+    (println "dev mode")))
+
+;; ;; ## Main
+
+(defn ^:export main
+  "Called from `index.html` to start the app. Exported because
+  `index.html` refers to it by name even in non-dev builds."
+  []
+  (dev-setup)
+  (start!))
+
+
+(dev-setup)
+(start!)
+(println "This text is printed from src/keechma_todomvc/worder.cljs. Go ahead and edit it and see reloading in action.")
+
+
+#+end_src
+***** src worder.cljs
+#+begin_src clojure :no-expand t :mkdirp yes :tangle no
+(ns ^:figwheel-hooks keechma-todomvc.worder
+  "# Keechma TodoMVC App"
+  (:require [keechma-todomvc.components :as components]
+            [keechma-todomvc.controllers.todos :as todos]
+            [keechma-todomvc.subscriptions :as subscriptions]
+            [goog.dom :as gdom]
+            [reagent.core :as reagent :refer [atom]]
+            [reagent.dom :as rdom]
+            [keechma.app-state :as app-state]))
+
+;; (ns ^:figwheel-hooks keechma-todomvc.worder
+;;   (:require
+;;    [goog.dom :as gdom]
+;;    [reagent.core :as reagent :refer [atom]]
+;;    [reagent.dom :as rdom]))
+
+(defn multiply [a b] (* a b))
+
+(defonce running-app (atom nil))
+
+;; ;; ## App Definition
+
+(def app-definition
+  "Pulls the app together."
+  {:routes [[":status" {:status "all"}]]
+   :controllers {:todos (todos/->Controller)}
+   :components components/system
+   :subscriptions subscriptions/subscriptions
+   :html-element (.getElementById js/document "app")})
+
+;; ## App Lifecycle
+
+(defn start!
+  "Starts the app."
+  []
+  (reset! running-app (app-state/start! app-definition)))
+
+(defn restart!
+  "Restarts the app. `project.clj` contains a config setting for
+  `figwheel` requesting a call to this function whenever the code is
+  reloaded."
+  []
+  (if-let [current @running-app]
+    (app-state/stop! current start!)
+    (start!)))
+
+(defn dev-setup
+  "Enables console output for dev builds."
+  []
+  (when ^boolean js/goog.DEBUG
+    (enable-console-print!)
+    (println "dev mode")))
+
+;; ;; ## Main
+
+(defn ^:export main
+  "Called from `index.html` to start the app. Exported because
+  `index.html` refers to it by name even in non-dev builds."
+  []
+  (dev-setup)
+  (start!))
+
+(println "This text is printed from src/keechma_todomvc/worder.cljs. Go ahead and edit it and see reloading in action.")
+
+;; (defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+(defn hello-world []
+  [:div
+   [:h1 (:text @app-state)]
+   [:h3 "Edit this in src/keechma_todomvc/worder.cljs and watch it change!"]])
+
+(defn mount [el]
+  (rdom/render [hello-world] el))
+
+(defn mount-app-element []
+  (when-let [el (get-app-element)]
+    (mount el)))
+
+;; conditionally start your application based on the presence of an "app" element
+;; this is particularly helpful for testing this ns without launching the app
+(mount-app-element)
+;; (dev-setup)
+;; (start!)
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  (mount-app-element)
+  ;; (dev-setup)
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+
+;; (defn ^:after-load on-reload []
+;;   (restart!))
+#+end_src
+***** CANCELED original figwheel template
+#+begin_src clojure :no-expand t :mkdirp yes :tangle no 
+(ns ^:figwheel-hooks keechma-todomvc.worder
+  (:require
+   [goog.dom :as gdom]
+   [reagent.core :as reagent :refer [atom]]
+   [reagent.dom :as rdom]))
+
+(println "This text is printed from src/keechma_todomvc/worder.cljs. Go ahead and edit it and see reloading in action.")
+
+(defn multiply [a b] (* a b))
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+(defn hello-world []
+  [:div
+   [:h1 (:text @app-state)]
+   [:h3 "Edit this in src/keechma_todomvc/worder.cljs and watch it change!"]])
+
+(defn mount [el]
+  (rdom/render [hello-world] el))
+
+(defn mount-app-element []
+  (when-let [el (get-app-element)]
+    (mount el)))
+
+;; conditionally start your application based on the presence of an "app" element
+;; this is particularly helpful for testing this ns without launching the app
+(mount-app-element)
+
+;; specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  (mount-app-element)
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+#+end_src
+**** repl
+
+# (ns ^:figwheel-hooks keechma-todomvc.worder
+(require `[keechma-todomvc.worder :as worder-main]
+
+(in-ns `keechma-todomvc.worder)
+**** exampl
+(find-file-other-frame "./src/keechma_todomvc/app.cljs")
 ** src components
 *** components/app.cljs
 :PROPERTIES:
-:header-args: :tangle  ./src/keechma_todomvc/components/app.cljs
+:header-args: :tangle ./src/keechma_todomvc/components/app.cljs
 :END:
 **** file
 (find-file-other-frame "./src/keechma_todomvc/components/app.cljs")
@@ -59,6 +397,97 @@
          :subscription-deps [:has-todos?]))
 #+end_src
 
+*** components/todo_edit.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/keechma_todomvc/components/todo_edit.cljs
+:END:
+**** file
+(find-file-other-frame "./src/keechma_todomvc/components/todo_edit.cljs")
+**** src
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.app
+  "# Main app component"
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
+
+(defn render
+  "## Renders the top level UI
+
+  Some elements are rendered inline, others are implemented as
+  `components`. Each `component` will have its own `context` provided.
+
+### Component Deps
+
+- `:new-todo` top field where new `todos` are entered
+- `:toggle-todos` checkbox to the left of `:new-todo`
+- `:todo-list` main body list of `todos`
+- `:footer` active count, filtering, clearing
+
+### Subscription Deps
+
+- `:has-todos?` returns true if there are any todos in the EntityDB."
+  [ctx]
+  [:<>
+   [:section.todoapp
+    [:header.header
+     [:h1 "Worder"]
+     [comp> ctx :new-todo]]
+    (when (sub> ctx :has-todos?)
+      [:<>
+       [:section.main
+        [comp> ctx :toggle-todos]
+        [comp> ctx :todo-list]]
+       [comp> ctx :footer]])]
+   [:footer.info
+    [:p "Double-click to edit a word"]
+    [:p
+     [:a {:href "https://keechma.com"} "Keechma"] " "
+     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+
+(def component
+  (<comp :renderer render
+         :component-deps [:new-todo
+                          :toggle-todos
+                          :todo-list
+                          :footer]
+         :subscription-deps [:has-todos?]))
+#+end_src
+
+** src resources
+*** index.html
+:PROPERTIES:
+:header-args: :tangle ./resources/public/index.html
+:END:
+**** file
+(find-file-other-frame "./resources/public/index.html")
+**** src
+#+begin_src html :no-expand t :mkdirp yes 
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Worder • Keechma</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="https://clojurescript.org/images/cljs-logo-icon-32.png">
+  </head>
+  <body>
+    <div id="app"> 
+    </div> <!-- end of app div -->
+    <script src="cljs-out/dev-main.js" type="text/javascript"></script>
+    <!-- <script src="js/app.js" type="text/javascript"></script> -->
+    <script>keechma_todomvc.worder.main()</script>
+  </body>
+</html>
+#+end_src
+    <script src="cljs-out/dev-main.js"></script>
+    <script src="js/app.js" type="text/javascript"></script>
+
+<script>keechma_todomvc.worder.main()</script>
+**** exampl
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/resources/public/index.html")
+
+*** style.css
+(find-file-other-frame "./resources/public/css/style.css")
 * files worder
 ** files core
 (find-file-other-frame "./src/keechma_todomvc/app.cljs")
@@ -93,6 +522,9 @@ find "$PWD" -type f >>filepath.txt
 (find-file-other-frame "./figwheel_server.log")
 * run worder
 *** run
+cd worder
+clojure -M:fig:build
+clojure -M:fig:build dev
 lein figwheel
 
 :cljs/quit
@@ -105,7 +537,142 @@ git clone https://github.com/keechma/example-todomvc.git
 ** DONE перенести в орг нужные файла для работы
 взять как миннимум один фаил что убедить в работоспособности механизма
 ** DONE сделать комит
-** переделать под фигвилл маин
+** NEXT переделать под фигвилл маин
+*** перенести в делейт
+*** сделать темплат
+clj -X:new :template figwheel-main :name keechma-todomvc/worder :args '["+deps" "--reagent"]'
+clj -X:new :template figwheel-main :name worder/keechma-todomvc :args '["+deps" "--reagent"]'
+*** через темплат
+Переделать **Leiningen + figwheel** → **deps.edn + figwheel-main** — можно ✅
+Но **автоматического конвертера** project.clj → deps.edn **не существует**.
+Lein и deps используют **разные экосистемы**, поэтому часть настроек придётся переносить вручную.
+
+---
+
+## ✅ Самый простой путь — да:
+
+> Создать новый проект под Figwheel Main и **перенести только код**
+
+Это **гарантированно** даст рабочую конфигурацию без борьбы со сборкой.
+
+---
+
+Но если хочешь — давай сделаем **конвертацию "правильно"** 💪
+Вот точный план для твоего проекта.
+
+---
+
+# ✅ deps.edn для твоего TodoMVC на Keechma
+
+Создаём файл: `deps.edn`
+
+```clojure
+{:paths ["src" "resources"]
+
+ :deps {org.clojure/clojure        {:mvn/version "1.10.1"}
+        org.clojure/clojurescript  {:mvn/version "1.10.597"}
+        org.clojure/core.async     {:mvn/version "0.7.559"
+                                    :exclusions  [org.clojure/tools.reader]}
+        reagent/reagent            {:mvn/version "0.9.1"}
+        keechma/keechma            {:mvn/version "0.3.14"
+                                    :exclusions [cljsjs/react-with-addons
+                                                 cljsjs/react-dom
+                                                 cljsjs/react-dom-server]}
+        keechma/entitydb           {:mvn/version "0.1.6"}}
+
+ :aliases
+ {:fig {:extra-deps
+        {com.bhauman/figwheel-main {:mvn/version "0.2.18"}
+         com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+        :main-opts ["-m" "figwheel.main"]}}}
+```
+
+---
+
+## ✅ Конфиг Figwheel Main
+
+Создай файл: `figwheel-main.edn`
+
+```clojure
+{:watch-dirs ["src"]
+ :css-dirs   ["resources/public/css"]}
+```
+
+---
+
+## ✅ Build config (вместо :cljsbuild)
+
+Создай: `dev.cljs.edn`
+
+```clojure
+{:main keechma-todomvc.app
+ :output-to "resources/public/js/app.js"
+ :output-dir "resources/public/js/dev"
+ :asset-path "js/dev"
+ :closure-defines {goog.DEBUG true}
+ :preloads [devtools.preload]}
+```
+
+И production build:
+
+`prod.cljs.edn`:
+
+```clojure
+{:main keechma-todomvc.app
+ :optimizations :advanced
+ :output-to "resources/public/js/app.js"
+ :output-dir "resources/public/js/min"
+ :closure-defines {goog.DEBUG false}}
+```
+
+---
+
+## ✅ Запуск
+
+Dev mode (аналог `lein figwheel`):
+
+```bash
+clojure -M:fig:build dev
+```
+
+Prod build:
+
+```bash
+clojure -M:fig:build prod
+```
+
+---
+
+# 🧠 Сравнение подходов
+
+| Способ                            | Плюсы                       | Минусы                                 |
+| --------------------------------- | --------------------------- | -------------------------------------- |
+| ✅ Новый проект + перенос кода     | Быстро, чисто, современно   | Нужно переносить руками                |
+| 🛠 Конвертация вручную (как выше) | Сохраняем структуру проекта | Нужно разбираться в deps+figwheel-main |
+| ❌ Авто-конвертер                  | —                           | Его не существует                      |
+
+---
+
+## 🎁 Хочешь — я могу сделать всё за тебя 💅
+
+Я могу:
+✅ Сгенерировать эталонный figwheel-main проект
+✅ Переместить твои файлы
+✅ Проверить запуск
+✅ Помочь добавить live reload HTML, REPL, nREPL, Shadow готовый переход
+
+Только скажи, как ты хочешь назвать новый проект 💬
+
+Например:
+
+```
+keechma-todomvc-main
+```
+
+Хочешь — сделаю PR-style diff, чтобы было видно все изменения ✅
+
+Продолжаем? 😎
+
 *** ИИ
 у меня есть проект под lein figwheel
 (find-file-other-frame "./project.clj")
@@ -198,6 +765,698 @@ git clone https://github.com/keechma/example-todomvc.git
 *** команда
 clojure -Sdeps '{:deps {leiningen/tools.deps.converter {:mvn/version "0.4.2"}}}' \
 -m leiningen.tools.deps.converter project.clj
+*** вручную
+
+Крутой шаг! 🎯 Переход с **Leiningen + Figwheel Classic** → на **deps.edn + Figwheel Main** — сейчас это “канон” для ClojureScript ✅
+Но автоматического конвертера *к сожалению нет* — приходится переносить вручную. Я помогу сделать это красиво и минимально больно 💪
+
+---
+
+## ✅ Что нам надо перенести
+
+Из твоего `project.clj` важны:
+
+| Что                  | Из `project.clj` → В `deps.edn`       |
+| -------------------- | ------------------------------------- |
+| зависимости          | `:dependencies`                       |
+| пути                 | `:source-paths`                       |
+| конфиг Figwheel Main | создаём отдельный файл `dev.cljs.edn` |
+| запуск               | `clojure -M:fig`                      |
+
+Остальное можно забыть.
+`cljsbuild`, `plugins` — **не нужны** в deps.edn мире ❌
+
+---
+
+## ✅ Пример твоего `deps.edn`
+
+Создай `deps.edn` в корне проекта:
+
+```clojure
+{:paths ["src" "resources"]
+
+ :deps {org.clojure/clojure            {:mvn/version "1.10.1"}
+        org.clojure/clojurescript      {:mvn/version "1.10.597"}
+        org.clojure/core.async         {:mvn/version "0.7.559"
+                                        :exclusions  [org.clojure/tools.reader]}
+        reagent/reagent                {:mvn/version "0.9.1"}
+        keechma/keechma                {:mvn/version "0.3.14"
+                                        :exclusions [cljsjs/react-with-addons
+                                                     cljsjs/react-dom
+                                                     cljsjs/react-dom-server]}
+        keechma/entitydb               {:mvn/version "0.1.6"}}
+
+ :aliases
+ {:fig
+  {:extra-deps {com.bhauman/figwheel-main       {:mvn/version "0.2.18"}
+                com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+   :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}}}
+```
+
+---
+
+## ✅ Добавляем конфиг сборки Figwheel Main
+
+Создай папку:
+
+```
+./dev
+```
+
+И файл `dev/dev.cljs.edn`:
+
+```clojure
+^{:watch-dirs ["src"]
+  :css-dirs ["resources/public/css"]}
+{:main keechma-todomvc.app}
+```
+
+Это заменяет весь твой блок:
+
+```
+:cljsbuild
+:figwheel
+```
+
+---
+
+## ✅ HTML исправить путь к js
+
+В `resources/public/index.html` (или где main HTML):
+
+Заменить:
+
+```html
+<script src="js/app.js"></script>
+```
+
+На Figwheel Main путь:
+
+```html
+<script src="/cljs-out/dev-main.js"></script>
+```
+
+(Figwheel сам создаст `cljs-out/`)
+
+---
+
+## ✅ Как запускать теперь 🚀
+
+Режим разработки:
+
+```bash
+clojure -M:fig
+```
+
+Продакшн-сборка:
+
+```bash
+clojure -M:fig -bo dev
+```
+
+---
+
+## ✅ Что делать с `project.clj`?
+
+Удали или оставь только как метаданные проекта — он больше не нужен 👍
+
+---
+
+## ✨ Бонус: хотим REPL + автоперезагрузку при изменениях?
+
+Можно также:
+
+```bash
+clojure -M:fig -b dev -r
+```
+
+---
+
+## 📌 Ответы на твои вопросы
+
+| Вопрос                                                        | Ответ                   |
+| ------------------------------------------------------------- | ----------------------- |
+| Можно ли автоматически конвертировать project.clj → deps.edn? | ❌ Нет (ручной перенос)  |
+| Можно ли запускать через `clojure -M:fig:build`?              | ✅ Да, см. alias         |
+| Lein plugins нужны?                                           | ❌ Вообще нет в deps.edn |
+
+---
+
+Хочешь — я могу:
+✅ подготовить для тебя всё полностью
+✅ проверить что приложение собирается
+✅ оптимизировать структуру проекта (src/dev separation)
+✅ добавить hot reload React компонент точно как в прежнем figwheel
+
+Хочешь — просто скинь структуру проекта (`tree -L 3`) и я сделаю идеальную миграцию 🔥
+*** ошибка
+**** 1
+
+#+begin_src html :no-expand t :mkdirp yes 
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Worder • Keechma</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="https://clojurescript.org/images/cljs-logo-icon-32.png">
+  </head>
+  <body>
+    <div id="app"> 
+    </div> <!-- end of app div -->
+    <script src="cljs-out/dev-main.js" type="text/javascript"></script>
+    <script>keechma_todomvc.worder.main()</script>
+  </body>
+</html>
+#+end_src
+
+
+
+
+(ns ^:figwheel-hooks keechma-todomvc.worder
+  "# Keechma TodoMVC App"
+  (:require [keechma-todomvc.components :as components]
+            [keechma-todomvc.controllers.todos :as todos]
+            [keechma-todomvc.subscriptions :as subscriptions]
+            [keechma.app-state :as app-state]))
+
+(defn multiply [a b] (* a b))
+
+(defonce running-app (atom nil))
+
+;; ## App Definition
+
+(def app-definition
+  "Pulls the app together."
+  {:routes [[":status" {:status "all"}]]
+   :controllers {:todos (todos/->Controller)}
+   :components components/system
+   :subscriptions subscriptions/subscriptions
+   :html-element (.getElementById js/document "app")})
+
+;; ## App Lifecycle
+
+(defn start!
+  "Starts the app."
+  []
+  (reset! running-app (app-state/start! app-definition)))
+
+(defn restart!
+  "Restarts the app. `project.clj` contains a config setting for
+  `figwheel` requesting a call to this function whenever the code is
+  reloaded."
+  []
+  (if-let [current @running-app]
+    (app-state/stop! current start!)
+    (start!)))
+
+(defn dev-setup
+  "Enables console output for dev builds."
+  []
+  (when ^boolean js/goog.DEBUG
+    (enable-console-print!)
+    (println "dev mode")))
+
+;; ## Main
+
+(defn ^:export main
+  "Called from `index.html` to start the app. Exported because
+  `index.html` refers to it by name even in non-dev builds."
+  []
+  (dev-setup)
+  (start!))
+
+
+~/Dev/ClojureScript/tutorials/my-cljs-project/worder $ clojure -M:fig:build
+
+[Figwheel] Validating figwheel-main.edn
+[Figwheel] figwheel-main.edn is valid \(ツ)/
+[Figwheel] Compiling build dev to "target/public/cljs-out/dev-main.js"
+[Figwheel] Successfully compiled build dev to "target/public/cljs-out/dev-main.js" in 2.309 seconds.
+[Figwheel] Outputting main file: target/public/cljs-out/dev-main-auto-testing.js
+[Figwheel] Watching paths: ("test" "src") to compile build - dev
+[Figwheel] Starting Server at http://localhost:9500
+[Figwheel] Starting REPL
+Prompt will show when REPL connects to evaluation environment (i.e. a REPL hosting webpage)
+Figwheel Main Controls:
+          (figwheel.main/stop-builds id ...)  ;; stops Figwheel autobuilder for ids
+          (figwheel.main/start-builds id ...) ;; starts autobuilder focused on ids
+          (figwheel.main/reset)               ;; stops, cleans, reloads config, and starts autobuilder
+          (figwheel.main/build-once id ...)   ;; builds source one time
+          (figwheel.main/clean id ...)        ;; deletes compiled cljs target files
+          (figwheel.main/status)              ;; displays current state of system
+Figwheel REPL Controls:
+          (figwheel.repl/conns)               ;; displays the current connections
+          (figwheel.repl/focus session-name)  ;; choose which session name to focus on
+In the cljs.user ns, controls can be called without ns ie. (conns) instead of (figwheel.repl/conns)
+    Docs: (doc function-name-here)
+    Exit: :cljs/quit
+ Results: Stored in vars *1, *2, *3, *e holds last exception object
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::loadLibrary has been called by org.fusesource.hawtjni.runtime.Library in an unnamed module (file:/home/buyn/.m2/repository/org/fusesource/jansi/jansi/1.16/jansi-1.16.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+[Rebel readline] Type :repl/help for online help info
+Opening URL http://localhost:9500
+ClojureScript 1.11.132
+cljs.user=> 
+
+ util.cljs:187:64
+Feature :formatters cannot be installed. Unsupported Javascript context: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0. util.cljs:248:15
+CLJS DevTools: some custom formatters were not rendered.
+https://github.com/binaryage/cljs-devtools/blob/master/docs/faq.md#why-some-custom-formatters-were-not-rendered util.cljs:136:15
+Uncaught Error: Bad dependency path or symbol: keechma_todomvc.components.todo_edit
+    visit http://localhost:9500/cljs-out/dev/goog/base.js:2349
+    visit http://localhost:9500/cljs-out/dev/goog/base.js:2361
+    visit http://localhost:9500/cljs-out/dev/goog/base.js:2361
+    load_ http://localhost:9500/cljs-out/dev/goog/base.js:2368
+    require http://localhost:9500/cljs-out/dev/goog/base.js:832
+    <anonymous> http://localhost:9500/:13
+base.js:2349:17
+    visit http://localhost:9500/cljs-out/dev/goog/base.js:2349
+    visit http://localhost:9500/cljs-out/dev/goog/base.js:2361
+    visit http://localhost:9500/cljs-out/dev/goog/base.js:2361
+    load_ http://localhost:9500/cljs-out/dev/goog/base.js:2368
+    require http://localhost:9500/cljs-out/dev/goog/base.js:832
+    <anonymous> http://localhost:9500/:13
+Uncaught ReferenceError: keechma_todomvc is not defined
+    <anonymous> http://localhost:9500/:14
+localhost:9500:14:13
+    <anonymous> http://localhost:9500/:14
+ [goog.net.WebSocket] Opening the WebSocket on ws://localhost:9500/figwheel-connect?fwprocess=7fb158&fwbuild=dev&fwsid=ba3c1dab-1ca9-4ad4-ac61-a614e44e1471 <empty string> console.js:218:20
+ [goog.net.WebSocket] WebSocket opened on ws://localhost:9500/figwheel-connect?fwprocess=7fb158&fwbuild=dev&fwsid=ba3c1dab-1ca9-4ad4-ac61-a614e44e1471 <empty string> console.js:218:20
+ [Figwheel REPL] Session ID: ba3c1dab-1ca9-4ad4-ac61-a614e44e1471 <empty string> console.js:218:20
+ [Figwheel REPL] Session Name: Bridget <empty string>
+    <anonymous> http://localhost:9500/:12
+**** 2
+Installing CLJS DevTools 1.0.5 and enabling features :formatters :hints :async util.cljs:187:64
+Feature :formatters cannot be installed. Unsupported Javascript context: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0. util.cljs:248:15
+CLJS DevTools: some custom formatters were not rendered.
+https://github.com/binaryage/cljs-devtools/blob/master/docs/faq.md#why-some-custom-formatters-were-not-rendered util.cljs:136:15
+dev mode core.cljs:200:24
+Uncaught 
+Object { message: "Missing dependencies :todo-edit for component :todo-item", data: {…}, cause: null, name: "Error", description: undefined, number: undefined, fileName: "http://localhost:9500/cljs-out/dev/cljs/core.js", lineNumber: 38425, columnNumber: 10, stack: "cljs$core$ExceptionInfo@http://localhost:9500/cljs-out/dev/cljs/core.js:38425:10\ncljs.core.ex_info.cljs$core$IFn$_invoke$arity$3@http://localhost:9500/cljs-out/dev/cljs/core.js:38486:9\ncljs.core.ex_info.cljs$core$IFn$_invoke$arity$2@http://localhost:9500/cljs-out/dev/cljs/core.js:38482:26\ncljs$core$ex_info@http://localhost:9500/cljs-out/dev/cljs/core.js:38468:26\nkeechma$ui_component$make_ex@http://localhost:9500/cljs-out/dev/keechma/ui_component.js:11:26\nkeechma$ui_component$component_with_deps@http://localhost:9500/cljs-out/dev/keechma/ui_component.js:971:36\nkeechma$ui_component$resolved_system/<@http://localhost:9500/cljs-out/dev/keechma/ui_component.js:1017:86\ncljs.core.seq_reduce.cljs$core$IFn$_invoke$arity$3/nval<@http://localhost:9500/cljs-out/dev/cljs/core.js:8530:98\ncljs.core.seq_reduce.cljs$core$IFn$_invoke$arity$3@http://localhost:9500/cljs-out/dev/cljs/core.js:8531:3\ncljs.core.Cons.prototype.cljs$core$IReduce$_reduce$arity$3@http://localhost:9500/cljs-out/dev/cljs/core.js:11531:29\ncljs.core.reduce.cljs$core$IFn$_invoke$arity$3@http://localhost:9500/cljs-out/dev/cljs/core.js:8684:13\ncljs$core$reduce@http://localhost:9500/cljs-out/dev/cljs/core.js:8648:25\nkeechma$ui_component$resolved_system@http://localhost:9500/cljs-out/dev/keechma/ui_component.js:1012:25\nkeechma.ui_component.system.cljs$core$IFn$_invoke$arity$2@http://localhost:9500/cljs-out/dev/keechma/ui_component.js:1175:51\nkeechma$ui_component$system@http://localhost:9500/cljs-out/dev/keechma/ui_component.js:1155:36\nkeechma$app_state$resolve_main_component@http://localhost:9500/cljs-out/dev/keechma/app_state.js:801:50\nkeechma.app_state.start_BANG_.cljs$core$IFn$_invoke$arity$2@http://localhost:9500/cljs-out/dev/keechma/app_state.js:988:92\nkeechma$app_state$start_BANG_@http://localhost:9500/cljs-out/dev/keechma/app_state.js:970:38\nkeechma.app_state.start_BANG_.cljs$core$IFn$_invoke$arity$1@http://localhost:9500/cljs-out/dev/keechma/app_state.js:980:38\nkeechma$app_state$start_BANG_@http://localhost:9500/cljs-out/dev/keechma/app_state.js:966:38\nkeechma_todomvc$worder$start_BANG_@http://localhost:9500/cljs-out/dev/keechma_todomvc/worder.js:23:105\nkeechma_todomvc$worder$main@http://localhost:9500/cljs-out/dev/keechma_todomvc/worder.js:58:43\n@http://localhost:9500/:14:36\n" }
+core.cljs:11778:11
+ [goog.net.WebSocket] Opening the WebSocket on ws://localhost:9500/figwheel-connect?fwprocess=b292cc&fwbuild=dev&fwsid=ae8af371-96d0-41d5-ab1c-859cabaf1a7a <empty string> console.js:218:20
+ [goog.net.WebSocket] WebSocket opened on ws://localhost:9500/figwheel-connect?fwprocess=b292cc&fwbuild=dev&fwsid=ae8af371-96d0-41d5-ab1c-859cabaf1a7a <empty string> console.js:218:20
+ [Figwheel REPL] Session ID: ae8af371-96d0-41d5-ab1c-859cabaf1a7a <empty string> console.js:218:20
+ [Figwheel REPL] Session Name: Eufemia <empty string>
+**** 3
+Installing CLJS DevTools 1.0.5 and enabling features :formatters :hints :async util.cljs:187:64
+Feature :formatters cannot be installed. Unsupported Javascript context: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0. util.cljs:248:15
+CLJS DevTools: some custom formatters were not rendered.
+https://github.com/binaryage/cljs-devtools/blob/master/docs/faq.md#why-some-custom-formatters-were-not-rendered util.cljs:136:15
+dev mode core.cljs:200:24
+Uncaught TypeError: can't access property "call", reagent.core.render_component is undefined
+    keechma$app_state$mount_to_element_BANG_ app_state.cljs:200
+    cljs$core$IFn$_invoke$arity$2 app_state.cljs:312
+    keechma$app_state$start_BANG_ app_state.cljs:258
+    cljs$core$IFn$_invoke$arity$1 app_state.cljs:301
+    keechma$app_state$start_BANG_ app_state.cljs:258
+    keechma_todomvc$worder$start_BANG_ worder.cljs:27
+    keechma_todomvc$worder$main worder.cljs:52
+    <anonymous> (index):14
+app_state.cljs:200:5
+ [goog.net.WebSocket] Opening the WebSocket on ws://localhost:9500/figwheel-connect?fwprocess=1af083&fwbuild=dev&fwsid=c6a9dd49-7f6e-4d90-9e13-4a3715118bc4 <empty string> console.js:218:20
+ [goog.net.WebSocket] WebSocket opened on ws://localhost:9500/figwheel-connect?fwprocess=1af083&fwbuild=dev&fwsid=c6a9dd49-7f6e-4d90-9e13-4a3715118bc4 <empty string> console.js:218:20
+ [Figwheel REPL] Session ID: c6a9dd49-7f6e-4d90-9e13-4a3715118bc4 <empty string> console.js:218:20
+ [Figwheel REPL] Session Name: Rolando <empty string> console.js:218:20
+*** ИИ
+**** index.html
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>Worder • Keechma</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="css/style.css" rel="stylesheet" type="text/css">
+    <link rel="icon" href="https://clojurescript.org/images/cljs-logo-icon-32.png">
+  </head>
+  <body>
+    <div id="app"> 
+    </div> <!-- end of app div -->
+    <script src="cljs-out/dev-main.js" type="text/javascript"></script>
+    <script>keechma_todomvc.worder.main()</script>
+  </body>
+</html>
+**** src deps.edn
+#+begin_src clojure :no-expand t
+{:deps {org.clojure/clojure {:mvn/version "1.12.0"}
+        org.clojure/clojurescript {:mvn/version "1.11.132"}
+        org.clojure/data.json {:mvn/version "2.5.1"}
+        cljsjs/react {:mvn/version "18.3.1-1"}
+        cljsjs/react-dom {:mvn/version "18.3.1-1"}
+        org.clojure/core.async     {:mvn/version "0.7.559"
+                                    :exclusions  [org.clojure/tools.reader]}
+        keechma/keechma            {:mvn/version "0.3.14"
+                                    :exclusions [cljsjs/react-with-addons
+                                                 cljsjs/react-dom
+                                                 cljsjs/react-dom-server]}
+        keechma/entitydb           {:mvn/version "0.1.6"}
+        reagent/reagent {:mvn/version "1.2.0" }}
+
+ :paths ["src" "resources"]
+
+ :aliases {:fig {:extra-deps
+                 {com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}
+                  com.bhauman/figwheel-main {:mvn/version "0.2.20"}
+                  org.slf4j/slf4j-nop {:mvn/version "2.0.16"}}
+                 :extra-paths ["target" "test"]}
+           :build {:main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}
+           :clean {:main-opts ["-m" "figwheel.main" "--clean" "dev"]}
+           :min   {:main-opts ["-m" "figwheel.main" "-O" "advanced" "-bo" "dev"]}
+           :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "keechma-todomvc.test-runner"]}}}
+
+#+end_src
+**** src worder.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns ^:figwheel-hooks keechma-todomvc.worder
+  "# Keechma TodoMVC App"
+  (:require [keechma-todomvc.components :as components]
+            [keechma-todomvc.controllers.todos :as todos]
+            [keechma-todomvc.subscriptions :as subscriptions]
+            [goog.dom :as gdom]
+            [reagent.core :as reagent :refer [atom]]
+            [reagent.dom :as rdom]
+            [keechma.app-state :as app-state]))
+
+(defn multiply [a b] (* a b))
+
+(defonce running-app (atom nil))
+
+;; ;; ## App Definition
+
+(def app-definition
+  "Pulls the app together."
+  {:routes [[":status" {:status "all"}]]
+   :controllers {:todos (todos/->Controller)}
+   :components components/system
+   :subscriptions subscriptions/subscriptions
+   :html-element (.getElementById js/document "app")})
+
+;; ## App Lifecycle
+
+(defn start!
+  "Starts the app."
+  []
+  (reset! running-app (app-state/start! app-definition)))
+
+(defn restart!
+  "Restarts the app. `project.clj` contains a config setting for
+  `figwheel` requesting a call to this function whenever the code is
+  reloaded."
+  []
+  (if-let [current @running-app]
+    (app-state/stop! current start!)
+    (start!)))
+
+(defn dev-setup
+  "Enables console output for dev builds."
+  []
+  (when ^boolean js/goog.DEBUG
+    (enable-console-print!)
+    (println "dev mode")))
+
+;; ;; ## Main
+
+(defn ^:export main
+  "Called from `index.html` to start the app. Exported because
+  `index.html` refers to it by name even in non-dev builds."
+  []
+  (dev-setup)
+  (start!))
+
+(println "This text is printed from src/keechma_todomvc/worder.cljs. Go ahead and edit it and see reloading in action.")
+
+;; define your app data so that it doesn't get over-written on reload
+(defonce app-state (atom {:text "Hello world!"}))
+
+(defn get-app-element []
+  (gdom/getElement "app"))
+
+(defn hello-world []
+  [:div
+   [:h1 (:text @app-state)]
+   [:h3 "Edit this in src/keechma_todomvc/worder.cljs and watch it change!"]])
+
+(defn mount [el]
+  (rdom/render [hello-world] el))
+
+(defn mount-app-element []
+  (when-let [el (get-app-element)]
+    (mount el)))
+
+;; conditionally start your application based on the presence of an "app" element
+;; this is particularly helpful for testing this ns without launching the app
+(mount-app-element)
+(dev-setup)
+(start!)
+
+specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  (mount-app-element)
+  (dev-setup)
+  (start!)
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+
+;; (defn ^:after-load on-reload []
+;;   (restart!))
+#+end_src
+**** нужна помошь
+пытаюсь проект с lein figwheel переложить и запустить на figwheel main
+figwheel темлпат работает замечательно а вот кичма не запускается
+
+приэтом если я убираю чатьс
+specify reload hook with ^:after-load metadata
+(defn ^:after-load on-reload []
+  (mount-app-element)
+  (dev-setup)
+  (start!)
+  ;; optionally touch your app-state to force rerendering depending on
+  ;; your application
+  ;; (swap! app-state update-in [:__figwheel_counter] inc)
+)
+
+и остоваляю только
+(defn ^:after-load on-reload []
+  (restart!))
+
+похожо кичм не запускает совсем.
+*** Лучшее решение сейчас
+
+Откатить Reagent на последнюю совместимую версию:
+
+reagent/reagent {:mvn/version "0.10.0"}
+
+
+                 [reagent "0.9.1"]
+*** откат
+**** ИИ
+buyn@ArchSRV:~/Dev/ClojureScript/tutorials/my-cljs-project % git status
+On branch main
+Your branch is up to date with 'origin/main'.
+
+nothing to commit, working tree clean
+buyn@ArchSRV:~/Dev/ClojureScript/tutorials/my-cljs-project % git log --oneline
+
+bf51392 (HEAD -> main, origin/main) ass css
+42cb6ae add files from todomvs and fix errors
+d49e5f8 add deps to sorce
+f92b97e add empty feegwheal templat
+bb63b1b add hcain to template converter
+d6a3537 add comand for conversio to main
+e80a0b3 first change
+d36d75d add to Woeder project copy of Toduer
+61e3578 add new org project
+2486e93 end risoning todomvc
+6672ce9 ignor change
+87f0a57 clone Keechma todomvc and start risoning
+dfe18b0 start risoning
+a5ae467 add projrct clone Keechma Counter
+bb01003 fix home page
+bf86704 new files core and note-form
+c537fcb fix bide initialized
+631d7d1 add massaging and UI
+fe039f5 add new project noter
+817e02f add chat
+faffa29 Add first components
+53e43de fix async
+285e637 add files
+4fa4514 add grup-chat project and org file
+e4fe4d4 tangle error manual fix
+4d43c21 start transfer all from book version
+de7f8d7 new reagent test app
+081e156 add grupchat org
+09eaa2d end project
+83f46a0 add style
+da61c02 add reander header
+e911ed5 tagle reander
+a897a3c add rehdering
+7f9948e fix test
+c7b418c srart editing
+4e97680 new project contacts
+d766099 tagle all
+9654579 add promt fun
+f505989 add end vwersion of starbase
+
+
+хорошь меня интересует комит
+d6a3537 add comand for conversio to main
+и довай превратим его по варианту 3 в отдельный бранчь.
+потом мы сможем это бранчь сделать основным? а тот который основной сейчас просто удалить, если понадобится?
+**** 1
+Да, всё верно 👍
+Ты можешь спокойно сделать от нужного коммита **новую ветку**, поработать в ней — и если она станет основной, то потом переключить `main` на неё или вовсе удалить старую.
+
+---
+
+## ✅ Шаг 1 — создать новую ветку от коммита `d6a3537`
+
+```bash
+git checkout -b new-main d6a3537
+```
+
+Команда создаёт ветку `new-main` и сразу переключает на неё.
+
+Проверка:
+
+```bash
+git status
+git log --oneline
+```
+
+---
+
+## ✅ Шаг 2 — запушить новую ветку на GitHub (если нужно)
+
+```bash
+git push -u origin new-main
+```
+
+---
+
+## ✅ Что дальше можно сделать
+
+| Цель                                     | Команда                                                         |
+| ---------------------------------------- | --------------------------------------------------------------- |
+| Сделать новую ветку основной             | через UI GitHub (Settings → Branches) или: `git branch -M main` |
+| Удалить старую `main` после переключения | `git push origin --delete main`                                 |
+| Или локально удалить старую ветку        | `git branch -D main`                                            |
+
+---
+
+## Если хочешь полностью заменить main новой веткой
+
+Вариант А — после проверки всё ок:
+
+```bash
+git checkout main
+git reset --hard new-main
+git push --force
+```
+
+Вариант Б — переименовать новую ветку в main сразу:
+
+```bash
+git branch -M main
+git push -u origin main --force
+```
+
+---
+
+Хочешь — я прослежу с тобой каждый шаг и проверим вместе, чтобы ничего лишнего не затереть ✅
+Просто скажи, когда выполнить команду №1 😎**** 
+
+**** 2
+Да — это идеальный, **самый безопасный сценарий** ✅
+Старый `main` не пропадёт: просто дашь ему новое имя, а свежий бранч станет новым `main`.
+
+Пошагово 👇
+
+---
+
+## ✅ Шаг 1 — ты уже в `new-main` (если нет — выполните)
+
+(предположим, ветка `new-main` уже создана от `d6a3537`)
+
+Проверка:
+
+```bash
+git branch
+```
+
+Если ты не в `new-main`, то:
+
+```bash
+git checkout new-main
+```
+
+---
+
+## ✅ Шаг 2 — переименовать старый `main` → например `main-old`
+
+```bash
+git branch -m main main-old
+```
+
+И отправить переименование на сервер:
+
+```bash
+git push origin main-old
+```
+
+---
+
+## ✅ Шаг 3 — переименовать текущую ветку `new-main` → `main`
+
+```bash
+git branch -m main
+```
+
+И сделать её основной на GitHub:
+
+```bash
+git push -u origin main
+```
+
+GitHub скажет, что старая ветка `main` исчезла — но у нас же есть `main-old` ✅
+
+---
+
+## ✅ Шаг 4 — поправить удалённую ссылку на старый main
+
+На GitHub в → **Settings → Branches → Default branch**
+выбираешь `main`.
+
+---
+
+## ✅ Итог
+
+Твоя структура будет выглядеть так:
+
+| Ветка    | Что это                           | Состояние                                  |
+| -------- | --------------------------------- | ------------------------------------------ |
+| **main** | новая основная ветка от `d6a3537` | активная                                   |
+| main-old | бывшая основная ветка             | сохранена для истории, можно удалить позже |
+
+---
+
+Если хочешь — я могу проверить каждый шаг вместе с тобой
+Ты просто по очереди отправляй вывод команд:
+
+```bash
+git branch
+git status
+```
+
+Готов подстраховать 💪🔥
+
+
 
 ** сделать комит
 ** сделать новый фаил компонента
@@ -271,6 +1530,221 @@ clojure -M:fig:build
 ** захостить
 возможно нужна будет помошь Уни
 ** передать вале
+* project comands
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+** поиск по проекту
+*** 
+**** dropbox in org
+#+begin_src sh  
+grep --include=\*.cljs -rnw ./ -e "reagent"
+#+end_src       
+
+#+RESULTS:
+| ./src/keechma_todomvc/components/new_todo.cljs:5:                          | [reagent.core                      | :as                     | reagent]))           |                        |                      |                     |           |             |            |        |                 |            |
+| ./src/keechma_todomvc/components/new_todo.cljs:18:                         | function                           | will                    | be                   | called                 | each                 | time                | `reagent` | needs       | to         | render | the             |            |
+| ./src/keechma_todomvc/components/new_todo.cljs:24:                         | (let                               | [new-title              | (reagent/atom        | "")]                   |                      |                     |           |             |            |        |                 |            |
+| ./src/keechma_todomvc/subscriptions.cljs:4:                                | Subscription                       | functions               | return               | `reagent               | reactions`           | that                | cause     |             |            |        |                 |            |
+| ./src/keechma_todomvc/subscriptions.cljs:8:                                | [reagent.ratom                     | :refer-macros           | [reaction]]))        |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/debug.cljs:1:(ns                      | reagent.debug                      |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/debug.cljs:2:                         | (:require-macros                   | [reagent.debug]))       |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/util.cljs:1:(ns                  | reagent.impl.util                  |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/util.cljs:5:                     | [reagent.debug                     | :refer-macros           | [dev?]]))            |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/protocols.cljs:1:(ns             | reagent.impl.protocols)            |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/batching.cljs:1:(ns              | reagent.impl.batching              |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/batching.cljs:3:                 | (:require                          | [reagent.debug          | :refer-macros        | [assert-some]]         |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/batching.cljs:4:                 | [reagent.impl.util                 | :refer                  | [is-client]]))       |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:1:(ns             | reagent.impl.component             |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:4:                | [reagent.impl.util                 | :as                     | util]                |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:5:                | [reagent.impl.batching             | :as                     | batch]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:6:                | [reagent.impl.protocols            | :as                     | p]                   |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:7:                | [reagent.ratom                     | :as                     | ratom]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:8:                | [reagent.debug                     | :refer-macros           | [dev?                | warn                   | warn-unless          | assert-callable]])) |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:47:(defn          | ^boolean                           | reagent-class?          | [c]                  |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:55:(defn          | ^boolean                           | reagent-component?      | [^clj                | c]                     |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:79:               | ;;                                 | using                   | :render              | instead                | of                   | :reagent-render     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:94:               | (ifn?                              | res)                    | (let                 | [f                     | (if                  | (reagent-class?     | res)      |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:237:              | (assert                            | (not                    | (:componentFunction  | fmap))                 | ":component-function | is                  | no        | longer      | supported, | use    | :reagent-render | instead.") |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:238:              | (assert                            | (pos?                   | (count               | renders))              | "Missing             | reagent-render")    |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:246:              | (str                               | (gensym                 | "reagent")))         |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:353:              | (not                               | (reagent-class?         | f))))                |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:359:              | (if                                | (reagent-class?         | f)                   |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:362:              | withrender                         | (assoc                  | spec                 | :reagent-render        | f)                   |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:384:              | (ifn?                              | res)                    | (let                 | [f                     | (if                  | (reagent-class?     | res)      |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:425:              | reagent-state                      | (.-current              | state-ref)           |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:428:              | rat                                | ^ratom/Reaction         | (gobj/get            | reagent-state          | "cljsRatom")]        |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:433:              | (some->                            | (gobj/get               | reagent-state        | "cljsRatom")           | ratom/dispose!)))    |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:439:              | (set!                              | (.-argv                 | reagent-state)       | argv)                  |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:441:              | (batch/mark-rendered               | reagent-state)          |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:447:              | #(functional-do-render             | compiler                | reagent-state)       |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/component.cljs:448:              | reagent-state                      |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/input.cljs:1:(ns                 | reagent.impl.input                 |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/input.cljs:2:                    | (:require                          | [reagent.impl.component | :as                  | comp]                  |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/input.cljs:3:                    | [reagent.impl.batching             | :as                     | batch]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/input.cljs:4:                    | [reagent.impl.protocols            | :as                     | p]))                 |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/input.cljs:146:                  | :reagent-render                    |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/template.cljs:1:(ns              | reagent.impl.template              |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/template.cljs:4:                 | [reagent.impl.util                 | :as                     | util                 | :refer                 | [named?]]            |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/template.cljs:5:                 | [reagent.impl.component            | :as                     | comp]                |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/template.cljs:6:                 | [reagent.impl.input                | :as                     | input]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/template.cljs:7:                 | [reagent.impl.protocols            | :as                     | p]                   |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/template.cljs:8:                 | [reagent.ratom                     | :as                     | ratom]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/template.cljs:9:                 | [reagent.debug                     | :refer-macros           | [dev?                | warn]]                 |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/impl/template.cljs:306:               | (let                               | [id                     | (gensym              | "reagent-compiler")    |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/ratom.cljs:1:(ns                      | reagent.ratom                      |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/ratom.cljs:3:                         | (:require-macros                   | [reagent.ratom])        |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/ratom.cljs:4:                         | (:require                          | [reagent.impl.util      | :as                  | util]                  |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/ratom.cljs:5:                         | [reagent.debug                     | :refer-macros           | [warn                | dev?]]                 |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/ratom.cljs:6:                         | [reagent.impl.batching             | :as                     | batch]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/ratom.cljs:108:                       | (-write                            | writer                  | (str                 | #object[reagent.ratom. | s                    | "                   | "))       |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/dom.cljs:1:(ns                        | reagent.dom                        |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/dom.cljs:3:                           | [reagent.impl.util                 | :as                     | util]                |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/dom.cljs:4:                           | [reagent.impl.template             | :as                     | tmpl]                |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/dom.cljs:5:                           | [reagent.impl.batching             | :as                     | batch]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/dom.cljs:6:                           | [reagent.impl.protocols            | :as                     | p]                   |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/dom.cljs:7:                           | [reagent.ratom                     | :as                     | ratom]))             |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:1:(ns                       | reagent.core                       |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:2:                          | (:require-macros                   | [reagent.core])         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:5:                          | [reagent.impl.template             | :as                     | tmpl]                |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:6:                          | [reagent.impl.component            | :as                     | comp]                |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:7:                          | [reagent.impl.util                 | :as                     | util]                |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:8:                          | [reagent.impl.batching             | :as                     | batch]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:9:                          | [reagent.impl.protocols            | :as                     | p]                   |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:10:                         | [reagent.ratom                     | :as                     | ratom]               |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:11:                         | [reagent.debug                     | :as                     | deb                  | :refer-macros          | [assert-some         | assert-component    |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:85:                         | :reagent-render                    | (fn                     | [args....])          |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:94:                         | Everything                         | is                      | optional,            | except                 | either               | :reagent-render     | or        | :render.    |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:372:                        | :superseded-by                     | "reagent.dom/render"}   |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/reagent/core.cljs:374:                        | (throw                             | (js/Error.              | "Reagent.core/render | function               | was                  | moved               | to        | reagent.dom | namespace  | in     | Reagent         | v1.0.")))  |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/new_todo.cljs:5:   | [reagent.core                      | :as                     | reagent]))           |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/new_todo.cljs:18:  | function                           | will                    | be                   | called                 | each                 | time                | `reagent` | needs       | to         | render | the             |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/new_todo.cljs:24:  | (let                               | [new-title              | (reagent/atom        | "")]                   |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:5:  | [reagent.core                      | :as                     | reagent]))           |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:12: | Returns                            | a                       | `reagent             | class`                 | created              | from                | a         | map         | that       | allows | us              | to         |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:13: | provide                            | additional              | component            | data                   | to                   | `reagent`           | including |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:29: | todo-title                         | (reagent/atom           | (:title              | edit-todo))            |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:41: | focus-input                        | #(let                   | [node                | (reagent/dom-node      | %)                   |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:45: | (reagent/create-class              |                         |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:47: | :reagent-render                    | render                  |                      |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/subscriptions.cljs:4:         | Subscription                       | functions               | return               | `reagent               | reactions`           | that                | cause     |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma_todomvc/subscriptions.cljs:8:         | [reagent.ratom                     | :refer-macros           | [reaction]]))        |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma/app_state/react_native_router.cljs:3: | [reagent.core                      | :as                     | r]                   |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma/app_state.cljs:2:                     | (:require                          | [reagent.core           | :as                  | reagent                | :refer               | [cursor]]           |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma/app_state.cljs:14:                    | [reagent.ratom                     | :refer                  | [reaction]]))        |                        |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma/app_state.cljs:95:                    | (reagent/atom                      | (merge                  | {:route              | {}                     |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma/app_state.cljs:200:                   | (reagent/render-component          | (app-renderer           | state)               | container)             |                      |                     |           |             |            |        |                 |            |
+| ./target/public/cljs-out/dev/keechma/app_state.cljs:202:                   | (reagent/unmount-component-at-node | container)))))          |                      |                        |                      |                     |           |             |            |        |                 |            |
+
+
+**** dropbox in org
+#+begin_src sh  
+grep --include=\*.cljs -rnw ./ -e "reagent.core"
+#+end_src       
+
+#+RESULTS:
+| ./src/keechma_todomvc/components/new_todo.cljs:5:                          | [reagent.core    | :as             | reagent])) |         |        |           |
+| ./target/public/cljs-out/dev/reagent/core.cljs:1:(ns                       | reagent.core     |                 |            |         |        |           |
+| ./target/public/cljs-out/dev/reagent/core.cljs:2:                          | (:require-macros | [reagent.core]) |            |         |        |           |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/new_todo.cljs:5:   | [reagent.core    | :as             | reagent])) |         |        |           |
+| ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:5:  | [reagent.core    | :as             | reagent])) |         |        |           |
+| ./target/public/cljs-out/dev/keechma/app_state/react_native_router.cljs:3: | [reagent.core    | :as             | r]         |         |        |           |
+| ./target/public/cljs-out/dev/keechma/app_state.cljs:2:                     | (:require        | [reagent.core   | :as        | reagent | :refer | [cursor]] |
+
+
+** repl
+*** run eshell in project root
+clojure -M:fig:build
+:cljs/quit
+:cljs/restart
+
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+
+
+clojure -P
+clojure -M:fig:clean
+clojure -M:fig:build
+
+#+begin_src elisp :results output silent :dir ./notes/
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+
+      ;; (execute-kbd-macro "A \C-m")
+*** run eshell in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+#+begin_src elisp :results output silent
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+
+      ;; (execute-kbd-macro "A \C-m")
+*** run repl
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+
+clojure -M:fig:build
+:cljs/quit
+:cljs/restart
+#+begin_src eshell
+clj -m cljs.main --compile my-cljs-project.core --repl
+
+
+#+end_src
+
+#+RESULTS:
+*** repl commands
+:cljs/quit
+*** repl test
+(js/alert "Am I connected?")
+** new project
+clj -X:new :template figwheel-main :name learn-cljs/notes :args '["+deps" "--reagent"]'
+
+{:deps {org.clojure/clojure {:mvn/version "1.10.0"}
+        org.clojure/clojurescript {:mvn/version "1.10.773"}
+        reagent/reagent {:mvn/version "1.0.0"}
+        funcool/bide {:mvn/version "1.6.0"}
+        camel-snake-kebab/camel-snake-kebab {:mvn/version "0.4.2"}}
+
+$ clj -X:new :template figwheel-main :name learn-cljs/weather :args 
+[[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*2025-09-04T11:12:30+03:00][2025-09-04T11:12:30+03:00]]
+** cider
+If you have a Clojure project in your file system and want CIDER to launch an nREPL session for it, simply visit a file that belongs to the project, and type M-x cider-jack-in RET.[1] CIDER will start an nREPL server and automatically connect to it.
+  In Clojure(Script) buffers the command cider-jack-in is bound to C-c C-x (C-)j (C-)j. 
+
+** console
+*** run console in org root
+clj -M:dev
+clojure -m cljs.main --compile my-cljs-project.core --repl
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
+
+*** run console with command
+#+begin_src elisp :results output silent
+(buyn-shell-start "konsole -e /bin/bash --rcfile <(clj -M:dev)")
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+#+end_src
+
 * DONE Done worder
 ** DONE сделать отдельный орг
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
