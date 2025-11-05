@@ -24,4 +24,4 @@ return new cljs.core.PersistentVector(null, 3, 5, cljs.core.PersistentVector.EMP
 });
 keechma_todomvc.components.app.component = keechma_todomvc.ui._LT_comp.call(null,new cljs.core.Keyword(null,"renderer","renderer",336841071),keechma_todomvc.components.app.render,new cljs.core.Keyword(null,"component-deps","component-deps",-405716162),new cljs.core.PersistentVector(null, 4, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"new-todo","new-todo",1331420444),new cljs.core.Keyword(null,"toggle-todos","toggle-todos",1635358696),new cljs.core.Keyword(null,"todo-list","todo-list",653205378),new cljs.core.Keyword(null,"footer","footer",1606445390)], null),new cljs.core.Keyword(null,"subscription-deps","subscription-deps",1798032321),new cljs.core.PersistentVector(null, 1, 5, cljs.core.PersistentVector.EMPTY_NODE, [new cljs.core.Keyword(null,"has-todos?","has-todos?",1891687793)], null));
 
-//# sourceMappingURL=app.js.map?rel=1762119011411
+//# sourceMappingURL=app.js.map?rel=1762299006631

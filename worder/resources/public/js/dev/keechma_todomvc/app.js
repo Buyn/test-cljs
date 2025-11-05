@@ -56,4 +56,4 @@ return keechma_todomvc.app.start_BANG_.call(null);
 });
 goog.exportSymbol('keechma_todomvc.app.main', keechma_todomvc.app.main);
 
-//# sourceMappingURL=app.js.map?rel=1762119011495
+//# sourceMappingURL=app.js.map?rel=1762299007022

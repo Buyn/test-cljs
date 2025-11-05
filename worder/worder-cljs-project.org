@@ -452,6 +452,62 @@
          :subscription-deps [:has-todos?]))
 #+end_src
 
+*** components/timer_button.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/keechma_todomvc/components/timer_button.cljs
+:END:
+**** file
+(find-file-other-frame "./src/keechma_todomvc/components/timer_button.cljs")
+**** src
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.timer-button
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
+            [reagent.core :as r]))
+
+(defn render [ctx]
+  (let [running? (r/atom false)
+          seconds  (r/atom 0)
+          timer-id (r/atom nil)]
+      (fn []
+        [:div.timer
+          [:button
+            {:on-click
+              (fn [_]
+                (if @running?
+                  (do
+                    (swap! running? not)
+                    (js/clearInterval @timer-id)
+                    (reset! timer-id nil))
+                  (do
+                    (reset! seconds 0)
+                    (swap! running? not)
+                    (reset! timer-id
+                            (js/setInterval
+                              #(swap! seconds inc)
+                              1000)))))}
+            (if @running? "Stop" "Start")]
+          [:span.seconds (str @seconds " sec")]])))
+
+(def component
+  (<comp :renderer render
+         ;; :component-deps [:new-todo
+         ;;                  :toggle-todos
+         ;;                  :todo-list
+         ;;                  :footer]
+         ;; :subscription-deps [:has-todos?]
+         ))
+#+end_src
+**** ИИ
+***** хочу сделать новый компонент
+timer-button
+он должен состоять из двух элементов. и реагент атома.
+кнопка и отображаемое значение.
+кнопка запускает секудомер. повторное нажатие останавливает секундомер.
+количество прошедших секунд отображает во втором элементе.
+принцип работы создаём атом за пределами функции. 
+запоминет время сейчас
+и каждые 0.5 секунды высчитвает текушее время - запомненое.
+и помешает в атом.
 ** src resources
 *** index.html
 :PROPERTIES:
@@ -522,13 +578,25 @@ find "$PWD" -type f >>filepath.txt
 (find-file-other-frame "./figwheel_server.log")
 * run worder
 *** run
-cd worder
-clojure -M:fig:build
-clojure -M:fig:build dev
 lein figwheel
 
 :cljs/quit
 :cljs/restart
+
+#+begin_src elisp :results output silent 
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+
+cd worder
+clojure -M:fig:build
+clojure -M:fig:build dev
 *** clon
 git clone https://github.com/keechma/example-todomvc.git
 * TODO todo worder

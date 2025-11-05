@@ -6,3 +6,36 @@ notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/co
 Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 [32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.733 seconds.[0m
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[31mFailed to compile build :dev from ["src"] in 1.348 seconds.[0m
+[36m----  Could not Read  src/keechma_todomvc/components/timer_button.cljs   line:18 ----[0m
+
+  [1m/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/src/keechma_todomvc/components/timer_button.cljs [line 18, col 1] Unexpected EOF while reading item 3 of list, starting at line 10 and column 1.[0m
+
+[36m----  Reader Error : Please see src/keechma_todomvc/components/timer_button.cljs  ----[0m
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/timer_button.cljs   line:11  column:4  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.timer-button/<comp[0m
+
+  [36m 7[0m  [36m  [:h1 "Worder"][0m
+  [36m 8[0m  [36m  )[0m
+  [36m 9[0m  [36m[0m
+  [36m10[0m  [36m(def component[0m
+  [33m11[0m  [1m  (<comp :renderer render[0m
+  [0m  [0m  [33m   ^--- Use of undeclared Var keechma-todomvc.components.timer-button/<comp[0m
+  [36m12[0m  [36m         ;; :component-deps [:new-todo[0m
+  [36m13[0m  [36m         ;;                  :toggle-todos[0m
+  [36m14[0m  [36m         ;;                  :todo-list[0m
+  [36m15[0m  [36m         ;;                  :footer][0m
+  [36m16[0m  [36m         ;; :subscription-deps [:has-todos?][0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/timer_button.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.777 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/goog/deps.js
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.705 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
