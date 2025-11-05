@@ -23,6 +23,7 @@
    [:section.todoapp
     [:header.header
      [:h1 "Worder"]
+     ;; [comp> ctx :timer-button]
      [comp> ctx :new-todo]]
     (when (sub> ctx :has-todos?)
       [:<>
@@ -31,7 +32,7 @@
         [comp> ctx :todo-list]]
        [comp> ctx :footer]])]
    [:footer.info
-    [:p "Double-click to edit a word"]
+    [:p "Double-click to edit a todo"]
     [:p
      [:a {:href "https://keechma.com"} "Keechma"] " "
      [:a {:href "http://todomvc.com"} "TodoMVC"]]]])

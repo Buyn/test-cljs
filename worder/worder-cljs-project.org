@@ -10,10 +10,11 @@
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/test.cljs.edn
 (find-file-other-frame "figwheel-main.edn")
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/figwheel-main.edn
-*** deps.edn
+*** CANCELED deps.edn
 :PROPERTIES:
-:header-args: :tangle deps.edn
+:header-args: :tangle no
 :END:
+:header-args: :tangle deps.edn
 **** file
 (find-file-other-frame "deps.edn")
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/deps.edn
@@ -68,16 +69,113 @@
 #+end_src
 ** src core
 *** other
+*** components.cljs
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+:header-args: :tangle src/keechma_todomvc/components.cljs
+**** file components.cljs
+(find-file-other-frame "./src/keechma_todomvc/components.cljs")
+**** src components.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns keechma-todomvc.components
+  "# Todo UI Component system"
+  (:require [keechma-todomvc.components.app :as app]
+            [keechma-todomvc.components.footer :as footer]
+            [keechma-todomvc.components.new-todo :as new-todo]
+            [keechma-todomvc.components.todo-edit :as todo-edit]
+            [keechma-todomvc.components.timer-button :as timer-button]
+            [keechma-todomvc.components.todo-item :as todo-item]
+            [keechma-todomvc.components.todo-list :as todo-list]
+            [keechma-todomvc.components.toggle-todos :as toggle-todos]))
+
+(def system
+  "Defines the component `system`. All the components that send commands
+  are configured to send them to the `:todos` topic controller."
+  {:main app/component
+   :footer (assoc footer/component :topic :todos)
+   :new-todo (assoc new-todo/component :topic :todos)
+   :todo-edit (assoc todo-edit/component :topic :todos)
+   :todo-item (assoc todo-item/component :topic :todos)
+   :timer-button timer-button/component
+   :todo-list todo-list/component
+   :toggle-todos (assoc toggle-todos/component :topic :todos)})
+
+
+#+end_src
+*** app.cljs
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+:header-args: :tangle src/keechma_todomvc/app.cljs
+**** file app.cljs
+(find-file-other-frame "./src/keechma_todomvc/app.cljs")
+**** src app.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns keechma-todomvc.app
+  "# Keechma TodoMVC App"
+  (:require [keechma-todomvc.components :as components]
+            [keechma-todomvc.controllers.todos :as todos]
+            [keechma-todomvc.subscriptions :as subscriptions]
+            [keechma.app-state :as app-state]))
+
+(defonce running-app (atom nil))
+
+;; ## App Definition
+
+(def app-definition
+  "Pulls the app together."
+  {:routes [[":status" {:status "all"}]]
+   :controllers {:todos (todos/->Controller)}
+   :components components/system
+   :subscriptions subscriptions/subscriptions
+   :html-element (.getElementById js/document "app")})
+
+;; ## App Lifecycle
+
+(defn start!
+  "Starts the app."
+  []
+  (reset! running-app (app-state/start! app-definition)))
+
+(defn restart!
+  "Restarts the app. `project.clj` contains a config setting for
+  `figwheel` requesting a call to this function whenever the code is
+  reloaded."
+  []
+  (if-let [current @running-app]
+    (app-state/stop! current start!)
+    (start!)))
+
+(defn dev-setup
+  "Enables console output for dev builds."
+  []
+  (when ^boolean js/goog.DEBUG
+    (enable-console-print!)
+    (println "dev mode")))
+
+;; ## Main
+
+(defn ^:export main
+  "Called from `index.html` to start the app. Exported because
+  `index.html` refers to it by name even in non-dev builds."
+  []
+  (dev-setup)
+  (start!))
+
+
+#+end_src
+*** other
 (find-file-other-frame "./src/keechma_todomvc/subscriptions.cljs")
 (find-file-other-frame "./src/keechma_todomvc/ui.cljs")
 (find-file-other-frame "./src/keechma_todomvc/util.cljs")
-(find-file-other-frame "./src/keechma_todomvc/components.cljs")
 (find-file-other-frame "./src/keechma_todomvc/edb.cljs")
 (find-file-other-frame "./src/keechma_todomvc/edb.clj")
-*** worder.cljs
+*** CANCELED worder.cljs
 :PROPERTIES:
-:header-args: :tangle src/keechma_todomvc/worder.cljs
+:header-args: :tangle no
 :END:
+:header-args: :tangle src/keechma_todomvc/worder.cljs
 **** file worder.cljs
 (find-file-other-frame "src/keechma_todomvc/worder.cljs")
 **** src worder.cljs
@@ -346,6 +444,7 @@
 :PROPERTIES:
 :header-args: :tangle ./src/keechma_todomvc/components/app.cljs
 :END:
+:header-args: :tangle no
 **** file
 (find-file-other-frame "./src/keechma_todomvc/components/app.cljs")
 **** src
@@ -375,6 +474,7 @@
    [:section.todoapp
     [:header.header
      [:h1 "Worder"]
+     ;; [comp> ctx :timer-button]
      [comp> ctx :new-todo]]
     (when (sub> ctx :has-todos?)
       [:<>
@@ -383,7 +483,7 @@
         [comp> ctx :todo-list]]
        [comp> ctx :footer]])]
    [:footer.info
-    [:p "Double-click to edit a word"]
+    [:p "Double-click to edit a todo"]
     [:p
      [:a {:href "https://keechma.com"} "Keechma"] " "
      [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
@@ -395,8 +495,15 @@
                           :todo-list
                           :footer]
          :subscription-deps [:has-todos?]))
+
 #+end_src
 
+     [:h1 "Worder"]
+     ;; [comp> ctx :timer-button]
+     [comp> ctx :new-todo]]
+
+**** exempls
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/app.cljs")
 *** components/todo_edit.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/keechma_todomvc/components/todo_edit.cljs
@@ -405,57 +512,67 @@
 (find-file-other-frame "./src/keechma_todomvc/components/todo_edit.cljs")
 **** src
 #+begin_src clojure :no-expand t :mkdirp yes 
-(ns keechma-todomvc.components.app
-  "# Main app component"
-  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
+(ns keechma-todomvc.components.todo-edit
+  "# Todo Edit component"
+  (:require [keechma-todomvc.ui :refer [<cmd <comp sub>]]
+            [keechma-todomvc.util :refer [is-enter? is-esc?]]
+            [reagent.core :as reagent]))
 
-(defn render
-  "## Renders the top level UI
+(defn form-3-render
+  "## Renders an Edit Field
 
-  Some elements are rendered inline, others are implemented as
-  `components`. Each `component` will have its own `context` provided.
+### Form 3 render function
 
-### Component Deps
-
-- `:new-todo` top field where new `todos` are entered
-- `:toggle-todos` checkbox to the left of `:new-todo`
-- `:todo-list` main body list of `todos`
-- `:footer` active count, filtering, clearing
+  Returns a `reagent class` created from a map that allows us to
+  provide additional component data to `reagent` including
+  implementations for `react lifecycle functions` like
+  `:component-did-mount`.
 
 ### Subscription Deps
 
-- `:has-todos?` returns true if there are any todos in the EntityDB."
+- `:edit-todo` returns the `todo` currently being edited, or nil
+
+### Note
+
+  This component is using a `form 3` render function to demonstrate
+  the additional flexibility it allows. In this case, we could get the
+  same effect by setting the `:auto-focus` attribute on the
+  `:input.edit` element to `true` within a `form 2` render function."
   [ctx]
-  [:<>
-   [:section.todoapp
-    [:header.header
-     [:h1 "Worder"]
-     [comp> ctx :new-todo]]
-    (when (sub> ctx :has-todos?)
-      [:<>
-       [:section.main
-        [comp> ctx :toggle-todos]
-        [comp> ctx :todo-list]]
-       [comp> ctx :footer]])]
-   [:footer.info
-    [:p "Double-click to edit a word"]
-    [:p
-     [:a {:href "https://keechma.com"} "Keechma"] " "
-     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+  (let [edit-todo (sub> ctx :edit-todo)
+        todo-title (reagent/atom (:title edit-todo))
+        handle-change #(reset! todo-title (.. % -target -value))
+        update #(<cmd ctx :confirm-edit (assoc edit-todo :title @todo-title))
+        cancel #(<cmd ctx :cancel-edit)
+        handle-key-down #(let [key-code (.-keyCode %)]
+                           (when (is-enter? key-code) (update))
+                           (when (is-esc? key-code) (cancel)))
+        render (fn []
+                 [:input.edit {:value @todo-title
+                               :on-blur update
+                               :on-change handle-change
+                               :on-key-down handle-key-down}])
+        focus-input #(let [node (reagent/dom-node %)
+                           length (count (.-value node))]
+                       (.focus node)
+                       (.setSelectionRange node length length))]
+    (reagent/create-class
+     {:display-name "todo-edit"
+      :reagent-render render
+      :component-did-mount focus-input})))
 
 (def component
-  (<comp :renderer render
-         :component-deps [:new-todo
-                          :toggle-todos
-                          :todo-list
-                          :footer]
-         :subscription-deps [:has-todos?]))
+  (<comp :renderer form-3-render
+         :subscription-deps [:edit-todo]))
 #+end_src
+**** exempl
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_edit.cljs")
 
 *** components/timer_button.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/keechma_todomvc/components/timer_button.cljs
 :END:
+:header-args: :tangle no
 **** file
 (find-file-other-frame "./src/keechma_todomvc/components/timer_button.cljs")
 **** src
@@ -508,6 +625,13 @@ timer-button
 запоминет время сейчас
 и каждые 0.5 секунды высчитвает текушее время - запомненое.
 и помешает в атом.
+*** other
+(find-file-other-frame "./src/keechma_todomvc/components/new_todo.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/toggle_todos.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/todo_list.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/todo_item.cljs")
+(find-file-other-frame "./src/keechma_todomvc/components/footer.cljs")
+
 ** src resources
 *** index.html
 :PROPERTIES:
@@ -529,18 +653,14 @@ timer-button
   <body>
     <div id="app"> 
     </div> <!-- end of app div -->
-    <script src="cljs-out/dev-main.js" type="text/javascript"></script>
-    <!-- <script src="js/app.js" type="text/javascript"></script> -->
-    <script>keechma_todomvc.worder.main()</script>
+    <script src="js/app.js" type="text/javascript"></script>
+    <script>keechma_todomvc.app.main()</script>
   </body>
 </html>
 #+end_src
-    <script src="cljs-out/dev-main.js"></script>
-    <script src="js/app.js" type="text/javascript"></script>
-
-<script>keechma_todomvc.worder.main()</script>
 **** exampl
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/resources/public/index.html")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/resources/public/index.html")
 
 *** style.css
 (find-file-other-frame "./resources/public/css/style.css")
@@ -571,11 +691,6 @@ timer-button
 ** files project
 (find-file-other-frame "./project.clj")
 (find-file-other-frame "./target/stale/leiningen.figwheel.clean-on-dependency-change")
-** files other
-find "$PWD" -type f >>filepath.txt
-
-(find-file-other-frame "./README.md")
-(find-file-other-frame "./figwheel_server.log")
 * run worder
 *** run
 lein figwheel
@@ -597,6 +712,17 @@ lein figwheel
 cd worder
 clojure -M:fig:build
 clojure -M:fig:build dev
+
+ls 
+ls target public/js
+ls .cpcache
+rm -rf target public/js
+rm -rf .cpcache
+
+lein cljsbuild once
+
+lein deps :refresh
+
 *** clon
 git clone https://github.com/keechma/example-todomvc.git
 * TODO todo worder
@@ -1769,6 +1895,11 @@ grep --include=\*.cljs -rnw ./ -e "reagent.core"
 | ./target/public/cljs-out/dev/keechma/app_state.cljs:2:                     | (:require        | [reagent.core   | :as        | reagent | :refer | [cursor]] |
 
 
+** files other
+find "$PWD" -type f >>filepath.txt
+
+(find-file-other-frame "./README.md")
+(find-file-other-frame "./figwheel_server.log")
 ** repl
 *** run eshell in project root
 clojure -M:fig:build

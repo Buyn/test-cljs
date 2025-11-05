@@ -1,1 +1,0 @@
-{:main keechma-todomvc.app, :optimizations :none, :output-to "resources/public/js/app.js", :output-dir "resources/public/js/dev", :asset-path "js/dev", :source-map-timestamp true, :preloads [figwheel.connect], :external-config #:figwheel{:config {:on-jsload "keechma-todomvc.app/restart!", :build-id "dev", :websocket-url "ws://localhost:3449/figwheel-ws"}}}

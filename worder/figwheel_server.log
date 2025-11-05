@@ -39,3 +39,73 @@ Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 [32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.705 seconds.[0m
 notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 1.11 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/goog/deps.js
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/toggle_todos.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/entities/todo.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/todo_edit.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/todo_list.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/new_todo.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/edb.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/subscriptions.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/controllers/todos.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/app.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/util.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/todo_item.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/footer.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/ui.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 1.592 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/goog/deps.js
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 1.131 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/toggle_todos.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/entities/todo.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/todo_edit.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/todo_list.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/new_todo.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/edb.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/subscriptions.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/controllers/todos.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/app.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/util.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/todo_item.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/footer.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/ui.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 1.581 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/goog/deps.js
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.741 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.731 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.737 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.722 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 1.575 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/goog/deps.js
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.798 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/todo_edit.js

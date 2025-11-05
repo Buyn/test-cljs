@@ -1,0 +1,10 @@
+/target
+/checkouts
+/docs
+/.lein-*
+/.nrepl-port
+/resources/public/js
+/*-init.clj
+/*.log
+/.rebel_readline_history
+out
