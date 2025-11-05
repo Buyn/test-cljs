@@ -572,10 +572,212 @@
 :PROPERTIES:
 :header-args: :tangle ./src/keechma_todomvc/components/timer_button.cljs
 :END:
-:header-args: :tangle no
-**** file
+**** file timer_button.cljs
 (find-file-other-frame "./src/keechma_todomvc/components/timer_button.cljs")
-**** src
+**** src timer_button.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.timer-button
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
+            [reagent.core :as r]))
+
+(defn render [_ctx]
+  (let [seconds (r/atom 0)    ;; здесь живёт только результат
+        timer-id (r/atom nil)
+        toggle! (fn [_]
+           (if @timer-id
+             ;; Stop
+             (do (js/clearInterval @timer-id)
+                 (reset! timer-id nil))
+             ;; Start
+             (let [start-ms (.now js/Date)]
+               (reset! timer-id
+                       (js/setInterval
+                        (fn []
+                          (let [elapsed (/ (- (.now js/Date) start-ms) 1000)]
+                            (reset! seconds elapsed)))
+                        100)))))]  
+
+    (fn []
+      [:div.timer
+       [:button
+        {:on-click toggle!} 
+        (if @timer-id "■ Stop" "▶ Start")]
+       [:span.seconds (str @seconds " sec")]])))
+
+(def component
+  (<comp :renderer render))
+#+end_src
+**** ИИ
+***** я изменил немного функцию и довай изменим логигику
+timer-button
+он должен состоять из двух элементов. и реагент атома.
+кнопка и отображаемое значение.
+кнопка запускает секудомер. повторное нажатие останавливает секундомер.
+количество прошедших секунд отображает во втором элементе.
+принцип работы создаём атом за пределами функции. 
+запоминет время сейчас
+и каждые 0.5 секунды высчитвает текушее время - запомненое.
+и помешает в атом.
+и довай сделаем это только на основе одно атома в котором будет конечный результат секунты.
+остальные перменные предлогаю сделать врмеными и не атомами. Чтоб не плодить сушности.
+отображение секунт сточностью до милесикунд через запятую
+***** 
+(defn render [ctx]
+  (let [seconds (r/atom 0)
+        timer-id (atom nil)
+        start-ts (atom nil)
+        toggle! (fn [_]
+                  (if @timer-id
+                    ;; Stop
+                    (do (js/clearInterval @timer-id)
+                        (reset! timer-id nil)
+                        (reset! start-ts nil))
+                    ;; Start
+                    (let [now (.now js/Date)]
+                      (reset! start-ts now)
+                      (reset! timer-id
+                              (js/setInterval
+                                (fn []
+                                  (let [elapsed (/ (- (.now js/Date) @start-ts) 1000)]
+                                    (reset! seconds (Math/floor elapsed))))
+                                500)))))]
+    
+    (fn []
+        [:div.timer
+          [:button
+            {:on-click triger-fn}
+            (if @running? "■ Stop" "▶ Start")]
+          [:span.seconds (str @seconds " sec.")]])))
+
+***** хочу сделать новый компонент
+timer-button
+он должен состоять из двух элементов. и реагент атома.
+кнопка и отображаемое значение.
+кнопка запускает секудомер. повторное нажатие останавливает секундомер.
+количество прошедших секунд отображает во втором элементе.
+принцип работы создаём атом за пределами функции. 
+запоминет время сейчас
+и каждые 0.5 секунды высчитвает текушее время - запомненое.
+и помешает в атом.
+**** arhiv
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+***** src 01 timer_button.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.timer-button
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
+            [reagent.core :as r]))
+
+(defn render [_ctx]
+  (let [seconds (r/atom 0)    ;; здесь живёт только результат
+        timer-id (r/atom nil)
+        toggle! (fn [_]
+           (if @timer-id
+             ;; Stop
+             (do (js/clearInterval @timer-id)
+                 (reset! timer-id nil))
+             ;; Start
+             (let [start-ms (.now js/Date)]
+               (reset! timer-id
+                       (js/setInterval
+                        (fn []
+                          (let [elapsed (/ (- (.now js/Date) start-ms) 1000)]
+                            (reset! seconds elapsed)))
+                        100)))))]  
+
+    (fn []
+      [:div.timer
+       [:button
+        {:on-click toggle!} 
+        (if @timer-id "■ Stop" "▶ Start")]
+       [:span.seconds (str @seconds " sec")]])))
+
+(def component
+  (<comp :renderer render))
+#+end_src
+***** src error
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.timer-button
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
+            [reagent.core :as r]))
+
+(defn render [_ctx]
+  (let [seconds (r/atom 0)
+        timer-id (atom nil)
+        activ? (= @timer-id nil) 
+        start-ms (atom 0)
+        toggle! (fn [_]
+           (if @timer-id
+             ;; Stop
+             (do (js/clearInterval @timer-id)
+                 (reset! timer-id nil)
+                 (let [elapsed (/ (- (.now js/Date) @start-ms) 1000)]
+                    (reset! seconds elapsed)))
+             ;; Start
+             (do (reset! @start-ms (.now js/Date))
+                 (reset! timer-id
+                      (js/setInterval
+                        (fn []
+                          (let [elapsed (/ (- (.now js/Date) @start-ms) 1000)]
+                            (reset! seconds elapsed)))
+                        100)))))]  
+    (fn []
+      [:div.timer
+       [:button
+        {:on-click toggle!} 
+        (if (activ?) "■ Stop" "▶ Start")]
+       [:span.seconds (str @seconds " sec")]])))
+
+(def component
+  (<comp :renderer render))
+#+end_src
+***** src 02
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.timer-button
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
+            [reagent.core :as r]))
+
+(defn render [_ctx]
+  (let [seconds (r/atom 0)    ;; здесь живёт только результат
+        timer-id (atom nil)
+        togle! (fn [_]
+           (if @timer-id
+             ;; Stop
+             (do (js/clearInterval @timer-id)
+                 (reset! timer-id nil))
+             ;; Start
+             (let [start-ms (.now js/Date)]
+               (reset! timer-id
+                       (js/setInterval
+                        (fn []
+                          (let [elapsed (/ (- (.now js/Date) start-ms) 1000)]
+                            (reset! seconds elapsed)))
+                        100)))))]  
+
+    (fn []
+      [:div.timer
+       [:button
+        {:on-click togle!} 
+        (if @timer-id "■ Stop" "▶ Start")]
+       [:span.seconds
+        (str @seconds " sec")
+        ;; (-> @seconds
+        ;;     (* 100)
+        ;;     (Math/round)
+        ;;     (/ 100)
+        ;;     (str " sec"))
+        ]])))
+(def component
+  (<comp :renderer render
+         ;; :component-deps [:new-todo
+         ;;                  :toggle-todos
+         ;;                  :todo-list
+         ;;                  :footer]
+         ;; :subscription-deps [:has-todos?]
+         ))
+#+end_src
+***** src 01
 #+begin_src clojure :no-expand t :mkdirp yes 
 (ns keechma-todomvc.components.timer-button
   (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
@@ -583,9 +785,13 @@
 
 (defn render [ctx]
   (let [running? (r/atom false)
-        seconds  (r/atom 0)
-        timer-id (r/atom nil)
-        triger-fn (fn [_]
+          seconds  (r/atom 0)
+          timer-id (r/atom nil)]
+      (fn []
+        [:div.timer
+          [:button
+            {:on-click
+              (fn [_]
                 (if @running?
                   (do
                     (swap! running? not)
@@ -597,11 +803,7 @@
                     (reset! timer-id
                             (js/setInterval
                               #(swap! seconds inc)
-                              1000)))))]
-      (fn []
-        [:div.timer
-          [:button
-            {:on-click triger-fn}
+                              1000)))))}
             (if @running? "■ Stop" "▶ Start")]
           [:span.seconds (str @seconds " sec.")]])))
 
@@ -614,17 +816,17 @@
          ;; :subscription-deps [:has-todos?]
          ))
 #+end_src
-**** ИИ
-***** хочу сделать новый компонент
-timer-button
-он должен состоять из двух элементов. и реагент атома.
-кнопка и отображаемое значение.
-кнопка запускает секудомер. повторное нажатие останавливает секундомер.
-количество прошедших секунд отображает во втором элементе.
-принцип работы создаём атом за пределами функции. 
-запоминет время сейчас
-и каждые 0.5 секунды высчитвает текушее время - запомненое.
-и помешает в атом.
+**** reple
+***** atom
+(def timer-id (atom nil))
+
+(= @timer-id nil)
+
+(reset! timer-id 3)
+
+@timer-id
+
+(= @timer-id nil)
 *** other
 (find-file-other-frame "./src/keechma_todomvc/components/new_todo.cljs")
 (find-file-other-frame "./src/keechma_todomvc/components/toggle_todos.cljs")
