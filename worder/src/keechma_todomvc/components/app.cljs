@@ -23,7 +23,7 @@
    [:section.todoapp
     [:header.header
      [:h1 "Worder"]
-     ;; [comp> ctx :timer-button]
+     [comp> ctx :timer-button]
      [comp> ctx :new-todo]]
     (when (sub> ctx :has-todos?)
       [:<>
@@ -41,7 +41,7 @@
   (<comp :renderer render
          :component-deps [:new-todo
                           :toggle-todos
-                          ;; :timer-button
+                          :timer-button
                           :todo-list
                           :footer]
          :subscription-deps [:has-todos?]))

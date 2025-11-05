@@ -375,3 +375,39 @@ html .clear-completed:active {
         bottom: 10px;
     }
 }
+
+.timer {
+    margin: 15px auto;
+    padding: 10px;
+    text-align: center;
+    font-size: 18px;
+}
+
+.timer button {
+    background: #5dc2af;
+    color: #fff;
+    border-radius: 4px;
+    padding: 6px 14px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: background 0.2s ease-out;
+    border: none;
+}
+
+.timer button:hover {
+    background: #54b2a0;
+}
+
+.timer button:active {
+    background: #4aa492;
+}
+
+.timer .seconds {
+    margin-left: 10px;
+    font-weight: bold;
+    color: #4d4d4d;
+}
+
+.timer.running .seconds {
+    color: #5dc2af;
+}

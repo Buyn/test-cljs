@@ -23,8 +23,8 @@
                             (js/setInterval
                               #(swap! seconds inc)
                               1000)))))}
-            (if @running? "Stop" "Start")]
-          [:span.seconds (str @seconds " sec")]])))
+            (if @running? "■ Stop" "▶ Start")]
+          [:span.seconds (str @seconds " sec.")]])))
 
 (def component
   (<comp :renderer render
