@@ -41,6 +41,7 @@
   (<comp :renderer render
          :component-deps [:new-todo
                           :toggle-todos
+                          ;; :timer-button
                           :todo-list
                           :footer]
          :subscription-deps [:has-todos?]))

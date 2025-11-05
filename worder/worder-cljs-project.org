@@ -71,11 +71,9 @@
 *** other
 *** components.cljs
 :PROPERTIES:
-:header-args: :tangle no
-:END:
 :header-args: :tangle src/keechma_todomvc/components.cljs
-**** file components.cljs
-(find-file-other-frame "./src/keechma_todomvc/components.cljs")
+:END:
+:header-args: :tangle no
 **** src components.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns keechma-todomvc.components
@@ -103,13 +101,12 @@
 
 
 #+end_src
+**** file components.cljs
+(find-file-other-frame "./src/keechma_todomvc/components.cljs")
 *** app.cljs
 :PROPERTIES:
-:header-args: :tangle no
-:END:
 :header-args: :tangle src/keechma_todomvc/app.cljs
-**** file app.cljs
-(find-file-other-frame "./src/keechma_todomvc/app.cljs")
+:END:
 **** src app.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns keechma-todomvc.app
@@ -165,6 +162,8 @@
 
 
 #+end_src
+**** file app.cljs
+(find-file-other-frame "./src/keechma_todomvc/app.cljs")
 *** other
 (find-file-other-frame "./src/keechma_todomvc/subscriptions.cljs")
 (find-file-other-frame "./src/keechma_todomvc/ui.cljs")
@@ -492,6 +491,7 @@
   (<comp :renderer render
          :component-deps [:new-todo
                           :toggle-todos
+                          ;; :timer-button
                           :todo-list
                           :footer]
          :subscription-deps [:has-todos?]))

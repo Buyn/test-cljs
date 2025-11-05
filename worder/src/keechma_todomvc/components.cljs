@@ -4,6 +4,7 @@
             [keechma-todomvc.components.footer :as footer]
             [keechma-todomvc.components.new-todo :as new-todo]
             [keechma-todomvc.components.todo-edit :as todo-edit]
+            [keechma-todomvc.components.timer-button :as timer-button]
             [keechma-todomvc.components.todo-item :as todo-item]
             [keechma-todomvc.components.todo-list :as todo-list]
             [keechma-todomvc.components.toggle-todos :as toggle-todos]))
@@ -16,5 +17,6 @@
    :new-todo (assoc new-todo/component :topic :todos)
    :todo-edit (assoc todo-edit/component :topic :todos)
    :todo-item (assoc todo-item/component :topic :todos)
+   :timer-button timer-button/component
    :todo-list todo-list/component
    :toggle-todos (assoc toggle-todos/component :topic :todos)})
