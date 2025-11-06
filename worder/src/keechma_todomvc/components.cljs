@@ -17,6 +17,6 @@
    :new-todo (assoc new-todo/component :topic :todos)
    :todo-edit (assoc todo-edit/component :topic :todos)
    :todo-item (assoc todo-item/component :topic :todos)
-   :timer-button timer-button/component
+   :timer-button (assoc timer-button/component :topic :todos)
    :todo-list todo-list/component
    :toggle-todos (assoc toggle-todos/component :topic :todos)})

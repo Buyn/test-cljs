@@ -32,7 +32,7 @@ If the item is currently being edited, overlays a `todo-edit` component.
                     :checked (:completed todo)
                     :on-change #(<cmd ctx :toggle-todo todo)}]
     [:label (:title todo)
-      [comp> ctx :timer-button]]
+      [comp> ctx :timer-button todo]]
     [:button.destroy {:on-click #(<cmd ctx :delete-todo todo)}]]
    (when is-editing?
      [comp> ctx :todo-edit])])

@@ -1,8 +1,8 @@
 (ns keechma-todomvc.components.timer-button
-  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]
             [reagent.core :as r]))
 
-(defn render [_ctx]
+(defn render [ctx todo]
   (let [seconds (r/atom 0)
         timer-id (r/atom nil)
         start-ms (r/atom nil)
@@ -12,7 +12,10 @@
                 (counter)
                 (js/clearInterval @timer-id)
                 (reset! timer-id nil)
-                (reset! start-ms nil))
+                (reset! start-ms nil)
+                (<cmd ctx
+                      :update-todo-time
+                      {:id (:id todo) :time @seconds :todo todo}))
         start! (fn []
                   (reset! start-ms (.now js/Date))
                   (reset! timer-id (js/setInterval counter 100)))

@@ -84,6 +84,13 @@
   (assert id)
   (edb/insert-item app-db :todos patch-todo))
 
+(defn update-todo-time
+  [app-db {:keys [id time todo]}]
+  (assert id)
+  (let [updated-todo (assoc todo :time time)]
+    (edb/insert-item app-db :todos updated-todo)))
+
+
 (defn toggle-todo
   "Toggles the `:completed` status of a saved `todo`."
   [app-db todo]
@@ -145,6 +152,7 @@
                       :delete-todo delete-todo
                       :toggle-todo toggle-todo
                       :toggle-all toggle-all
+                      :update-todo-time update-todo-time
                       :delete-completed delete-completed}
         action-adapter (fn [f]
                          (fn [app-db args]

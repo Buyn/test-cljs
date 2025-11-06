@@ -68,12 +68,12 @@
            :test  {:main-opts ["-m" "figwheel.main" "-co" "test.cljs.edn" "-m" "keechma-todomvc.test-runner"]}}}
 #+end_src
 ** src core
-*** other
 *** components.cljs
 :PROPERTIES:
 :header-args: :tangle src/keechma_todomvc/components.cljs
 :END:
-:header-args: :tangle no
+**** file components.cljs
+(find-file-other-frame "./src/keechma_todomvc/components.cljs")
 **** src components.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns keechma-todomvc.components
@@ -95,14 +95,12 @@
    :new-todo (assoc new-todo/component :topic :todos)
    :todo-edit (assoc todo-edit/component :topic :todos)
    :todo-item (assoc todo-item/component :topic :todos)
-   :timer-button timer-button/component
+   :timer-button (assoc timer-button/component :topic :todos)
    :todo-list todo-list/component
    :toggle-todos (assoc toggle-todos/component :topic :todos)})
 
 
 #+end_src
-**** file components.cljs
-(find-file-other-frame "./src/keechma_todomvc/components.cljs")
 *** app.cljs
 :PROPERTIES:
 :header-args: :tangle src/keechma_todomvc/app.cljs
@@ -579,10 +577,10 @@
 **** src timer_button.cljs
 #+begin_src clojure :no-expand t :mkdirp yes 
 (ns keechma-todomvc.components.timer-button
-  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]
             [reagent.core :as r]))
 
-(defn render [_ctx]
+(defn render [ctx todo]
   (let [seconds (r/atom 0)
         timer-id (r/atom nil)
         start-ms (r/atom nil)
@@ -592,7 +590,10 @@
                 (counter)
                 (js/clearInterval @timer-id)
                 (reset! timer-id nil)
-                (reset! start-ms nil))
+                (reset! start-ms nil)
+                (<cmd ctx
+                      :update-todo-time
+                      {:id (:id todo) :time @seconds :todo todo}))
         start! (fn []
                   (reset! start-ms (.now js/Date))
                   (reset! timer-id (js/setInterval counter 100)))
@@ -659,7 +660,7 @@ timer-button
 запоминет время сейчас
 и каждые 0.5 секунды высчитвает текушее время - запомненое.
 и помешает в атом.
-**** arhiv
+**** CANCELED arhiv
 :PROPERTIES:
 :header-args: :tangle no
 :END:
@@ -863,6 +864,16 @@ timer-button
 running?
 (running?)
 {:class (when (running?) "running")}
+***** command
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]
+
+(keechma-todomvc.ui\<cmd 2 :update-todo-time 12 13))
+***** js
+
+(js/console.log
+  (clj->js
+    (-> @keechma.app-state/app-db :entities :todos)))
+
 *** components/todo_item.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/keechma_todomvc/components/todo_item.cljs
@@ -905,7 +916,7 @@ If the item is currently being edited, overlays a `todo-edit` component.
                     :checked (:completed todo)
                     :on-change #(<cmd ctx :toggle-todo todo)}]
     [:label (:title todo)
-      [comp> ctx :timer-button]]
+      [comp> ctx :timer-button todo]]
     [:button.destroy {:on-click #(<cmd ctx :delete-todo todo)}]]
    (when is-editing?
      [comp> ctx :todo-edit])])
@@ -916,10 +927,6 @@ If the item is currently being edited, overlays a `todo-edit` component.
                           :timer-button]))
 
 #+end_src
-
-     [:h1 "Worder"]
-     ;; [comp> ctx :timer-button]
-     [comp> ctx :new-todo]]
      
 **** exempls
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_item.cljs")
@@ -928,6 +935,208 @@ If the item is currently being edited, overlays a `todo-edit` component.
 (find-file-other-frame "./src/keechma_todomvc/components/toggle_todos.cljs")
 (find-file-other-frame "./src/keechma_todomvc/components/todo_list.cljs")
 (find-file-other-frame "./src/keechma_todomvc/components/footer.cljs")
+
+** src entities
+*** entities/todo.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/keechma_todomvc/entities/todo.cljs
+:END:
+**** file entities/todo.cljs
+(find-file-other-frame "./src/keechma_todomvc/entities/todo.cljs")
+**** src entities/todo.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.entities.todo
+  "# Todo Entities"
+  (:require [clojure.string :as str]
+            [keechma-todomvc.edb :as edb])
+  (:import [goog.ui IdGenerator]))
+
+;; ## Helpers
+
+(def id-generator (IdGenerator.))
+
+(defn id
+  "Returns a unique ID for a new todo."
+  []
+  (.getNextUniqueId id-generator))
+
+(defn valid-title?
+  "Returns `true` if `title` is a valid `todo` title."
+  [title]
+  (not (str/blank? title)))
+
+;; ## Subscription Support (Read)
+
+(defn todos-by-status
+  "Returns all `todos` with a `status`."
+  [app-db status]
+  (let [todos (edb/get-collection app-db :todos :list)]
+    (case status
+      :completed (filter :completed todos)
+      :active (filter (complement :completed) todos)
+      :all todos)))
+
+(defn edit-todo
+  "Returns the `todo` currently being edited."
+  [app-db]
+  (->> (get-in app-db [:kv :editing-id])
+       (edb/get-item-by-id app-db :todos)))
+
+;; ## Action Support (Write)
+
+;; ### Edit Management
+
+(defn start-edit
+  "Sets state: this `todo` is currently being edited."
+  [app-db {:keys [id] :as todo}]
+  (assoc-in app-db [:kv :editing-id] id))
+
+(defn cancel-edit
+  "Clears state: no `todo` is currently being edited."
+  [app-db]
+  (assoc-in app-db [:kv :editing-id] nil))
+
+(defn confirm-edit
+  "Updates `todo` if `new-todo` has a valid `title`."
+  [app-db {:keys [id title] :as new-todo}]
+  (assert id)
+  (if (valid-title? title)
+    (-> app-db
+        (cancel-edit)
+        (edb/insert-item :todos new-todo))
+    app-db))
+
+;; ### Create, Update, Delete Todos
+
+(defn create-todos
+  "Creates an empty `todos` list."
+  [app-db]
+  (edb/insert-collection app-db :todos :list []))
+
+(defn create-todo
+  "If `title` is valid, creates a new `todo` and inserts it at the
+  beginning of the `todo` list."
+  [app-db title]
+  (if (valid-title? title)
+    (let [todo {:id (str "todo" (id))
+                :completed false
+                :title title}]
+      (edb/prepend-collection app-db :todos :list [todo]))
+    app-db))
+
+(defn update-todo
+  "Merges new data into a `todo`. `patch-todo` must have an `:id`
+  value that is the `id` of the `todo` to be updated."
+  [app-db {:keys [id] :as patch-todo}]
+  (assert id)
+  (edb/insert-item app-db :todos patch-todo))
+
+(defn update-todo-time
+  [app-db {:keys [id time todo]}]
+  (assert id)
+  (let [updated-todo (assoc todo :time time)]
+    (edb/insert-item app-db :todos updated-todo)))
+
+
+(defn toggle-todo
+  "Toggles the `:completed` status of a saved `todo`."
+  [app-db todo]
+  (update-todo app-db (update todo :completed not)))
+
+(defn toggle-all
+  "Marks all `todos` as completed or not based on `completed?`."
+  [app-db completed?]
+  (reduce (fn [acc todo]
+            (update-todo acc (assoc todo :completed completed?)))
+          app-db
+          (todos-by-status app-db :all)))
+
+(defn delete-todo
+  "Removes a `todo` from the EntityDB."
+  [app-db {:keys [id] :as todo}]
+  (edb/remove-item app-db :todos id))
+
+(defn delete-completed
+  "Removes all completed `todos` from the EntityDB."
+  [app-db]
+  (reduce (fn [acc {:keys [id]}]
+            (edb/remove-item acc :todos id))
+          app-db
+          (todos-by-status app-db :completed)))
+
+;; ## Actions for keechma.controllers/dispatcher
+
+(defn actions
+  "Returns a mapping from `todo` topic `command` keywords to `action`
+  functions. The mapping is suitable for use by
+  `keechma.controller/dispatcher`.
+
+  Adapts the calling convention from the one used by
+  `keechma.controllers/dispatcher`:
+
+  `(action-fn app-db-atom args-vec)`
+
+  to one that is more natural for ClojureScript:
+
+  `(handler app-db-atom arg1 arg2 arg3 ...)`.
+
+  Combined with `<cmd` in `ui.cljs`, this allows natural-looking
+  arguments in calls to `<cmd` to be handled by a handler with a
+  natural looking argument vector in its definition. This insulates
+  app developers from the restriction against varags in protocol
+  functions that results in `keechma.ui-component/send-command`
+  supporting only exactly 2 or 3 args, the last one an optional
+  explicit vector of additional args.
+
+  The adapter also provides the side-effect of updating the `app-db`
+  with the result of each call, allowing the handlers to be written
+  and tested as pure functions that return the new `app-db` value."
+  []
+  (let [cmd-handlers {:start-edit start-edit
+                      :cancel-edit cancel-edit
+                      :confirm-edit confirm-edit
+                      :create-todo create-todo
+                      :delete-todo delete-todo
+                      :toggle-todo toggle-todo
+                      :toggle-all toggle-all
+                      :update-todo-time update-todo-time
+                      :delete-completed delete-completed}
+        action-adapter (fn [f]
+                         (fn [app-db args]
+                           (apply swap! app-db f args)))]
+    (reduce-kv (fn [acc k f]
+                 (assoc acc k (action-adapter f)))
+               {}
+               cmd-handlers)))
+
+#+end_src
+     
+**** exempls
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/entities/todo.cljs")
+**** CANCELED archiv
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+***** 01 update-todo-time
+(defn update-todo-time
+  [app-db {:keys [id time]}]
+  ;; (assert id)
+  ;; (let [todo (edb/get-item-by-id app-db :todos id)
+  ;;       updated-todo (assoc todo :time time)]
+  ;;   (edb/insert-item app-db :todos updated-todo))
+  (println "test!!!!")
+  app-db)
+
+***** update-todo-time
+(defn update-todo-time
+  [app-db {:keys [id] :as patch-todo}]
+  ;; (assert id)
+  ;; (println patch-todo)
+  ;; (println time)
+  (println "test!")
+  ;; сохранить time внутри туду
+  ;; и новерно вызвать update-todo
+  )
 
 ** src resources
 *** index.html
@@ -2206,6 +2415,302 @@ html .clear-completed:active {
 ---
 
 Хочешь таймер превратить в **мини-POMODORO** в TodoMVC? ⏱🔥
+*** :on-change #(<cmd ctx :toggle-todo todo)}]
+*** src
+**** file components.cljs
+(find-file-other-frame "./src/keechma_todomvc/components.cljs")
+**** src components.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns keechma-todomvc.components
+  "# Todo UI Component system"
+  (:require [keechma-todomvc.components.app :as app]
+            [keechma-todomvc.components.footer :as footer]
+            [keechma-todomvc.components.new-todo :as new-todo]
+            [keechma-todomvc.components.todo-edit :as todo-edit]
+            [keechma-todomvc.components.timer-button :as timer-button]
+            [keechma-todomvc.components.todo-item :as todo-item]
+            [keechma-todomvc.components.todo-list :as todo-list]
+            [keechma-todomvc.components.toggle-todos :as toggle-todos]))
+
+(def system
+  "Defines the component `system`. All the components that send commands
+  are configured to send them to the `:todos` topic controller."
+  {:main app/component
+   :footer (assoc footer/component :topic :todos)
+   :new-todo (assoc new-todo/component :topic :todos)
+   :todo-edit (assoc todo-edit/component :topic :todos)
+   :todo-item (assoc todo-item/component :topic :todos)
+   :timer-button (assoc timer-button/component :topic :todos)
+   :todo-list todo-list/component
+   :toggle-todos (assoc toggle-todos/component :topic :todos)})
+
+
+#+end_src
+**** file components/todo_item.cljs
+(find-file-other-frame "./src/keechma_todomvc/components/todo_item.cljs")
+**** src components/todo_item.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.todo-item
+  "# Todo Item component"
+  (:require [keechma-todomvc.ui :refer [<cmd <comp comp>]]))
+
+(defn render
+  [ctx todo is-editing?]
+  [:li {:class [(when is-editing? :editing)
+                (when (:completed todo) :completed)]}
+   [:div.view {:on-double-click #(<cmd ctx :start-edit todo)}
+    [:input.toggle {:type :checkbox
+                    :checked (:completed todo)
+                    :on-change #(<cmd ctx :toggle-todo todo)}]
+    [:label (:title todo)
+      [comp> ctx :timer-button todo]]
+    [:button.destroy {:on-click #(<cmd ctx :delete-todo todo)}]]
+   (when is-editing?
+     [comp> ctx :todo-edit])])
+
+(def component
+  (<comp :renderer render
+         :component-deps [:todo-edit
+                          :timer-button]))
+
+#+end_src
+     
+**** file entities/todo.cljs
+(find-file-other-frame "./src/keechma_todomvc/entities/todo.cljs")
+**** src entities/todo.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.entities.todo
+  "# Todo Entities"
+  (:require [clojure.string :as str]
+            [keechma-todomvc.edb :as edb])
+  (:import [goog.ui IdGenerator]))
+
+;; ## Helpers
+
+(def id-generator (IdGenerator.))
+
+(defn id
+  "Returns a unique ID for a new todo."
+  []
+  (.getNextUniqueId id-generator))
+
+(defn valid-title?
+  "Returns `true` if `title` is a valid `todo` title."
+  [title]
+  (not (str/blank? title)))
+
+;; ## Subscription Support (Read)
+
+(defn todos-by-status
+  "Returns all `todos` with a `status`."
+  [app-db status]
+  (let [todos (edb/get-collection app-db :todos :list)]
+    (case status
+      :completed (filter :completed todos)
+      :active (filter (complement :completed) todos)
+      :all todos)))
+
+(defn edit-todo
+  "Returns the `todo` currently being edited."
+  [app-db]
+  (->> (get-in app-db [:kv :editing-id])
+       (edb/get-item-by-id app-db :todos)))
+
+;; ## Action Support (Write)
+
+;; ### Edit Management
+
+(defn start-edit
+  "Sets state: this `todo` is currently being edited."
+  [app-db {:keys [id] :as todo}]
+  (assoc-in app-db [:kv :editing-id] id))
+
+(defn cancel-edit
+  "Clears state: no `todo` is currently being edited."
+  [app-db]
+  (assoc-in app-db [:kv :editing-id] nil))
+
+(defn confirm-edit
+  "Updates `todo` if `new-todo` has a valid `title`."
+  [app-db {:keys [id title] :as new-todo}]
+  (assert id)
+  (if (valid-title? title)
+    (-> app-db
+        (cancel-edit)
+        (edb/insert-item :todos new-todo))
+    app-db))
+
+;; ### Create, Update, Delete Todos
+
+(defn create-todos
+  "Creates an empty `todos` list."
+  [app-db]
+  (edb/insert-collection app-db :todos :list []))
+
+(defn create-todo
+  "If `title` is valid, creates a new `todo` and inserts it at the
+  beginning of the `todo` list."
+  [app-db title]
+  (if (valid-title? title)
+    (let [todo {:id (str "todo" (id))
+                :completed false
+                :title title}]
+      (edb/prepend-collection app-db :todos :list [todo]))
+    app-db))
+
+(defn update-todo
+  "Merges new data into a `todo`. `patch-todo` must have an `:id`
+  value that is the `id` of the `todo` to be updated."
+  [app-db {:keys [id] :as patch-todo}]
+  (assert id)
+  (edb/insert-item app-db :todos patch-todo))
+
+
+(defn update-todo-time
+  [app-db {:keys [id] :as patch-todo} time]
+  ;; (assert id)
+  ;; (println patch-todo)
+  ;; (println time)
+  (println "test!")
+  ;; сохранить time внутри туду
+  ;; и новерно вызвать update-todo
+  )
+
+(defn toggle-todo
+  "Toggles the `:completed` status of a saved `todo`."
+  [app-db todo]
+  (update-todo app-db (update todo :completed not)))
+
+(defn toggle-all
+  "Marks all `todos` as completed or not based on `completed?`."
+  [app-db completed?]
+  (reduce (fn [acc todo]
+            (update-todo acc (assoc todo :completed completed?)))
+          app-db
+          (todos-by-status app-db :all)))
+
+(defn delete-todo
+  "Removes a `todo` from the EntityDB."
+  [app-db {:keys [id] :as todo}]
+  (edb/remove-item app-db :todos id))
+
+(defn delete-completed
+  "Removes all completed `todos` from the EntityDB."
+  [app-db]
+  (reduce (fn [acc {:keys [id]}]
+            (edb/remove-item acc :todos id))
+          app-db
+          (todos-by-status app-db :completed)))
+
+;; ## Actions for keechma.controllers/dispatcher
+
+(defn actions
+  "Returns a mapping from `todo` topic `command` keywords to `action`
+  functions. The mapping is suitable for use by
+  `keechma.controller/dispatcher`.
+
+  Adapts the calling convention from the one used by
+  `keechma.controllers/dispatcher`:
+
+  `(action-fn app-db-atom args-vec)`
+
+  to one that is more natural for ClojureScript:
+
+  `(handler app-db-atom arg1 arg2 arg3 ...)`.
+
+  Combined with `<cmd` in `ui.cljs`, this allows natural-looking
+  arguments in calls to `<cmd` to be handled by a handler with a
+  natural looking argument vector in its definition. This insulates
+  app developers from the restriction against varags in protocol
+  functions that results in `keechma.ui-component/send-command`
+  supporting only exactly 2 or 3 args, the last one an optional
+  explicit vector of additional args.
+
+  The adapter also provides the side-effect of updating the `app-db`
+  with the result of each call, allowing the handlers to be written
+  and tested as pure functions that return the new `app-db` value."
+  []
+  (let [cmd-handlers {:start-edit start-edit
+                      :cancel-edit cancel-edit
+                      :confirm-edit confirm-edit
+                      :create-todo create-todo
+                      :delete-todo delete-todo
+                      :toggle-todo toggle-todo
+                      :toggle-all toggle-all
+                      :update-todo-time update-todo-time
+                      :delete-completed delete-completed}
+        action-adapter (fn [f]
+                         (fn [app-db args]
+                           (apply swap! app-db f args)))]
+    (reduce-kv (fn [acc k f]
+                 (assoc acc k (action-adapter f)))
+               {}
+               cmd-handlers)))
+
+#+end_src
+     
+**** file components/todo_item.cljs
+(find-file-other-frame "./src/keechma_todomvc/components/todo_item.cljs")
+**** src components/todo_item.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.todo-item
+  "# Todo Item component"
+  (:require [keechma-todomvc.ui :refer [<cmd <comp comp>]]))
+
+(defn render
+  "## Renders a todo list item
+
+  The item's content includes:
+
+- a `checkbox` for toggling `:completed`
+- a `label` displaying the `:title`
+- a `button` to delete the item
+
+If the item is currently being edited, overlays a `todo-edit` component.
+
+### Component Deps
+
+- `:todo-edit` presents ui to edit a `todo`'s title
+
+### Arguments
+
+  This render function has arguments in addition to `ctx`. Values for
+  those are provided at the site where this component is included
+  within another, in this case `:todo-list`. If this were a `form-2`
+  render function, the returned function would have only `todo` and
+  `is-editing?` as arguments."
+  [ctx todo is-editing?]
+  [:li {:class [(when is-editing? :editing)
+                (when (:completed todo) :completed)]}
+   [:div.view {:on-double-click #(<cmd ctx :start-edit todo)}
+    [:input.toggle {:type :checkbox
+                    :checked (:completed todo)
+                    :on-change #(<cmd ctx :toggle-todo todo)}]
+    [:label (:title todo)
+      [comp> ctx :timer-button todo]]
+    [:button.destroy {:on-click #(<cmd ctx :delete-todo todo)}]]
+   (when is-editing?
+     [comp> ctx :todo-edit])])
+
+(def component
+  (<comp :renderer render
+         :component-deps [:todo-edit
+                          :timer-button]))
+
+#+end_src
+     
+*** что-то update-todo-time уменя неработает
+должно при срабатывании stop!
+происходило сохранение окончательного значения секунд в edb (привязаное к todo-id)
+но функция вызвается. при нажатии стоп я получаю я получаю ожидаемы тест
+
+test! client.cljs:39:18
+Trying to send command to a controller that is not running 
+Object { meta: null, cnt: 3, arr: (6) […], __hash: null, "cljs$lang$protocol_mask$partition0$": 16647951, "cljs$lang$protocol_mask$partition1$": 139268 }
+controller_manager.cljs:27:16
+в консоли браузера
+Что я делаю нетак?
+и предложи рабочую версию update-todo-time выполняюших сохранение
 
 ** понять можно ли оптемизировать атомы
 чтоб по остановку таймера освобождались не нужные атомы
@@ -2243,10 +2748,17 @@ clojure -M:fig:build
 добовлем слова вместо туду
 видемо вордер
 ** туду итем комплит делает невозможны запуск таймер
+** туду итем комплит делает кнопку серой
 ** помошь уни стиль прижать кнопу в право
 ** туду итем комплит останавливает таймер
 если он запущен в этот момент
 ** убедится что удаение останваливает таймер
+
+Ещё: чистка таймера при размонтировании
+
+Добавь "cleanup" чтобы не оставлять setInterval висеть, если todo удаляется / компонент размонтируется:
+
+Если используешь form-2, можно в reagent/create-class (form-3) реализовать :component-will-unmount и там js/clearInterval. Или в form-2 — вернуть функцию очистки через reagent.core/create-class — но проще: при остановке или размонтировании явно чисти @timer-id.
 ** переписать текст под слова в коде
 повозможно везде по коду
 ** загрузить список слов
@@ -2492,6 +3004,20 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 (delete-other-windows)
 #+end_src
 
+** auto-tangle-block:
+#+NAME: auto-tangle-block
+#+begin_src emacs-lisp :results output silent :tangle no
+(setq org-src-preserve-indentation t)
+(untabify (point-min) (point-max))
+(save-buffer)
+;; (universal-argument)
+;; (universal-argument)
+(org-babel-tangle)
+;; (find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
+;; (find-file-other-frame "~/INI/hydra-cfg.el")
+;; (load "~/INI/hydra-cfg.el")
+;; (load "~/ELs/BuYn/reader.el")
+ #+end_src
 * DONE Done worder
 ** DONE запустить копию
 убедится в работо способности
