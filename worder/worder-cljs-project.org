@@ -443,7 +443,6 @@
 :PROPERTIES:
 :header-args: :tangle ./src/keechma_todomvc/components/app.cljs
 :END:
-:header-args: :tangle no
 **** file
 (find-file-other-frame "./src/keechma_todomvc/components/app.cljs")
 **** src
@@ -473,7 +472,6 @@
    [:section.todoapp
     [:header.header
      [:h1 "Worder"]
-     [comp> ctx :timer-button]
      [comp> ctx :new-todo]]
     (when (sub> ctx :has-todos?)
       [:<>
@@ -491,13 +489,14 @@
   (<comp :renderer render
          :component-deps [:new-todo
                           :toggle-todos
-                          :timer-button
                           :todo-list
                           :footer]
          :subscription-deps [:has-todos?]))
 
 #+end_src
 
+     [comp> ctx :timer-button]
+                          :timer-button
      [:h1 "Worder"]
      ;; [comp> ctx :timer-button]
      [comp> ctx :new-todo]]
@@ -854,11 +853,70 @@ timer-button
 @timer-id
 
 (= @timer-id nil)
+*** components/todo_item.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/keechma_todomvc/components/todo_item.cljs
+:END:
+**** file
+(find-file-other-frame "./src/keechma_todomvc/components/todo_item.cljs")
+**** src
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.todo-item
+  "# Todo Item component"
+  (:require [keechma-todomvc.ui :refer [<cmd <comp comp>]]))
+
+(defn render
+  "## Renders a todo list item
+
+  The item's content includes:
+
+- a `checkbox` for toggling `:completed`
+- a `label` displaying the `:title`
+- a `button` to delete the item
+
+If the item is currently being edited, overlays a `todo-edit` component.
+
+### Component Deps
+
+- `:todo-edit` presents ui to edit a `todo`'s title
+
+### Arguments
+
+  This render function has arguments in addition to `ctx`. Values for
+  those are provided at the site where this component is included
+  within another, in this case `:todo-list`. If this were a `form-2`
+  render function, the returned function would have only `todo` and
+  `is-editing?` as arguments."
+  [ctx todo is-editing?]
+  [:li {:class [(when is-editing? :editing)
+                (when (:completed todo) :completed)]}
+   [:div.view {:on-double-click #(<cmd ctx :start-edit todo)}
+    [:input.toggle {:type :checkbox
+                    :checked (:completed todo)
+                    :on-change #(<cmd ctx :toggle-todo todo)}]
+    [:label (:title todo)]
+    [comp> ctx :timer-button]
+    [:button.destroy {:on-click #(<cmd ctx :delete-todo todo)}]]
+   (when is-editing?
+     [comp> ctx :todo-edit])])
+
+(def component
+  (<comp :renderer render
+         :component-deps [:todo-edit
+                          :timer-button]))
+
+#+end_src
+
+     [:h1 "Worder"]
+     ;; [comp> ctx :timer-button]
+     [comp> ctx :new-todo]]
+     
+**** exempls
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_item.cljs")
 *** other
 (find-file-other-frame "./src/keechma_todomvc/components/new_todo.cljs")
 (find-file-other-frame "./src/keechma_todomvc/components/toggle_todos.cljs")
 (find-file-other-frame "./src/keechma_todomvc/components/todo_list.cljs")
-(find-file-other-frame "./src/keechma_todomvc/components/todo_item.cljs")
 (find-file-other-frame "./src/keechma_todomvc/components/footer.cljs")
 
 ** src resources

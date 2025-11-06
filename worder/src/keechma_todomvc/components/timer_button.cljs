@@ -16,7 +16,6 @@
                   (reset! start-ms (.now js/Date))
                   (reset! timer-id (js/setInterval counter 100)))
         toggle! (fn [_] (if @timer-id (stop!) (start!)))]  
-
     (fn []
       [:div.timer
        [:button

@@ -307,3 +307,10 @@ notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/co
 Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 [32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.719 seconds.[0m
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.763 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/todo_item.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.792 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
