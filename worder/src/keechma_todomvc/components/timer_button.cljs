@@ -3,21 +3,19 @@
             [reagent.core :as r]))
 
 (defn render [_ctx]
-  (let [seconds (r/atom 0)    ;; здесь живёт только результат
+  (let [seconds (r/atom 0)
         timer-id (r/atom nil)
-        toggle! (fn [_]
-           (if @timer-id
-             ;; Stop
-             (do (js/clearInterval @timer-id)
-                 (reset! timer-id nil))
-             ;; Start
-             (let [start-ms (.now js/Date)]
-               (reset! timer-id
-                       (js/setInterval
-                        (fn []
-                          (let [elapsed (/ (- (.now js/Date) start-ms) 1000)]
-                            (reset! seconds elapsed)))
-                        100)))))]  
+        start-ms (r/atom nil)
+        counter (fn [] (reset! seconds (/ (- (.now js/Date) @start-ms) 1000)))
+        stop! (fn []
+                (counter)
+                (js/clearInterval @timer-id)
+                (reset! timer-id nil)
+                (reset! start-ms nil))
+        start! (fn []
+                  (reset! start-ms (.now js/Date))
+                  (reset! timer-id (js/setInterval counter 100)))
+        toggle! (fn [_] (if @timer-id (stop!) (start!)))]  
 
     (fn []
       [:div.timer

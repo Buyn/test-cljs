@@ -249,3 +249,61 @@ notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/co
 Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 [32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.712 seconds.[0m
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.726 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.728 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/timer_button.cljs   line:17  column:39  ----[0m
+
+  [1mWrong number of args (0) passed to stop![0m
+
+  [36m13[0m  [36m                        (fn [][0m
+  [36m14[0m  [36m                          (let [elapsed (/ (- (.now js/Date) start-ms) 1000)][0m
+  [36m15[0m  [36m                            (reset! seconds elapsed)))[0m
+  [36m16[0m  [36m                        100))))[0m
+  [33m17[0m  [1m        toggle! (fn [_] (if @timer-id (stop!) (start!)))]  [0m
+  [0m  [0m  [33m                                      ^--- Wrong number of args (0) passed to stop![0m
+  [36m18[0m  [36m[0m
+  [36m19[0m  [36m    (fn [][0m
+  [36m20[0m  [36m      [:div.timer[0m
+  [36m21[0m  [36m       [:button[0m
+  [36m22[0m  [36m        {:on-click toggle!} [0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/timer_button.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/timer_button.cljs   line:17  column:47  ----[0m
+
+  [1mWrong number of args (0) passed to start![0m
+
+  [36m13[0m  [36m                        (fn [][0m
+  [36m14[0m  [36m                          (let [elapsed (/ (- (.now js/Date) start-ms) 1000)][0m
+  [36m15[0m  [36m                            (reset! seconds elapsed)))[0m
+  [36m16[0m  [36m                        100))))[0m
+  [33m17[0m  [1m        toggle! (fn [_] (if @timer-id (stop!) (start!)))]  [0m
+  [0m  [0m  [33m                                              ^--- Wrong number of args (0) passed to start![0m
+  [36m18[0m  [36m[0m
+  [36m19[0m  [36m    (fn [][0m
+  [36m20[0m  [36m      [:div.timer[0m
+  [36m21[0m  [36m       [:button[0m
+  [36m22[0m  [36m        {:on-click toggle!} [0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/timer_button.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.758 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.747 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.722 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.759 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.742 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.719 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/timer_button.js
