@@ -586,7 +586,7 @@
   (let [seconds (r/atom 0)
         timer-id (r/atom nil)
         start-ms (r/atom nil)
-        ;; running? (not (= timer-id nil))
+        running? (fn [](not (= @timer-id nil)))
         counter (fn [] (reset! seconds (/ (- (.now js/Date) @start-ms) 1000)))
         stop! (fn []
                 (counter)
@@ -596,12 +596,12 @@
         start! (fn []
                   (reset! start-ms (.now js/Date))
                   (reset! timer-id (js/setInterval counter 100)))
-        toggle! (fn [_] (if @timer-id (stop!) (start!)))]  
+        toggle! (fn [_] (if (running?) (stop!) (start!)))]  
     (fn []
-      [:div.timer
+      [:div.timer {:class (when (running?) "running")}
        [:button
         {:on-click toggle!} 
-        (if @timer-id "■ Stop" "▶ Start")]
+        (if (running?) "■ Stop" "▶ Start")]
        [:span.seconds (str @seconds " sec")]])))
 
 (def component
@@ -848,7 +848,8 @@ timer-button
 #+end_src
 **** reple
 ***** atom
-(def timer-id (atom nil))
+
+(def timer-id (reagent.core/atom nil))
 
 (= @timer-id nil)
 
@@ -857,6 +858,11 @@ timer-button
 @timer-id
 
 (= @timer-id nil)
+
+(def running? (not (= timer-id nil)))
+running?
+(running?)
+{:class (when (running?) "running")}
 *** components/todo_item.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/keechma_todomvc/components/todo_item.cljs
