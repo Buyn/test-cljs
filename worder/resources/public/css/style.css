@@ -376,38 +376,42 @@ html .clear-completed:active {
     }
 }
 
-.timer {
-    margin: 15px auto;
-    padding: 10px;
-    text-align: center;
-    font-size: 18px;
+.todo-list li .timer {
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto; 
 }
 
-.timer button {
-    background: #5dc2af;
-    color: #fff;
+.todo-list li .timer button {
+    font-size: 13px;           
+    padding: 7px 13px;         
+    background: none;
+    border: 2px solid #ccc;
     border-radius: 4px;
-    padding: 6px 14px;
-    font-size: 14px;
     cursor: pointer;
-    transition: background 0.2s ease-out;
-    border: none;
+    color: #555;
+    transition: all 0.2s ease-out;
 }
 
-.timer button:hover {
-    background: #54b2a0;
+.todo-list li .timer button:hover {
+    background: #eee;
+    border-color: #bbb;
+    color: #333;
 }
 
-.timer button:active {
-    background: #4aa492;
+/* состояние когда таймер запущен */
+.todo-list li .timer.running button {
+    background: #27ae60;
+    border-color: #1e874b;
+    color: #fff;
 }
 
-.timer .seconds {
-    margin-left: 10px;
-    font-weight: bold;
-    color: #4d4d4d;
+.todo-list li.completed .timer .seconds {
+    color: #d9d9d9;
 }
 
-.timer.running .seconds {
-    color: #5dc2af;
+.todo-list li .timer .seconds {
+    margin-left: 8px;
+    font-size: 14px;
+    color: #777;
 }
