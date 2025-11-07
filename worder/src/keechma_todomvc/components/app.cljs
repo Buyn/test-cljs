@@ -1,6 +1,7 @@
 (ns keechma-todomvc.components.app
   "# Main app component"
-  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]))
+
 
 (defn render
   "## Renders the top level UI
@@ -23,6 +24,7 @@
    [:section.todoapp
     [:header.header
      [:h1 "Worder"]
+     [comp> ctx :import-txt]
      [comp> ctx :new-todo]]
     (when (sub> ctx :has-todos?)
       [:<>
@@ -31,15 +33,16 @@
         [comp> ctx :todo-list]]
        [comp> ctx :footer]])]
    [:footer.info
-    [:p "Double-click to edit a todo"]
+    [:p "Double-click to edit a Word"]
     [:p
      [:a {:href "https://keechma.com"} "Keechma"] " "
-     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+     [:a {:href "http://todomvc.com"} "Freeman"]]]])
 
 (def component
   (<comp :renderer render
          :component-deps [:new-todo
                           :toggle-todos
                           :todo-list
+                          :import-txt
                           :footer]
          :subscription-deps [:has-todos?]))

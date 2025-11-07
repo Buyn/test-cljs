@@ -588,3 +588,167 @@ notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/en
 Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 [32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.835 seconds.[0m
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/entities/todo.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.734 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.725 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/app.cljs   line:16  column:22  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.app/<cmd[0m
+
+  [36m12[0m  [36m                  lines (.split content "\n")][0m
+  [36m13[0m  [36m              (doseq [l lines][0m
+  [36m14[0m  [36m                (let [t (clojure.string/trim l)][0m
+  [36m15[0m  [36m                  (when-not (empty? t)[0m
+  [33m16[0m  [1m                    (<cmd ctx :create-todo t)))))))[0m
+  [0m  [0m  [33m                     ^--- Use of undeclared Var keechma-todomvc.components.app/<cmd[0m
+  [36m17[0m  [36m    (.readAsText reader file)))[0m
+  [36m18[0m  [36m[0m
+  [36m19[0m  [36m(defn render[0m
+  [36m20[0m  [36m  "## Renders the top level UI[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/app.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/app.cljs   line:16  column:22  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.app/<cmd[0m
+
+  [36m12[0m  [36m                  lines (.split content "\n")][0m
+  [36m13[0m  [36m              (doseq [l lines][0m
+  [36m14[0m  [36m                (let [t (clojure.string/trim l)][0m
+  [36m15[0m  [36m                  (when-not (empty? t)[0m
+  [33m16[0m  [1m                    (<cmd ctx :create-todo t)))))))[0m
+  [0m  [0m  [33m                     ^--- Use of undeclared Var keechma-todomvc.components.app/<cmd[0m
+  [36m17[0m  [36m    (.readAsText reader file)))[0m
+  [36m18[0m  [36m[0m
+  [36m19[0m  [36m(defn render[0m
+  [36m20[0m  [36m  "## Renders the top level UI[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/app.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.783 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.731 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/app.cljs   line:44  column:31  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.app/file-input[0m
+
+  [36m40[0m  [36m ;; ---- НАША НОВАЯ КНОПКА ----[0m
+  [36m41[0m  [36m [:div[0m
+  [36m42[0m  [36m   [:input {:type "file"[0m
+  [36m43[0m  [36m           :style {:display "none"}[0m
+  [33m44[0m  [1m           :ref #(reset! file-input %)[0m
+  [0m  [0m  [33m                         ^--- Use of undeclared Var keechma-todomvc.components.app/file-input[0m
+  [36m45[0m  [36m           :on-change #(import-file ctx %)}][0m
+  [36m46[0m  [36m   [:button {:on-click #(.click @file-input)}[0m
+  [36m47[0m  [36m   "Import from file"]][0m
+  [36m48[0m  [36m ;; --------------------------[0m
+  [36m49[0m  [36m[comp> ctx :new-todo]][0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/app.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/app.cljs   line:46  column:39  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.app/file-input[0m
+
+  [36m42[0m  [36m    [:input {:type "file"[0m
+  [36m43[0m  [36m            :style {:display "none"}[0m
+  [36m44[0m  [36m            :ref #(reset! file-input %)[0m
+  [36m45[0m  [36m            :on-change #(import-file ctx %)}][0m
+  [33m46[0m  [1m    [:button {:on-click #(.click @file-input)}[0m
+  [0m  [0m  [33m                                  ^--- Use of undeclared Var keechma-todomvc.components.app/file-input[0m
+  [36m47[0m  [36m    "Import from file"]][0m
+  [36m48[0m  [36m  ;; --------------------------[0m
+  [36m49[0m  [36m [comp> ctx :new-todo]][0m
+  [36m50[0m  [36m(when (sub> ctx :has-todos?)[0m
+  [36m51[0m  [36m  [:<>[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/app.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.818 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/app.cljs   line:5  column:18  ----[0m
+
+  [1mNo such namespace: r, could not locate r.cljs, r.cljc, or JavaScript source providing "r"[0m
+
+  [36m 1[0m  [36m(ns keechma-todomvc.components.app[0m
+  [36m 2[0m  [36m  "# Main app component"[0m
+  [36m 3[0m  [36m  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]))[0m
+  [36m 4[0m  [36m[0m
+  [33m 5[0m  [1m(def file-input (r/atom nil))[0m
+  [0m  [0m  [33m                 ^--- No such namespace: r, could not locate r.cljs, r.cljc, or JavaScript source providing "r"[0m
+  [36m 6[0m  [36m[0m
+  [36m 7[0m  [36m(defn import-file [ctx e][0m
+  [36m 8[0m  [36m  (let [file (-> e .-target .-files (aget 0))[0m
+  [36m 9[0m  [36m        reader (js/FileReader.)][0m
+  [36m10[0m  [36m    (set! (.-onload reader)[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/app.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/app.cljs   line:5  column:18  ----[0m
+
+  [1mUse of undeclared Var r/atom[0m
+
+  [36m 1[0m  [36m(ns keechma-todomvc.components.app[0m
+  [36m 2[0m  [36m  "# Main app component"[0m
+  [36m 3[0m  [36m  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]))[0m
+  [36m 4[0m  [36m[0m
+  [33m 5[0m  [1m(def file-input (r/atom nil))[0m
+  [0m  [0m  [33m                 ^--- Use of undeclared Var r/atom[0m
+  [36m 6[0m  [36m[0m
+  [36m 7[0m  [36m(defn import-file [ctx e][0m
+  [36m 8[0m  [36m  (let [file (-> e .-target .-files (aget 0))[0m
+  [36m 9[0m  [36m        reader (js/FileReader.)][0m
+  [36m10[0m  [36m    (set! (.-onload reader)[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/app.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.77 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[31mFailed to compile build :dev from ["src"] in 0.216 seconds.[0m
+[36m----  Could not Analyze  src/keechma_todomvc/components/app.cljs   line:1  column:1  ----[0m
+
+  [1mOnly :as alias, :refer (names) and :rename {from to} options supported in :require; offending spec: [keechma-todomvc.ui :refer [<comp comp> sub> <cmd] [reagent.core :as r]] at line 1 src/keechma_todomvc/components/app.cljs[0m
+
+  [33m1[0m  [1m(ns keechma-todomvc.components.app[0m
+  [0m [0m  [33m^--- Only :as alias, :refer (names) and :rename {from to} options supported in :require; offending spec: [keechma-todomvc.ui :refer [<comp comp> sub> <cmd] [reagent.core :as r]] at line 1 src/keechma_todomvc/components/app.cljs[0m
+  [36m2[0m  [36m  "# Main app component"[0m
+  [36m3[0m  [36m  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd][0m
+  [36m4[0m  [36m             [reagent.core :as r]]))[0m
+
+[36m----  Analysis Error : Please see src/keechma_todomvc/components/app.cljs  ----[0m
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.765 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.762 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/import_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[31mFailed to compile build :dev from ["src"] in 0.421 seconds.[0m
+[36m----  Could not Read  src/keechma_todomvc/components.cljs   line:24  column:63  ----[0m
+
+  [1mDuplicate key: :timer-button[0m
+
+  [36m22[0m  [36m:timer-button (assoc import-txt/component :topic :todos)[0m
+  [36m23[0m  [36m:todo-list todo-list/component[0m
+  [33m24[0m  [1m:toggle-todos (assoc toggle-todos/component :topic :todos)})[0m
+  [0m  [0m  [33m                                                           ^--- Duplicate key: :timer-button[0m
+
+[36m----  Reader Error : Please see src/keechma_todomvc/components.cljs  ----[0m
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.708 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.764 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.74 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/import_txt.js
