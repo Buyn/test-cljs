@@ -85,11 +85,22 @@
   (edb/insert-item app-db :todos patch-todo))
 
 (defn update-todo-time
+  "Updates the `:time` value on an existing todo item.
+  This handler expects a map with the `:todo`, `:id` and new `:time` value.
+  If the todo exists, a new todo map is created with the updated time
+  and stored back in the EntityDB.
+  Arguments:
+  - app-db: The current application state atom
+  - {:keys [id time todo]}: A map containing the todo ID and the new time (in seconds)
+  Returns:
+  - The updated `app-db` value
+  Notes:
+  - If `id` or `todo` is missing, the original `app-db` unchanged."
   [app-db {:keys [id time todo]}]
   (assert id)
+  (assert todo)
   (let [updated-todo (assoc todo :time time)]
     (edb/insert-item app-db :todos updated-todo)))
-
 
 (defn toggle-todo
   "Toggles the `:completed` status of a saved `todo`."
