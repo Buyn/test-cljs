@@ -4,16 +4,17 @@
 
 (defn import-file [ctx e]
   (let [file (-> e .-target .-files (aget 0))
-        reader (js/FileReader.)]
-    (set! (.-onload reader)
-          (fn [evt]
+        reader (js/FileReader.)
+        onload-evt (fn [evt]
             (let [content (.. evt -target -result)
                   lines (.split content "\n")]
               (doseq [l lines]
                 (let [t (clojure.string/trim l)]
                   (when-not (empty? t)
-                    (<cmd ctx :create-todo t)))))))
-    (.readAsText reader file)))
+                    (<cmd ctx :create-todo t))))))]
+        (set! (.-onload reader) onload-evt)
+    (println (.readAsText reader file))
+    ))
 
 (defn render [ctx]
   (let [file-input (r/atom nil)]  
@@ -24,7 +25,7 @@
                 :ref #(reset! file-input %)
                 :on-change #(import-file ctx %)}]
         [:button {:on-click #(.click @file-input)}
-        "Import from file"]])))
+        "📎Import from file"]])))
 
 (def component
   (<comp :renderer render))

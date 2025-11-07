@@ -752,3 +752,28 @@ notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/co
 Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 [32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.74 seconds.[0m
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/import_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[31mFailed to compile build :dev from ["src"] in 0.417 seconds.[0m
+[36m----  Could not Read  src/keechma_todomvc/components/import_txt.cljs   line:32 ----[0m
+
+  [1m/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/src/keechma_todomvc/components/import_txt.cljs [line 32, col 1] Unexpected EOF while reading item 6 of list, starting at line 5 and column 1.[0m
+
+[36m----  Reader Error : Please see src/keechma_todomvc/components/import_txt.cljs  ----[0m
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[31mFailed to compile build :dev from ["src"] in 0.465 seconds.[0m
+[36m----  Could not Analyze  src/keechma_todomvc/components/import_txt.cljs   line:15  column:16  ----[0m
+
+  [1mset! target must be a field or a symbol naming a var at line 15 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/src/keechma_todomvc/components/import_txt.cljs[0m
+
+  [36m13[0m  [36m              (when-not (empty? t)[0m
+  [36m14[0m  [36m                (<cmd ctx :create-todo t))))))[0m
+  [33m15[0m  [1m    result (set! (.-onload reader) onload-evt [0m
+  [0m  [0m  [33m           ^--- set! target must be a field or a symbol naming a var at line 15 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/src/keechma_todomvc/components/import_txt.cljs[0m
+  [36m16[0m  [36m                 (.readAsText reader file))][0m
+  [36m17[0m  [36m(println result)))[0m
+
+[36m----  Analysis Error : Please see src/keechma_todomvc/components/import_txt.cljs  ----[0m
+Figwheel: Can't open  ("src/keechma_todomvc/components/import_txt.cljs" 15 16) No :open-file-command supplied in the config.
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.726 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/import_txt.js
