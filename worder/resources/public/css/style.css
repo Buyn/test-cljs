@@ -415,3 +415,33 @@ html .clear-completed:active {
     font-size: 14px;
     color: #777;
 }
+
+.export-btn {
+    float: right;
+    margin-left: 8px;
+    padding: 3px 10px;
+    font-size: 12px;
+    line-height: 20px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    background: #fafafa;
+    cursor: pointer;
+    color: #555;
+    transition: all 0.2s ease-in-out;
+}
+
+.export-btn:hover {
+    background: #e6e6e6;
+    border-color: #aaa;
+    color: #333;
+}
+
+.export-btn:active {
+    background: #d6d6d6;
+    border-color: #888;
+}
+
+.footer .export-btn {
+    position: relative;
+    top: -2px;
+}
