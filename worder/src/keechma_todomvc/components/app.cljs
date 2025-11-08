@@ -37,6 +37,10 @@
                             :sep "\t"
                             :eof "\n"
                             :ext ".txt"}]
+    [comp> ctx :export-txt {:title "💾 Export to CSV "
+                            :sep ";"
+                            :eof "\n"
+                            :ext ".csv"}]
     [:p "Double-click to edit a Word"]
     [:p
      [:a {:href "https://keechma.com"} "Keechma"] " "

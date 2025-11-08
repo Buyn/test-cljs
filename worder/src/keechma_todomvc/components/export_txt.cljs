@@ -28,7 +28,7 @@
     [:button.export-btn
      {:on-click #(export-file todos props)
       :title "Export current list to text file"}
-     "💾 Export to text"]))
+     title]))
 
 (def component
   (<comp :renderer render
