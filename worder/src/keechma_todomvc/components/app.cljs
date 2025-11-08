@@ -33,7 +33,10 @@
         [comp> ctx :todo-list]]
        [comp> ctx :footer]])]
    [:footer.info
-    [comp> ctx :export-txt]
+    [comp> ctx :export-txt {:title "💾 Export to text"
+                            :sep "\t"
+                            :eof "\n"
+                            :ext ".txt"}]
     [:p "Double-click to edit a Word"]
     [:p
      [:a {:href "https://keechma.com"} "Keechma"] " "

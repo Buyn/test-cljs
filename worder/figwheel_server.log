@@ -1140,3 +1140,33 @@ notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/co
 Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 [32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.737 seconds.[0m
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.794 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:29  column:18  ----[0m
+
+  [1mWrong number of args (2) passed to keechma-todomvc.components.export-txt/export-file[0m
+
+  [36m25[0m  [36m(defn render [ctx {:keys [title] :as props}][0m
+  [36m26[0m  [36m  (let [route-status (keyword (route> ctx :status))[0m
+  [36m27[0m  [36m        todos (sub> ctx :todos-by-status route-status)][0m
+  [36m28[0m  [36m    [:button.export-btn[0m
+  [33m29[0m  [1m     {:on-click #(export-file todos props)[0m
+  [0m  [0m  [33m                 ^--- Wrong number of args (2) passed to keechma-todomvc.components.export-txt/export-file[0m
+  [36m30[0m  [36m      :title "Export current list to text file"}[0m
+  [36m31[0m  [36m     "💾 Export to text"]))[0m
+  [36m32[0m  [36m[0m
+  [36m33[0m  [36m(def component[0m
+  [36m34[0m  [36m  (<comp :renderer render[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.773 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.742 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.832 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
