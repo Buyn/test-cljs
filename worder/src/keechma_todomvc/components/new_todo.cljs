@@ -24,7 +24,7 @@
   (let [new-title (reagent/atom "")]
     (fn []
       [:input.new-todo
-       {:placeholder "What needs to be done?"
+       {:placeholder "What needs to be Word?"
         :value @new-title
         :auto-focus true
         :on-change #(reset! new-title (.. % -target -value))

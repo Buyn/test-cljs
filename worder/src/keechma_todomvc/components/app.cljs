@@ -32,19 +32,21 @@
         [comp> ctx :toggle-todos]
         [comp> ctx :todo-list]]
        [comp> ctx :footer]])]
+
+    [:div.export-panel
+        [comp> ctx :export-txt {:title "💾 Export to text"
+                                :sep "\t"
+                                :eof "\n"
+                                :ext ".txt"}]
+        [comp> ctx :export-txt {:title "💾 Export to CSV"
+                                :sep ";"
+                                :eof "\n"
+                                :ext ".csv"}]]
    [:footer.info
-    [comp> ctx :export-txt {:title "💾 Export to text"
-                            :sep "\t"
-                            :eof "\n"
-                            :ext ".txt"}]
-    [comp> ctx :export-txt {:title "💾 Export to CSV "
-                            :sep ";"
-                            :eof "\n"
-                            :ext ".csv"}]
     [:p "Double-click to edit a Word"]
     [:p
      [:a {:href "https://keechma.com"} "Keechma"] " "
-     [:a {:href "http://todomvc.com"} "Freeman"]]]])
+     [:a {:href "https://www.linkedin.com/in/buyn-max"} "Freeman"]]]])
 
 (def component
   (<comp :renderer render

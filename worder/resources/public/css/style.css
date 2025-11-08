@@ -416,6 +416,14 @@ html .clear-completed:active {
     color: #777;
 }
 
+.export-panel {
+    display: flex;
+    justify-content: flex-start;
+    gap: 8px;
+    margin: 10px 0 15px 0;
+    padding-left: 2px;
+}
+
 .export-btn {
     float: right;
     margin-left: 8px;
