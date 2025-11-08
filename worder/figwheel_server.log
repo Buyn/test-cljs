@@ -777,3 +777,300 @@ Figwheel: Can't open  ("src/keechma_todomvc/components/import_txt.cljs" 15 16) N
 Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 [32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.726 seconds.[0m
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/import_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 2.003 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/goog/deps.js
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/import_txt.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.767 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.745 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.751 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.793 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.738 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.738 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:28  column:34  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.export-txt/running?[0m
+
+  [36m24[0m  [36m;;     ))[0m
+  [36m25[0m  [36m[0m
+  [36m26[0m  [36m(defn render [ctx][0m
+  [36m27[0m  [36m(fn [][0m
+  [33m28[0m  [1m      [:div.timer {:class (when (running?) "running")}[0m
+  [0m  [0m  [33m                                 ^--- Use of undeclared Var keechma-todomvc.components.export-txt/running?[0m
+  [36m29[0m  [36m       [:button[0m
+  [36m30[0m  [36m        {:on-click toggle!} [0m
+  [36m31[0m  [36m        (if (running?) "■ Stop" "▶ Start")][0m
+  [36m32[0m  [36m       [:span.seconds (str @seconds " sec")]]))[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:30  column:20  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.export-txt/toggle![0m
+
+  [36m26[0m  [36m(defn render [ctx][0m
+  [36m27[0m  [36m(fn [][0m
+  [36m28[0m  [36m      [:div.timer {:class (when (running?) "running")}[0m
+  [36m29[0m  [36m       [:button[0m
+  [33m30[0m  [1m        {:on-click toggle!} [0m
+  [0m  [0m  [33m                   ^--- Use of undeclared Var keechma-todomvc.components.export-txt/toggle![0m
+  [36m31[0m  [36m        (if (running?) "■ Stop" "▶ Start")][0m
+  [36m32[0m  [36m       [:span.seconds (str @seconds " sec")]]))[0m
+  [36m33[0m  [36m[0m
+  [36m34[0m  [36m(def component[0m
+  [36m35[0m  [36m  (<comp :renderer render[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:31  column:14  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.export-txt/running?[0m
+
+  [36m27[0m  [36m(fn [][0m
+  [36m28[0m  [36m      [:div.timer {:class (when (running?) "running")}[0m
+  [36m29[0m  [36m       [:button[0m
+  [36m30[0m  [36m        {:on-click toggle!} [0m
+  [33m31[0m  [1m        (if (running?) "■ Stop" "▶ Start")][0m
+  [0m  [0m  [33m             ^--- Use of undeclared Var keechma-todomvc.components.export-txt/running?[0m
+  [36m32[0m  [36m       [:span.seconds (str @seconds " sec")]]))[0m
+  [36m33[0m  [36m[0m
+  [36m34[0m  [36m(def component[0m
+  [36m35[0m  [36m  (<comp :renderer render[0m
+  [36m36[0m  [36m         :subscription-deps [:todos-by-status]))[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:32  column:29  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.export-txt/seconds[0m
+
+  [36m28[0m  [36m      [:div.timer {:class (when (running?) "running")}[0m
+  [36m29[0m  [36m       [:button[0m
+  [36m30[0m  [36m        {:on-click toggle!} [0m
+  [36m31[0m  [36m        (if (running?) "■ Stop" "▶ Start")][0m
+  [33m32[0m  [1m       [:span.seconds (str @seconds " sec")]]))[0m
+  [0m  [0m  [33m                            ^--- Use of undeclared Var keechma-todomvc.components.export-txt/seconds[0m
+  [36m33[0m  [36m[0m
+  [36m34[0m  [36m(def component[0m
+  [36m35[0m  [36m  (<comp :renderer render[0m
+  [36m36[0m  [36m         :subscription-deps [:todos-by-status]))[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.843 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:33  column:29  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.export-txt/seconds[0m
+
+  [36m29[0m  [36m       [:button[0m
+  [36m30[0m  [36m        ;; {:on-click toggle!} [0m
+  [36m31[0m  [36m        ;; (if (running?) "■ Stop" "▶ Start")[0m
+  [36m32[0m  [36m        ][0m
+  [33m33[0m  [1m       [:span.seconds (str @seconds " sec")]]))[0m
+  [0m  [0m  [33m                            ^--- Use of undeclared Var keechma-todomvc.components.export-txt/seconds[0m
+  [36m34[0m  [36m[0m
+  [36m35[0m  [36m(def component[0m
+  [36m36[0m  [36m  (<comp :renderer render[0m
+  [36m37[0m  [36m         :subscription-deps [:todos-by-status]))[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.769 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.735 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.774 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.746 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:27  column:18  ----[0m
+
+  [1mNo such namespace: r, could not locate r.cljs, r.cljc, or JavaScript source providing "r"[0m
+
+  [36m23[0m  [36m;;     [:div][0m
+  [36m24[0m  [36m;;     ))[0m
+  [36m25[0m  [36m[0m
+  [36m26[0m  [36m(defn render [ctx todo][0m
+  [33m27[0m  [1m  (let [seconds (r/atom 0)[0m
+  [0m  [0m  [33m                 ^--- No such namespace: r, could not locate r.cljs, r.cljc, or JavaScript source providing "r"[0m
+  [36m28[0m  [36m        timer-id (r/atom nil)[0m
+  [36m29[0m  [36m        start-ms (r/atom nil)[0m
+  [36m30[0m  [36m        running? #(not (= @timer-id nil))[0m
+  [36m31[0m  [36m        counter #(reset! seconds (/ (- (.now js/Date) @start-ms) 1000))[0m
+  [36m32[0m  [36m        stop! (fn [][0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:27  column:18  ----[0m
+
+  [1mUse of undeclared Var r/atom[0m
+
+  [36m23[0m  [36m;;     [:div][0m
+  [36m24[0m  [36m;;     ))[0m
+  [36m25[0m  [36m[0m
+  [36m26[0m  [36m(defn render [ctx todo][0m
+  [33m27[0m  [1m  (let [seconds (r/atom 0)[0m
+  [0m  [0m  [33m                 ^--- Use of undeclared Var r/atom[0m
+  [36m28[0m  [36m        timer-id (r/atom nil)[0m
+  [36m29[0m  [36m        start-ms (r/atom nil)[0m
+  [36m30[0m  [36m        running? #(not (= @timer-id nil))[0m
+  [36m31[0m  [36m        counter #(reset! seconds (/ (- (.now js/Date) @start-ms) 1000))[0m
+  [36m32[0m  [36m        stop! (fn [][0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:28  column:19  ----[0m
+
+  [1mNo such namespace: r, could not locate r.cljs, r.cljc, or JavaScript source providing "r"[0m
+
+  [36m24[0m  [36m;;     ))[0m
+  [36m25[0m  [36m[0m
+  [36m26[0m  [36m(defn render [ctx todo][0m
+  [36m27[0m  [36m  (let [seconds (r/atom 0)[0m
+  [33m28[0m  [1m        timer-id (r/atom nil)[0m
+  [0m  [0m  [33m                  ^--- No such namespace: r, could not locate r.cljs, r.cljc, or JavaScript source providing "r"[0m
+  [36m29[0m  [36m        start-ms (r/atom nil)[0m
+  [36m30[0m  [36m        running? #(not (= @timer-id nil))[0m
+  [36m31[0m  [36m        counter #(reset! seconds (/ (- (.now js/Date) @start-ms) 1000))[0m
+  [36m32[0m  [36m        stop! (fn [][0m
+  [36m33[0m  [36m                (counter)[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:28  column:19  ----[0m
+
+  [1mUse of undeclared Var r/atom[0m
+
+  [36m24[0m  [36m;;     ))[0m
+  [36m25[0m  [36m[0m
+  [36m26[0m  [36m(defn render [ctx todo][0m
+  [36m27[0m  [36m  (let [seconds (r/atom 0)[0m
+  [33m28[0m  [1m        timer-id (r/atom nil)[0m
+  [0m  [0m  [33m                  ^--- Use of undeclared Var r/atom[0m
+  [36m29[0m  [36m        start-ms (r/atom nil)[0m
+  [36m30[0m  [36m        running? #(not (= @timer-id nil))[0m
+  [36m31[0m  [36m        counter #(reset! seconds (/ (- (.now js/Date) @start-ms) 1000))[0m
+  [36m32[0m  [36m        stop! (fn [][0m
+  [36m33[0m  [36m                (counter)[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:29  column:19  ----[0m
+
+  [1mNo such namespace: r, could not locate r.cljs, r.cljc, or JavaScript source providing "r"[0m
+
+  [36m26[0m  [36m(defn render [ctx todo][0m
+  [36m27[0m  [36m  (let [seconds (r/atom 0)[0m
+  [36m28[0m  [36m        timer-id (r/atom nil)[0m
+  [33m29[0m  [1m        start-ms (r/atom nil)[0m
+  [0m  [0m  [33m                  ^--- No such namespace: r, could not locate r.cljs, r.cljc, or JavaScript source providing "r"[0m
+  [36m30[0m  [36m        running? #(not (= @timer-id nil))[0m
+  [36m31[0m  [36m        counter #(reset! seconds (/ (- (.now js/Date) @start-ms) 1000))[0m
+  [36m32[0m  [36m        stop! (fn [][0m
+  [36m33[0m  [36m                (counter)[0m
+  [36m34[0m  [36m                (js/clearInterval @timer-id)[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:29  column:19  ----[0m
+
+  [1mUse of undeclared Var r/atom[0m
+
+  [36m26[0m  [36m(defn render [ctx todo][0m
+  [36m27[0m  [36m  (let [seconds (r/atom 0)[0m
+  [36m28[0m  [36m        timer-id (r/atom nil)[0m
+  [33m29[0m  [1m        start-ms (r/atom nil)[0m
+  [0m  [0m  [33m                  ^--- Use of undeclared Var r/atom[0m
+  [36m30[0m  [36m        running? #(not (= @timer-id nil))[0m
+  [36m31[0m  [36m        counter #(reset! seconds (/ (- (.now js/Date) @start-ms) 1000))[0m
+  [36m32[0m  [36m        stop! (fn [][0m
+  [36m33[0m  [36m                (counter)[0m
+  [36m34[0m  [36m                (js/clearInterval @timer-id)[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:37  column:18  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.export-txt/<cmd[0m
+
+  [36m33[0m  [36m        (counter)[0m
+  [36m34[0m  [36m        (js/clearInterval @timer-id)[0m
+  [36m35[0m  [36m        (reset! timer-id nil)[0m
+  [36m36[0m  [36m        (reset! start-ms nil)[0m
+  [33m37[0m  [1m        (<cmd ctx[0m
+  [0m  [0m  [33m         ^--- Use of undeclared Var keechma-todomvc.components.export-txt/<cmd[0m
+  [36m38[0m  [36m              :update-todo-time[0m
+  [36m39[0m  [36m              {:id (:id todo) :time @seconds :todo todo}))[0m
+  [36m40[0m  [36mstart! (fn [][0m
+  [36m41[0m  [36m          (reset! start-ms (.now js/Date))[0m
+  [36m42[0m  [36m          (reset! timer-id (js/setInterval counter 100)))[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.875 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:38  column:18  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.export-txt/<cmd[0m
+
+  [36m34[0m  [36m        (counter)[0m
+  [36m35[0m  [36m        (js/clearInterval @timer-id)[0m
+  [36m36[0m  [36m        (reset! timer-id nil)[0m
+  [36m37[0m  [36m        (reset! start-ms nil)[0m
+  [33m38[0m  [1m        (<cmd ctx[0m
+  [0m  [0m  [33m         ^--- Use of undeclared Var keechma-todomvc.components.export-txt/<cmd[0m
+  [36m39[0m  [36m              :update-todo-time[0m
+  [36m40[0m  [36m              {:id (:id todo) :time @seconds :todo todo}))[0m
+  [36m41[0m  [36mstart! (fn [][0m
+  [36m42[0m  [36m          (reset! start-ms (.now js/Date))[0m
+  [36m43[0m  [36m          (reset! timer-id (js/setInterval counter 100)))[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.786 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.861 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.801 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.782 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.747 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.814 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.784 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.755 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.828 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.782 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.756 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.756 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/app.js

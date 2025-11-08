@@ -13,8 +13,7 @@
                   (when-not (empty? t)
                     (<cmd ctx :create-todo t))))))]
         (set! (.-onload reader) onload-evt)
-    (println (.readAsText reader file))
-    ))
+        (println (.readAsText reader file))))
 
 (defn render [ctx]
   (let [file-input (r/atom nil)]  

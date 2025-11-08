@@ -2008,6 +2008,21 @@ button {
 **** захостить
 возможно нужна будет помошь Уни
 **** передать вале
+** сделать тестовый проект магазина орг
+*** firebase store proeject
+поидее должен быть котовое решение для магазина 
+и вообще готовый термен для поиска
+
+*** cljs-firebase-client
+
+Используй cljs-firebase-client: Эта библиотека упростит интеграцию с Firebase в ClojureScript.
+
+
+MVP	Каталог книг (json или Firestore)	всё локально
+1	Корзина, хранение заказов	Firestore
+2	Авторизация пользователей	Firebase Auth
+3	Деплой	Firebase Hosting
+4	Красота и метаданные	SEO, OpenGraph, manifest.json
 ** програма измерения прочитанного
 *** продумать интерфейс
 *** реализовать
@@ -2074,26 +2089,6 @@ Counter application example.
 
 ,* [[https://github.com/keechma/keechma-counter][Source code]]
 ,* [[https://keechma.com/annotated/counter/][Annotated source]]
-** DONE Keechma
-*** to
-
-
-https://keechma.com/guides/application-walkthrough/
-
-https://github.com/keechma/keechma
-https://keechma.com/api/index.html
-
-
-
-*** done
-https://keechma.com/guides/introduction/
-
-https://keechma.com/guides/
-https://keechma.com/guides/ui-system/
-https://keechma.com/guides/gluing/
-https://keechma.com/guides/entitydb/
-https://keechma.com/guides/controllers/
-https://keechma.com/guides/router/
 ** reagent-material-ui
 *** use
 https://github.com/DaveWM/reagent-material-u
@@ -2102,17 +2097,6 @@ https://github.com/arttuka/reagent-material-ui
 https://mui.com/material-ui/getting-started/supported-components/
 https://mui.com/material-ui/getting-started
 https://m1.material.io/material-design/introduction.html#
-
-** cljs-firebase-client
-
-Используй cljs-firebase-client: Эта библиотека упростит интеграцию с Firebase в ClojureScript.
-
-
-MVP	Каталог книг (json или Firestore)	всё локально
-1	Корзина, хранение заказов	Firestore
-2	Авторизация пользователей	Firebase Auth
-3	Деплой	Firebase Hosting
-4	Красота и метаданные	SEO, OpenGraph, manifest.json
 
 ** прочитать
 https://clojurescript.org/guides/quick-start
@@ -2130,7 +2114,6 @@ https://www.youtube.com/watch?v=j-kj2qwJa_E
 https://www.youtube.com/watch?v=KZjFVdU8VLI
 https://github.com/bhauman/figwheel-main
 
-** сделать тестовый проект магазина орг
 ** TODO Структура приложения
 
 Главная страница: Приветствие, информация о кофейне и книжном магазине.
@@ -2141,12 +2124,15 @@ https://github.com/bhauman/figwheel-main
 сделать и оплатить заказ кофе
 меню
 вызвать официанат
-** Изучить рефрейм
+** Изучить re-frame
 *** читать
 https://day8.github.io/re-frame/dominoes-30k/
 https://day8.github.io/re-frame/start-coding/
 https://github.com/day8/re-frame/blob/master/docs/External-Resources.md
 https://github.com/day8/re-frame-template/tree/master
+*** todo re-frame
+https://github.com/thdaraujo/re-frame-todo
+https://todomvc.com/
 *** сделать теплат
 https://github.com/Day8/re-frame-template
 *** почитать ре-фрейм сайт?
@@ -2187,163 +2173,73 @@ https://shadow-cljs.github.io/docs/UsersGuide.html
 https://cljdoc.org/d/kee-frame/kee-frame/0.3.4-SNAPSHOT/doc/readme
 
 https://github.com/ingesolvoll/kee-frame
-** CANCELED semantic‑ui‑reagent 
-https://react.semantic-ui.com/
-https://github.com/toyokumo/semantic-ui-reagent
+** изучить Fulcro
+**Angular-подобный фреймворк** для Clojure/ClojureScript — то ответ:
 
-** DONE понять какой проеkт темплат взять за основу
-*** 01
-clj -X:new :template figwheel-main :name learn-cljs/notes :args '["+deps" "--reagent"]'
-clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent"]'
-clj -X:new :template re-frame :name freeman/tolk :args '["+deps" "+re-com" "+10x"]'
+📌 **Есть аналоги по масштабу и строгости архитектуры.
+Это НЕ плохая идея — просто очень другая философия.**
 
-clj -Tnew create :template figwheel-main :name freeman/tolk :args '["--reagent"]'
+---
 
-clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent" "+re-com" "+10x"]'
+## ✅ Angular ≈ ClojureScript аналоги
 
-deps.edn:
-{:paths ["src" "resources"]
- :deps {org.clojure/clojurescript {:mvn/version "1.11.132"}
-        reagent/reagent {:mvn/version "1.2.0"}
-        re-frame/re-frame {:mvn/version "1.4.3"}
-        re-com/re-com {:mvn/version "2.13.2"}
-        day8.re-frame/tracing {:mvn/version "0.6.2"}}
- :aliases
- {:fig {:extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.18"}
-                     com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
-        :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}}}
+| Аналог Angular       | Что это                                          | Уровень «фреймворковости» | Примечание                                  |
+| -------------------- | ------------------------------------------------ | ------------------------- | ------------------------------------------- |
+| **Fulcro**           | Полноценный SPA-фреймворк (UI + сервер + данные) | 🟥🟥🟥🟥🟥                | State-driven, EQL/Pathom, мощный но сложный |
+| **Keechma**          | Архитектура + потоки данных                      | 🟥🟥🟥🟥⬜                 | Чистый FRP, круто но требует понимания      |
+| **Re-frame**         | Архитектура поверх Reagent                       | 🟥🟥🟥⬜⬜                  | Самый популярный путь                       |
+| **Helix** + tools    | Лёгкое ядро, можно достроить                     | 🟥🟥⬜⬜⬜                   | Совсем без «магии»                          |
+| **Hoplon** / Javelin | Реактивность без Virtual DOM                     | 🟥⬜⬜⬜⬜                    | Экзотика, но красиво                        |
 
+---
 
-И создай dev.cljs.edn:
-{:main freeman.tolk.core
- :output-to "resources/public/js/app.js"
- :output-dir "resources/public/js/out"
- :asset-path "js/out"
- :preloads [day8.re-frame-10x.preload]
- :infer-externs true}
-*** figwheel-main
+### Если сравнивать напрямую
 
-2. Рекомендованная база — figwheel-main template
+| Angular                      | Fulcro                                      |
+| ---------------------------- | ------------------------------------------- |
+| RxJS, DI, «магия»            | EQL + UI = DB query                         |
+| Сильная структура, сложность | Сильная структура, **ещё больше** сложности |
+| Компоненты = классы          | UI = pure data driven                       |
+| Two-way binding              | **One source of truth**                     |
 
-Шаг, который даст тебе чистый, deps.edn-проект с Figwheel и возможностью добавить re-frame вручную:
+**Fulcro — ближе всего к Angular по уровню “всё включено”**, но с функциональной, деклартивной моделью.
+Для многих разработчиков — это **лучший способ писать большие приложения на CLJS**.
 
-clj -Tnew create :template figwheel-main :name freeman/tolk :args '["--reagent"]'
+---
 
+## ❓ Плохая ли идея «Angular для Clojure»?
 
-⚡ --reagent уже создаёт точку входа с Reagent-компонентом и hot-reload через Figwheel.
-Отсюда ты легко добавишь re-frame + re-com вручную, без теней шаблона.
+Совершенно **нет**. Но:
 
-🧩 3. Добавляем зависимости вручную
+Angular = много boilerplate, императивных концепций
+Clojure = минимализм, иммутабельность, декларативная реактивность
 
-В deps.edn:
+👉 Поэтому Clojure-сообщество **не копирует Angular**, а делает **лучше**
 
-{:paths ["src" "resources"]
- :deps {org.clojure/clojurescript {:mvn/version "1.11.132"}
-        reagent/reagent           {:mvn/version "1.2.0"}
-        re-frame/re-frame         {:mvn/version "1.4.3"}
-        re-com/re-com             {:mvn/version "2.13.2"}
-        com.bhauman/figwheel-main {:mvn/version "0.2.18"}
-        com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
- :aliases
- {:dev {:main-opts ["-m" "figwheel.main" "--build" "dev" "--repl"]}}}
+---
 
-🔧 4. Настройки Figwheel
+### 🔥 Практическое резюме
 
-Создай dev.cljs.edn:
+| Размер проекта                     | Рекомендация                |
+| ---------------------------------- | --------------------------- |
+| Маленький SPA, быстро стартовать   | **Reagent + немного state** |
+| Средний, серьёзная архитектура     | **Re-frame**                |
+| Большой enterprise, сложные домены | **Fulcro** или **Keechma**  |
 
-^{:auto-bundle :webpack
-  :watch-dirs ["src"]
-  :css-dirs ["resources/public/css"]}
-{:main freeman.tolk.core}
+---
 
-🌱 5. Минимальный src/freeman/tolk/core.cljs
-(ns freeman.tolk.core
-  (:require [reagent.dom :as rdom]
-            [re-frame.core :as rf]
-            [re-com.core :as rc]))
+## Хочешь — сделаем следующее
 
-;; --- Ре-фрейм база ---
-(rf/reg-event-db
- :initialize
- (fn [_ _]
-   {:count 0}))
+Я могу предложить три направления, ты выбираешь:
 
-(rf/reg-sub
- :count
- (fn [db _] (:count db)))
+1️⃣ *«Как Angular, но на Clojure»* — показать **Fulcro** компонент + backend query
+2️⃣ *«Легко и быстро»* — Reagent + Re-frame пример TODO
+3️⃣ Разбор твоего текущего Keechma-проекта — улучшения архитектуры
 
-(rf/reg-event-db
- :inc
- (fn [db _] (update db :count inc)))
-
-(defn counter []
-  [rc/v-box
-   :children [[rc/label :label "Book counter"]
-              [rc/button :label "Add Book"
-                         :on-click #(rf/dispatch [:inc])]
-              [rc/label :label @(rf/subscribe [:count])]]])
-
-(defn mount-root []
-  (rf/dispatch-sync [:initialize])
-  (rdom/render [counter] (js/document.getElementById "app")))
-
-(defn ^:after-load reload [] (mount-root))
-
-(defn ^:export init [] (mount-root))
-
-🚀 6. Запуск
-clj -M:dev
+Что выберем?
+Могу сразу показать минимальный рабочий пример на выбранном инструменте.
 
 
-Figwheel поднимет REPL, откроет браузер и будет делать hot reload.
-Ты уже сможешь править UI и видеть результат мгновенно ⚡
-
-💡 Альтернатива
-
-Если ты всё же хочешь сразу готовый шаблон с re-frame, можно взять Day8/re-frame-template
- и заставить его работать с deps.edn, но это немного «хакерски» (он всё ещё больше под Lein).
-Так что для лёгкого старта — Figwheel + deps.edn + ручное добавление re-frame — это чисто, прозрачно и под полным твоим контролем.
-
-Хочешь, я соберу тебе готовый минимальный zip-шаблон (со всеми этими файлами, deps.edn и html), который можно просто распаковать и clj -M:dev — всё взлетит?
-*** +firebase +keechma
-(setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
-
- Reagent-figwheel: client-side template with lots of options (cider, devcards, firebase, petrol, keechma, etc.)
-
- 
-To add a profile to the base template, just append the profile name (let's use +routes as an example):
-
-lein new reagent-figwheel <project-name> +routes
-
-Any combinations of profiles can be added at once, for example:
-
-lein new reagent-figwheel <project-name> +cider +test +garden +less +routes +re-frisk
-
-
-https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
-
-Reagent-figwheel is a client-side, leiningen template for reagent + figwheel. The available profiles include:
-
-CSS: +garden (Generate CSS with Clojure) +less (Less css compiler plugin for the leiningen (clojure) build tool)
-
-Development: +test (doo is a library and lein plugin to run cljs.test on different js environments.) +devcards (Devcards aims to provide a visual REPL experience for ClojureScript)
-
-Editor: +cider (The Clojure Interactive Development Environment that Rocks for Emacs)
-
-Persistence: +firebase (Matchbox, a Firebase client for Clojure(Script))
-
-Routing: +routes (Secretary, a client-side router for ClojureScript.)
-
-Frameworks: +petrol (A simple event-handling framework for ClojureScript projects.) +keechma (Micro frontend framework for ClojureScript and Reagent)
-
-Q: How is this different than reagent-template? A: Reagent-template is fantastic, production ready, and should be used too! However, reagent-template is a little heavy and includes clojure as a backend. Reagent-figwheel focuses on being light-weight by default, and is only client-side.
-
-Q: Why don't you have re-frame? A: I recommend using re-frame-template instead (https://github.com/Day8/re-frame-template)
-
-** 
-** DONE [[file:noter/noter-cljs-project.org::*начать вносить измения по книге][начать вносить измения по книге]]
-** DONE [[file:noter/noter-cljs-project.org::*поэксперементировать с каналами][поэксперементировать с каналами]]
-** DONE [[file:noter/noter-cljs-project.org::*запустить собраное][запустить собраное]]
 * DONE arhiv
 ** DONE Осмотрет проект на котором остановился
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/Group-Chat-cljs-project.org")
@@ -2749,6 +2645,183 @@ CLOSED: [2024-08-18 Sun 11:11]
 ~/Dev/ClojureScript/tutorials/my-cljs-project $  clj -m cljs.main --compile my-cljs-project.core --repl
 Please install rlwrap for command editing or use "clojure" instead.
 
+** CANCELED semantic‑ui‑reagent 
+https://react.semantic-ui.com/
+https://github.com/toyokumo/semantic-ui-reagent
+
+** DONE понять какой проеkт темплат взять за основу
+*** 01
+clj -X:new :template figwheel-main :name learn-cljs/notes :args '["+deps" "--reagent"]'
+clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent"]'
+clj -X:new :template re-frame :name freeman/tolk :args '["+deps" "+re-com" "+10x"]'
+
+clj -Tnew create :template figwheel-main :name freeman/tolk :args '["--reagent"]'
+
+clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent" "+re-com" "+10x"]'
+
+deps.edn:
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojurescript {:mvn/version "1.11.132"}
+        reagent/reagent {:mvn/version "1.2.0"}
+        re-frame/re-frame {:mvn/version "1.4.3"}
+        re-com/re-com {:mvn/version "2.13.2"}
+        day8.re-frame/tracing {:mvn/version "0.6.2"}}
+ :aliases
+ {:fig {:extra-deps {com.bhauman/figwheel-main {:mvn/version "0.2.18"}
+                     com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+        :main-opts ["-m" "figwheel.main" "-b" "dev" "-r"]}}}
+
+
+И создай dev.cljs.edn:
+{:main freeman.tolk.core
+ :output-to "resources/public/js/app.js"
+ :output-dir "resources/public/js/out"
+ :asset-path "js/out"
+ :preloads [day8.re-frame-10x.preload]
+ :infer-externs true}
+*** figwheel-main
+
+2. Рекомендованная база — figwheel-main template
+
+Шаг, который даст тебе чистый, deps.edn-проект с Figwheel и возможностью добавить re-frame вручную:
+
+clj -Tnew create :template figwheel-main :name freeman/tolk :args '["--reagent"]'
+
+
+⚡ --reagent уже создаёт точку входа с Reagent-компонентом и hot-reload через Figwheel.
+Отсюда ты легко добавишь re-frame + re-com вручную, без теней шаблона.
+
+🧩 3. Добавляем зависимости вручную
+
+В deps.edn:
+
+{:paths ["src" "resources"]
+ :deps {org.clojure/clojurescript {:mvn/version "1.11.132"}
+        reagent/reagent           {:mvn/version "1.2.0"}
+        re-frame/re-frame         {:mvn/version "1.4.3"}
+        re-com/re-com             {:mvn/version "2.13.2"}
+        com.bhauman/figwheel-main {:mvn/version "0.2.18"}
+        com.bhauman/rebel-readline-cljs {:mvn/version "0.1.4"}}
+ :aliases
+ {:dev {:main-opts ["-m" "figwheel.main" "--build" "dev" "--repl"]}}}
+
+🔧 4. Настройки Figwheel
+
+Создай dev.cljs.edn:
+
+^{:auto-bundle :webpack
+  :watch-dirs ["src"]
+  :css-dirs ["resources/public/css"]}
+{:main freeman.tolk.core}
+
+🌱 5. Минимальный src/freeman/tolk/core.cljs
+(ns freeman.tolk.core
+  (:require [reagent.dom :as rdom]
+            [re-frame.core :as rf]
+            [re-com.core :as rc]))
+
+;; --- Ре-фрейм база ---
+(rf/reg-event-db
+ :initialize
+ (fn [_ _]
+   {:count 0}))
+
+(rf/reg-sub
+ :count
+ (fn [db _] (:count db)))
+
+(rf/reg-event-db
+ :inc
+ (fn [db _] (update db :count inc)))
+
+(defn counter []
+  [rc/v-box
+   :children [[rc/label :label "Book counter"]
+              [rc/button :label "Add Book"
+                         :on-click #(rf/dispatch [:inc])]
+              [rc/label :label @(rf/subscribe [:count])]]])
+
+(defn mount-root []
+  (rf/dispatch-sync [:initialize])
+  (rdom/render [counter] (js/document.getElementById "app")))
+
+(defn ^:after-load reload [] (mount-root))
+
+(defn ^:export init [] (mount-root))
+
+🚀 6. Запуск
+clj -M:dev
+
+
+Figwheel поднимет REPL, откроет браузер и будет делать hot reload.
+Ты уже сможешь править UI и видеть результат мгновенно ⚡
+
+💡 Альтернатива
+
+Если ты всё же хочешь сразу готовый шаблон с re-frame, можно взять Day8/re-frame-template
+ и заставить его работать с deps.edn, но это немного «хакерски» (он всё ещё больше под Lein).
+Так что для лёгкого старта — Figwheel + deps.edn + ручное добавление re-frame — это чисто, прозрачно и под полным твоим контролем.
+
+Хочешь, я соберу тебе готовый минимальный zip-шаблон (со всеми этими файлами, deps.edn и html), который можно просто распаковать и clj -M:dev — всё взлетит?
+*** +firebase +keechma
+(setq cider-cljs-lein-repl "(do (use 'figwheel-sidecar.repl-api) (start-figwheel!) (cljs-repl))")
+
+ Reagent-figwheel: client-side template with lots of options (cider, devcards, firebase, petrol, keechma, etc.)
+
+ 
+To add a profile to the base template, just append the profile name (let's use +routes as an example):
+
+lein new reagent-figwheel <project-name> +routes
+
+Any combinations of profiles can be added at once, for example:
+
+lein new reagent-figwheel <project-name> +cider +test +garden +less +routes +re-frisk
+
+
+https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
+
+Reagent-figwheel is a client-side, leiningen template for reagent + figwheel. The available profiles include:
+
+CSS: +garden (Generate CSS with Clojure) +less (Less css compiler plugin for the leiningen (clojure) build tool)
+
+Development: +test (doo is a library and lein plugin to run cljs.test on different js environments.) +devcards (Devcards aims to provide a visual REPL experience for ClojureScript)
+
+Editor: +cider (The Clojure Interactive Development Environment that Rocks for Emacs)
+
+Persistence: +firebase (Matchbox, a Firebase client for Clojure(Script))
+
+Routing: +routes (Secretary, a client-side router for ClojureScript.)
+
+Frameworks: +petrol (A simple event-handling framework for ClojureScript projects.) +keechma (Micro frontend framework for ClojureScript and Reagent)
+
+Q: How is this different than reagent-template? A: Reagent-template is fantastic, production ready, and should be used too! However, reagent-template is a little heavy and includes clojure as a backend. Reagent-figwheel focuses on being light-weight by default, and is only client-side.
+
+Q: Why don't you have re-frame? A: I recommend using re-frame-template instead (https://github.com/Day8/re-frame-template)
+
+** 
+** DONE [[file:noter/noter-cljs-project.org::*начать вносить измения по книге][начать вносить измения по книге]]
+** DONE [[file:noter/noter-cljs-project.org::*поэксперементировать с каналами][поэксперементировать с каналами]]
+** DONE [[file:noter/noter-cljs-project.org::*запустить собраное][запустить собраное]]
+** DONE Keechma
+*** to
+
+
+https://keechma.com/guides/application-walkthrough/
+
+https://github.com/keechma/keechma
+https://keechma.com/api/index.html
+
+
+
+*** done
+https://keechma.com/guides/introduction/
+
+https://keechma.com/guides/
+https://keechma.com/guides/ui-system/
+https://keechma.com/guides/gluing/
+https://keechma.com/guides/entitydb/
+https://keechma.com/guides/controllers/
+https://keechma.com/guides/router/
 * project comands
 :PROPERTIES:
 :header-args: :tangle no

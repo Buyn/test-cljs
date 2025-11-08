@@ -33,6 +33,7 @@
         [comp> ctx :todo-list]]
        [comp> ctx :footer]])]
    [:footer.info
+    [comp> ctx :export-txt]
     [:p "Double-click to edit a Word"]
     [:p
      [:a {:href "https://keechma.com"} "Keechma"] " "
@@ -44,5 +45,6 @@
                           :toggle-todos
                           :todo-list
                           :import-txt
+                          :export-txt
                           :footer]
          :subscription-deps [:has-todos?]))

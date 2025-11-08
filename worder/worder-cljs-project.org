@@ -85,6 +85,7 @@
             [keechma-todomvc.components.timer-button :as timer-button]
             [keechma-todomvc.components.todo-item :as todo-item]
             [keechma-todomvc.components.todo-list :as todo-list]
+            [keechma-todomvc.components.export-txt :as export-txt]
             [keechma-todomvc.components.import-txt :as import-txt]
             [keechma-todomvc.components.toggle-todos :as toggle-todos]))
 
@@ -98,6 +99,8 @@
    :todo-item (assoc todo-item/component :topic :todos)
    :timer-button (assoc timer-button/component :topic :todos)
    :import-txt (assoc import-txt/component :topic :todos)
+   ;; :export-txt (assoc export-txt/component :topic :todos)
+   :export-txt export-txt/component
    :todo-list todo-list/component
    :toggle-todos (assoc toggle-todos/component :topic :todos)})
 
@@ -482,6 +485,7 @@
         [comp> ctx :todo-list]]
        [comp> ctx :footer]])]
    [:footer.info
+    [comp> ctx :export-txt]
     [:p "Double-click to edit a Word"]
     [:p
      [:a {:href "https://keechma.com"} "Keechma"] " "
@@ -493,11 +497,11 @@
                           :toggle-todos
                           :todo-list
                           :import-txt
+                          :export-txt
                           :footer]
          :subscription-deps [:has-todos?]))
 
 #+end_src
-
 
 **** exempls
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/app.cljs")
@@ -1101,6 +1105,48 @@ running?
 (def component
   (<comp :renderer render))
 #+end_src
+**** reple
+*** components/export_txt.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/keechma_todomvc/components/export_txt.cljs
+:END:
+**** file export_txt.cljs
+(find-file-other-frame "./src/keechma_todomvc/components/export_txt.cljs")
+**** src export_txt.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.export-txt
+  (:require [keechma-todomvc.ui :refer [<comp sub> route>]]
+            [clojure.string :as str]))
+
+(defn export-file [todos]
+  (let [lines (map (fn [{:keys [title time]}]
+                     (str title "\t" (or time 0)))
+                   todos)
+        content (str/join "\n" lines)
+        blob (js/Blob. #js [content] #js {:type "text/plain"})
+        url (.createObjectURL js/URL blob)
+        a (.createElement js/document "a")]
+    (set! (.-href a) url)
+    (set! (.-download a) "todos.txt")
+    (.click a)
+    (.revokeObjectURL js/URL url)))
+
+(defn render [ctx]
+  (let [route-status (keyword (route> ctx :status))
+        todos (sub> ctx :todos-by-status route-status)]
+    [:button {:on-click #(export-file @todos)}
+     "💾 Export to text"]))
+
+(def component
+  (<comp :renderer render
+         :subscription-deps [:todos-by-status]))
+
+#+end_src
+**** CANCELED arhiv
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+***** 
 **** reple
 *** components/todo_item.cljs
 :PROPERTIES:
@@ -1992,244 +2038,353 @@ lein deps :refresh
 *** clon
 git clone https://github.com/keechma/example-todomvc.git
 * TODO todo worder
-** загрузить список слов
+** добавить кнопки сохранить слова 
+*** raw
+возможно только сразу все в текст
+с результатами в текстовый фаил
+сохранить только завершоные
+сохранить только не завершоные
+сохронять те что в даный момент отфильтрованы
+тоесть кнопка "сохранить активные as .txt"
+тоесть либо все либо завершоные либо не завершоные
 *** src
-**** file components/app.cljs
-(find-file-other-frame "./src/keechma_todomvc/components/app.cljs")
-**** src components/app.cljs
-#+begin_src clojure :no-expand t :mkdirp yes 
-(ns keechma-todomvc.components.app
-  "# Main app component"
-  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
+**** keechma-todomvc.components.todo-list
+(ns keechma-todomvc.components.todo-list
+  "# Todo List component"
+  (:require [keechma-todomvc.ui :refer [<comp comp> route> sub>]]))
 
 (defn render
+  "## Renders a list of currently visible todos
+
+  `todo` visiblity is controlled by the current `route`.
+
+### Component Deps
+
+- `:todo-item` Each list item is rendered by a `:todo-item` component
+  that receives the `todo` and the calculated `is-editing?` value as
+  arguments.
+
+### Subscription Deps
+
+- `:todos-by-status` returns `todos` with a `status`
+- `:edit-todo` returns the `todo` currently being edited, or nil"
   [ctx]
-  [:<>
-   [:section.todoapp
-    [:header.header
-     [:h1 "Worder"]
-     [comp> ctx :new-todo]]
-    (when (sub> ctx :has-todos?)
-      [:<>
-       [:section.main
-        [comp> ctx :toggle-todos]
-        [comp> ctx :todo-list]]
-       [comp> ctx :footer]])]
-   [:footer.info
-    [:p "Double-click to edit a todo"]
-    [:p
-     [:a {:href "https://keechma.com"} "Keechma"] " "
-     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+  (let [route-status (keyword (route> ctx :status))
+        is-editing? (fn [id] (= id (:id (sub> ctx :edit-todo))))
+        todo-item (fn [{id :id :as todo}]
+                    ^{:key id} [comp> ctx :todo-item todo (is-editing? id)])]
+    [:ul.todo-list
+     (doall (map todo-item (sub> ctx :todos-by-status route-status)))]))
 
 (def component
   (<comp :renderer render
-         :component-deps [:new-todo
-                          :toggle-todos
-                          :todo-list
-                          :footer]
-         :subscription-deps [:has-todos?]))
+         :component-deps [:todo-item]
+         :subscription-deps [:todos-by-status
+                             :edit-todo]))
+**** keechma-todomvc.subscriptions
+(ns keechma-todomvc.subscriptions
+  "# Todo Subscriptions
 
-#+end_src
+  Subscription functions return `reagent reactions` that cause
+  subscribed UI `components` to re-render when the value managed by
+  the `reaction` changes."
+  (:require [keechma-todomvc.entities.todo :as todo]
+            [reagent.ratom :refer-macros [reaction]]))
 
+;; ## Todos List
 
-*** Довай в components/app.cljs сделаем кнопку
-разместим под тайтлом Вордер.
-она должна просить юзера указать путь к файлу для загрузки.
-читать этот фаил. Парсить его контент на строки.
-и добовлять каждую строку, как новое туду.
+(defn todos-by-status
+  "Returns a `reaction` on the list of `todos` with a `status`."
+  [app-db status]
+  (reaction
+   (todo/todos-by-status @app-db status)))
 
-*** План реализации
-Супер! Вот как мы можем реализовать такой функционал "загрузки файла → парсинг строк → добавление каждой строки как отдельное todo" для вашего приложения Keechma + Reagent. Я дам **шаг-за-шагом** + код-пример.
+(defn count-todos-by-status
+  "Derived `reaction` that returns the `count` of `todos` with a
+  `status`. Fires only when the `count` changes, independent of the
+  details of the list contents."
+  [app-db status]
+  (reaction
+   (count @(todos-by-status app-db status))))
+
+(defn has-todos-by-status?
+  "Derived `reaction` that returns `true` if any `todos` with a `status`
+  exist. Fires only on a transition either way between `none` and
+  `some`, independent of the details of the list contents."
+  [app-db status]
+  (reaction
+   (some? (seq @(todos-by-status app-db status)))))
+
+(defn has-todos?
+  "Returns a `reaction` that indicates if there are currently any `todos`
+  at all."
+  [app-db]
+  (has-todos-by-status? app-db :all))
+
+;; ## Todo Editing
+
+(defn edit-todo
+  "Returns a `reaction` on the `todo` that is being edited."
+  [app-db]
+  (reaction
+   (todo/edit-todo @app-db)))
+
+(def subscriptions {:todos-by-status todos-by-status
+                    :count-todos-by-status count-todos-by-status
+                    :has-todos-by-status? has-todos-by-status?
+                    :has-todos? has-todos?
+                    :edit-todo edit-todo})
+*** помоги сделать новый компонент
+новая кнопка.
+открывает диолог сохранеия текстового файла.
+сохраняет текстовый фаил, в котором каждая строка это туду и через символ "таба" значаение секунд. если секунд нет то значение = 0.
+сохранение происходи не всех туду а выбраных фильтром в даный момент.
+*** 01 оут
+Отлично, сделаем компонент **Export TXT** рядом с твоим Import-компонентом 💪
+(Используем аналогичный шаблон.)
 
 ---
-## 🔍 План реализации
 
-1. Добавить кнопку или инпут `<input type="file">` в компонент.
-2. При выборе файла — прочитать его содержимое (FileReader API) ([MDN Web Docs][1]).
-3. Разбить содержимое на строки (`.split("\n")`).
-4. Для каждой строки вызвать команду контроллера `:create-todo` (или аналог) с этой строкой как заголовок.
-5. Опционально: показать пользователю прогресс (например “добавлено N задач”).
-6. Обеспечить обработку ошибок (пустой файл, слишком длинные строки и т.д.).
+## ✅ Твой вопрос про существующий код
 
----
-
-## 🧮 Пример компонента: `file-import-button.cljs`
+Этот блок:
 
 ```clojure
-(ns keechma-todomvc.components.file-import-button
-  (:require [reagent.core :as r]
-            [keechma-todomvc.ui :refer [<cmd <comp]]))
-
-(defn render‐import [_ctx]
-  (let [file-ref (r/atom nil)]
-    (fn []
-      [:div.file-import
-       [:input {:type "file"
-                :accept ".txt"
-                :on-change (fn [e]
-                             (let [file (-> e .-target .-files (aget 0))]
-                               (when file
-                                 (let [reader (js/FileReader.)]
-                                   (set! (.-onload reader)
-                                         (fn [evt]
-                                           (let [text (.. evt -target -result)
-                                                 lines (.split text "\n")]
-                                             (doseq [line lines
-                                                     :let [trimmed (clojure.string/trim line)]
-                                                     :when (not (clojure.string/blank? trimmed))]
-                                               (<cmd _ctx :create-todo trimmed)))))
-                                   (.readAsText reader file))))]
-        ]
-       [:button {:on-click #(when @file-ref (.click @file-ref))}
-        "Import todo-file"]])))
+[:div
+ [:input {:type "file"
+          :style {:display "none"}
+          :ref #(reset! file-input %)
+          :on-change #(import-file ctx %)}]
+ [:button {:on-click #(.click @file-input)}
+  "📎Import from file"]]
 ```
 
-И регистрация в системе компонентов:
+Объяснение:
+
+| Элемент                       | Зачем                                                        |
+| ----------------------------- | ------------------------------------------------------------ |
+| `input[type=file]`            | настоящий выбор файла                                        |
+| `display: none`               | скрыт — пользователь не видит                                |
+| `:ref #(reset! file-input %)` | сохраняем DOM-элемент в атом → для вызова `.click`           |
+| `on-change`                   | читает файл и создаёт todos                                  |
+| `button`                      | видимая кнопка, по нажатию симулирует клик по скрытому input |
+
+### То есть:
+
+Кликаем кнопку → JS симулирует выбор файла → on-change импортирует его 🎯
+
+---
+
+## ✅ Теперь создаём новый компонент — **Export TXT**
+
+📌 Файл: `src/keechma_todomvc/components/export_txt.cljs`
 
 ```clojure
-;; в components.cljs
-:import-todos (assoc file-import-button/component :topic :todos)
-```
+(ns keechma-todomvc.components.export-txt
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]
+            [clojure.string :as str]))
 
----
-
-## ✅ Что важно учесть
-
-  * Команда `:create-todo` должна быть реализована и контроллер должен слушать её (у вас уже есть `create-todo`).
-  * Убедитесь, что `<cmd _ctx :create-todo trimmed>` правильно передаёт аргумент (в виде строки или map) в контроллер.
-  * Обработка файла через `FileReader.readAsText()` работает только для текстовых файлов. ([MDN Web Docs][2])
-  * Используйте `clojure.string/trim` и фильтрацию пустых строк — чтобы не создавать задачи с пустым заголовком.
-  * Опционально: добавить UI-индикатор загрузки, показать сколько строк добавлено и т.д.
-
----
-
-Если хочешь — могу подготовить **полный рабочий файл** с CSS-стилями, кнопкой в строке `todo-item` (чтобы он появился рядом с таймером и кнопкой удаления) + интеграцией в контроллер, чтобы всё “из коробки” работало. Сделать?
-
-[1]: https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications?utm_source=chatgpt.com "Using files from web applications - Web APIs | MDN - Mozilla"
-[2]: https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsText?utm_source=chatgpt.com "FileReader: readAsText() method - Web APIs - MDN Web Docs"
-
-*** код для `components/app.cljs`
-Отличная идея 💪 — добавляем кнопку импорта, спрашиваем путь к файлу, читаем содержимое, разбиваем по строкам → создаём todos.
-
----
-
-## ✅ План
-
-1. Добавляем в UI кнопку **"Import from file"**
-2. Используем `<input type="file">` через Reagent ref
-3. Читаем файл через `js/FileReader`
-4. Каждую строку передаём в `<cmd ctx :create-todo ...>`
-
----
-
-## ✅ Полный рабочий код для `components/app.cljs`
-
-🔻 Ниже уже готовый, аккуратно встроенный сниппет:
-
-```clojure
-(ns keechma-todomvc.components.app
-  "# Main app component"
-  (:require [keechma-todomvc.ui :refer [<cmd <comp comp> sub>]]
-            [reagent.core :as r]))
-
-(defn import-file [ctx e]
-  (let [file (-> e .-target .-files (aget 0))
-        reader (js/FileReader.)]
-    (set! (.-onload reader)
-          (fn [evt]
-            (let [content (.. evt -target -result)
-                  lines (.split content "\n")]
-              (doseq [l lines]
-                (let [t (clojure.string/trim l)]
-                  (when-not (empty? t)
-                    (<cmd ctx :create-todo t)))))))
-    (.readAsText reader file)))
+(defn download-file [filename content]
+  (let [blob (js/Blob. #js [content] #js {:type "text/plain"})
+        url (js/URL.createObjectURL blob)
+        a (.createElement js/document "a")]
+    (set! (.-href a) url)
+    (set! (.-download a) filename)
+    (.appendChild js/document.body a)
+    (.click a)
+    (.removeChild js/document.body a)
+    (js/URL.revokeObjectURL url)))
 
 (defn render [ctx]
-  (let [file-input (r/atom nil)]
-    (fn [ctx]
-      [:<>
-       [:section.todoapp
-        [:header.header
-         [:h1 "Worder"]
-         ;; ---- НАША НОВАЯ КНОПКА ----
-         [:div
-          [:input {:type "file"
-                   :style {:display "none"}
-                   :ref #(reset! file-input %)
-                   :on-change #(import-file ctx %)}]
-          [:button {:on-click #(.click @file-input)}
-           "Import from file"]]
-         ;; --------------------------
-         [comp> ctx :new-todo]]
-        (when (sub> ctx :has-todos?)
-          [:<>
-           [:section.main
-            [comp> ctx :toggle-todos]
-            [comp> ctx :todo-list]]
-           [comp> ctx :footer]])]
-       [:footer.info
-        [:p "Double-click to edit a todo"]
-        [:p
-         [:a {:href "https://keechma.com"} "Keechma"] " "
-         [:a {:href "http://todomvc.com"} "TodoMVC"]]]])))
+  (let [todos (sub> ctx :todos :all)]
+    [:button
+     {:on-click
+      (fn []
+        (let [export-text
+              (->> todos
+                   (map (fn [{:keys [title time]}]
+                          (str title "\t" (or time 0))))
+                   (str/join "\n"))]
+          (download-file "todos_export.txt" export-text)))}
+     "💾 Export todos to TXT"]))
 
 (def component
-  (<comp :renderer render
-         :component-deps [:new-todo
-                          :toggle-todos
-                          :todo-list
-                          :footer]
-         :subscription-deps [:has-todos?]))
+  (<comp :renderer render))
 ```
 
 ---
 
-## ✅ Как это работает
+### Вставляем в `components.cljs`
 
-| Действие               | Что происходит                                              |
-| ---------------------- | ----------------------------------------------------------- |
-| Ты кликаешь кнопку ✅   | Скрытый `<input type="file">` открывает диалог выбора файла |
-| Выбор файла            | `FileReader` читает содержимое                              |
-| Чтение завершено       | Текст → строки → `create-todo` командой                     |
-| Keechma UI обновляется | Готово 🎉                                                   |
+```clojure
+(ns keechma-todomvc.components
+  ...
+  (:require
+    ...
+    [keechma-todomvc.components.import-txt :as import-txt]
+    [keechma-todomvc.components.export-txt :as export-txt]))
+```
 
----
+В систему:
 
-## ⏫ Планы на улучшение?
-
-Если хочешь — могу сразу сделать:
-
-✅ игнор пустых строк
-✅ trim кавычек
-✅ исключить дубликаты
-✅ подсвечивать ошибки файла
-✅ показывать прогресс
-✅ отдельный файл-формат (.txt, .csv, .json)
+```clojure
+:import-txt import-txt/component
+:export-txt export-txt/component
+```
 
 ---
 
-Хочешь сделать обратную фичу?
-📤 Export todos → в JSON или TXT?
+### Показываем в UI
 
-Скажи — сделаю ❤️
+Например — в футере или в `app/component`:
 
-*** 
+```clojure
+[comp> ctx :export-txt]
+[comp> ctx :import-txt]
+```
 
-(defn import-file [ctx e]
-  (let [file (-> e .-target .-files (aget 0))
-        reader (js/FileReader.)
-        onload-evt (fn [evt]
-            (let [content (.. evt -target -result)
-                  lines (.split content "\n")]
-              (doseq [l lines]
-                (let [t (clojure.string/trim l)]
-                  (when-not (empty? t)
-                    (<cmd ctx :create-todo t))))))
-        result (set! (.-onload reader) onload-evt 
-        (.readAsText reader file))
-        )]
+---
 
+## ✅ Результат
+
+| Действие              | Результат                    |
+| --------------------- | ---------------------------- |
+| Нажал **Export**      | Загружает `todos_export.txt` |
+| Формат строки         | `"title<TAB>seconds"`        |
+| Если `time` нет → `0` | ✅                            |
+
+---
+
+Если хочешь:
+✔ добавить BOM → чтобы UTF-8 на Windows читался корректно
+✔ сохранять сортировку (active → completed)
+✔ делать backup-timestamp в имени файла
+✔ добавить диалог выбора имени с `<input type="file" nwsaveas>` (Electron)
+
+---
+
+Хочешь — я ещё сделаю **обратный импорт**, чтобы распознавал формат с время́ми и восстанавливал `:time` ✅
+*** 02 оут
+Отлично — у тебя уже есть `import_txt.cljs`, так что сделаем **симметричный** компонент: экспорт выбранных (отфильтрованных) todos в `.txt`.
+
+---
+
+## ✅ Требования
+
+✔ Кнопка «Export»
+✔ Берёт список текущего фильтра:
+`(sub> ctx :todos-by-status route-status)`
+✔ Формат в файле:
+
+```
+<todo title>\t<time>
+```
+
+Если времени нет → `0`
+✔ Открывает стандартный save-dialog через Blob + download
+
+---
+
+## ✅ Новый компонент: `export_txt.cljs`
+
+📌 Путь:
+
+```
+./src/keechma_todomvc/components/export_txt.cljs
+```
+
+```clojure
+(ns keechma-todomvc.components.export-txt
+  (:require [keechma-todomvc.ui :refer [<comp sub> route>]]
+            [clojure.string :as str]))
+
+(defn export-file [todos]
+  (let [lines (map (fn [{:keys [title time]}]
+                     (str title "\t" (or time 0)))
+                   todos)
+        content (str/join "\n" lines)
+        blob (js/Blob. #js [content] #js {:type "text/plain"})
+        url (.createObjectURL js/URL blob)
+        a (.createElement js/document "a")]
+    (set! (.-href a) url)
+    (set! (.-download a) "todos.txt")
+    (.click a)
+    (.revokeObjectURL js/URL url)))
+
+(defn render [ctx]
+  (let [route-status (keyword (route> ctx :status))
+        todos (sub> ctx :todos-by-status route-status)]
+    [:button {:on-click #(export-file @todos)}
+     "💾 Export to text"]))
+
+(def component
+  (<comp :renderer render
+         :subscription-deps [:todos-by-status]))
+```
+
+---
+
+## ✅ Подключение в приложении
+
+В `components/system`
+
+добавить:
+
+```clojure
+:export-txt export-txt/component
+```
+
+---
+
+## ✅ Вставка кнопки в UI
+
+Например в footer:
+
+```clojure
+[comp> ctx :export-txt]
+```
+
+---
+
+## 🧪 Проверка
+
+Фильтр в URL:
+
+```
+/active
+/completed
+```
+
+Нажимаем **Export** → файл `todos.txt` содержит только выбранные.
+
+---
+
+## ⭐ Хочешь улучшений?
+
+Могу добавить любую из функций:
+
+| Фича                                         | Реализация                 |
+| -------------------------------------------- | -------------------------- |
+| Сохранение имени файла с датой               | ✅ `"todos-2025-11-01.txt"` |
+| UTF-8 BOM для Windows/Excel                  | ✅                          |
+| Выгрузка **всех** туду независимо от фильтра | ✅                          |
+| JSON экспорт для бэкапа                      | ✅                          |
+| CSV экспорт                                  | ✅                          |
+| ZIP с историей                               | ✅                          |
+
+---
+
+Если хочешь — я могу сразу сделать компонент **Export + Import** в одном выпадающем меню, чтобы выглядело красиво, а не двумя отдельными кнопками.
+
+** добавить кнопки сохранить слова в цсв
+CSV экспорт
+возможно только сразу все в цсв
+с результатами 
+сохранить только завершоные
+сохранить только не завершоные
+сохронять те что в даный момент отфильтрованы
+тоесть кнопка "сохранить активные as .csv"
+тоесть либо все либо завершоные либо не завершоные
 * REPL
 :PROPERTIES:
 :header-args: :tangle no :mkdirp yes :results output silent :no-expand t
@@ -2255,6 +2410,9 @@ clojure -M:fig:build
 clojure -M:fig:clean
 clojure -M:fig:build
 * backlog worder
+** сменить цветовую схему
+на автоматическую посмотреть что из этого получится
+** исправить дабл клик
 ** старт таймера останавливает остольные
 таймеры
 так чтоб всегда было не более одного таймера
@@ -2280,24 +2438,6 @@ clojure -M:fig:build
 Если используешь form-2, можно в reagent/create-class (form-3) реализовать :component-will-unmount и там js/clearInterval. Или в form-2 — вернуть функцию очистки через reagent.core/create-class — но проще: при остановке или размонтировании явно чисти @timer-id.
 ** переписать текст под слова в коде
 повозможно везде по коду
-** добавить кнопки сохранить слова 
-возможно только сразу все в текст
-с результатами в текстовый фаил
-сохранить только завершоные
-сохранить только не завершоные
-сохронять те что в даный момент отфильтрованы
-тоесть кнопка "сохранить активные as .txt"
-тоесть либо все либо завершоные либо не завершоные
-** добавить кнопки сохранить слова в цсв
-возможно только сразу все в цсв
-с результатами 
-сохранить только завершоные
-сохранить только не завершоные
-сохронять те что в даный момент отфильтрованы
-тоесть кнопка "сохранить активные as .csv"
-тоесть либо все либо завершоные либо не завершоные
-** сменить цветовую схему
-на автоматическую посмотреть что из этого получится
 ** забилдить для размешения
 ** захостить
 возможно нужна будет помошь Уни
@@ -2446,6 +2586,8 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 ;; (universal-argument)
 ;; (universal-argument)
 (org-babel-tangle)
+(evil-close-fold)
+(evil-close-fold)
 ;; (find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
 ;; (find-file-other-frame "~/INI/hydra-cfg.el")
 ;; (load "~/INI/hydra-cfg.el")
@@ -4410,6 +4552,244 @@ git push -u origin main --force
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
 ** DONE сделать копию проекта
 ** DONE заменить в разделе файлов на новый путь
+** DONE загрузить список слов
+*** src
+**** file components/app.cljs
+(find-file-other-frame "./src/keechma_todomvc/components/app.cljs")
+**** src components/app.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.app
+  "# Main app component"
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub>]]))
+
+(defn render
+  [ctx]
+  [:<>
+   [:section.todoapp
+    [:header.header
+     [:h1 "Worder"]
+     [comp> ctx :new-todo]]
+    (when (sub> ctx :has-todos?)
+      [:<>
+       [:section.main
+        [comp> ctx :toggle-todos]
+        [comp> ctx :todo-list]]
+       [comp> ctx :footer]])]
+   [:footer.info
+    [:p "Double-click to edit a todo"]
+    [:p
+     [:a {:href "https://keechma.com"} "Keechma"] " "
+     [:a {:href "http://todomvc.com"} "TodoMVC"]]]])
+
+(def component
+  (<comp :renderer render
+         :component-deps [:new-todo
+                          :toggle-todos
+                          :todo-list
+                          :footer]
+         :subscription-deps [:has-todos?]))
+
+#+end_src
+
+
+*** Довай в components/app.cljs сделаем кнопку
+разместим под тайтлом Вордер.
+она должна просить юзера указать путь к файлу для загрузки.
+читать этот фаил. Парсить его контент на строки.
+и добовлять каждую строку, как новое туду.
+
+*** План реализации
+Супер! Вот как мы можем реализовать такой функционал "загрузки файла → парсинг строк → добавление каждой строки как отдельное todo" для вашего приложения Keechma + Reagent. Я дам **шаг-за-шагом** + код-пример.
+
+---
+## 🔍 План реализации
+
+1. Добавить кнопку или инпут `<input type="file">` в компонент.
+2. При выборе файла — прочитать его содержимое (FileReader API) ([MDN Web Docs][1]).
+3. Разбить содержимое на строки (`.split("\n")`).
+4. Для каждой строки вызвать команду контроллера `:create-todo` (или аналог) с этой строкой как заголовок.
+5. Опционально: показать пользователю прогресс (например “добавлено N задач”).
+6. Обеспечить обработку ошибок (пустой файл, слишком длинные строки и т.д.).
+
+---
+
+## 🧮 Пример компонента: `file-import-button.cljs`
+
+```clojure
+(ns keechma-todomvc.components.file-import-button
+  (:require [reagent.core :as r]
+            [keechma-todomvc.ui :refer [<cmd <comp]]))
+
+(defn render‐import [_ctx]
+  (let [file-ref (r/atom nil)]
+    (fn []
+      [:div.file-import
+       [:input {:type "file"
+                :accept ".txt"
+                :on-change (fn [e]
+                             (let [file (-> e .-target .-files (aget 0))]
+                               (when file
+                                 (let [reader (js/FileReader.)]
+                                   (set! (.-onload reader)
+                                         (fn [evt]
+                                           (let [text (.. evt -target -result)
+                                                 lines (.split text "\n")]
+                                             (doseq [line lines
+                                                     :let [trimmed (clojure.string/trim line)]
+                                                     :when (not (clojure.string/blank? trimmed))]
+                                               (<cmd _ctx :create-todo trimmed)))))
+                                   (.readAsText reader file))))]
+        ]
+       [:button {:on-click #(when @file-ref (.click @file-ref))}
+        "Import todo-file"]])))
+```
+
+И регистрация в системе компонентов:
+
+```clojure
+;; в components.cljs
+:import-todos (assoc file-import-button/component :topic :todos)
+```
+
+---
+
+## ✅ Что важно учесть
+
+  * Команда `:create-todo` должна быть реализована и контроллер должен слушать её (у вас уже есть `create-todo`).
+  * Убедитесь, что `<cmd _ctx :create-todo trimmed>` правильно передаёт аргумент (в виде строки или map) в контроллер.
+  * Обработка файла через `FileReader.readAsText()` работает только для текстовых файлов. ([MDN Web Docs][2])
+  * Используйте `clojure.string/trim` и фильтрацию пустых строк — чтобы не создавать задачи с пустым заголовком.
+  * Опционально: добавить UI-индикатор загрузки, показать сколько строк добавлено и т.д.
+
+---
+
+Если хочешь — могу подготовить **полный рабочий файл** с CSS-стилями, кнопкой в строке `todo-item` (чтобы он появился рядом с таймером и кнопкой удаления) + интеграцией в контроллер, чтобы всё “из коробки” работало. Сделать?
+
+[1]: https://developer.mozilla.org/en-US/docs/Web/API/File_API/Using_files_from_web_applications?utm_source=chatgpt.com "Using files from web applications - Web APIs | MDN - Mozilla"
+[2]: https://developer.mozilla.org/en-US/docs/Web/API/FileReader/readAsText?utm_source=chatgpt.com "FileReader: readAsText() method - Web APIs - MDN Web Docs"
+
+*** код для `components/app.cljs`
+Отличная идея 💪 — добавляем кнопку импорта, спрашиваем путь к файлу, читаем содержимое, разбиваем по строкам → создаём todos.
+
+---
+
+## ✅ План
+
+1. Добавляем в UI кнопку **"Import from file"**
+2. Используем `<input type="file">` через Reagent ref
+3. Читаем файл через `js/FileReader`
+4. Каждую строку передаём в `<cmd ctx :create-todo ...>`
+
+---
+
+## ✅ Полный рабочий код для `components/app.cljs`
+
+🔻 Ниже уже готовый, аккуратно встроенный сниппет:
+
+```clojure
+(ns keechma-todomvc.components.app
+  "# Main app component"
+  (:require [keechma-todomvc.ui :refer [<cmd <comp comp> sub>]]
+            [reagent.core :as r]))
+
+(defn import-file [ctx e]
+  (let [file (-> e .-target .-files (aget 0))
+        reader (js/FileReader.)]
+    (set! (.-onload reader)
+          (fn [evt]
+            (let [content (.. evt -target -result)
+                  lines (.split content "\n")]
+              (doseq [l lines]
+                (let [t (clojure.string/trim l)]
+                  (when-not (empty? t)
+                    (<cmd ctx :create-todo t)))))))
+    (.readAsText reader file)))
+
+(defn render [ctx]
+  (let [file-input (r/atom nil)]
+    (fn [ctx]
+      [:<>
+       [:section.todoapp
+        [:header.header
+         [:h1 "Worder"]
+         ;; ---- НАША НОВАЯ КНОПКА ----
+         [:div
+          [:input {:type "file"
+                   :style {:display "none"}
+                   :ref #(reset! file-input %)
+                   :on-change #(import-file ctx %)}]
+          [:button {:on-click #(.click @file-input)}
+           "Import from file"]]
+         ;; --------------------------
+         [comp> ctx :new-todo]]
+        (when (sub> ctx :has-todos?)
+          [:<>
+           [:section.main
+            [comp> ctx :toggle-todos]
+            [comp> ctx :todo-list]]
+           [comp> ctx :footer]])]
+       [:footer.info
+        [:p "Double-click to edit a todo"]
+        [:p
+         [:a {:href "https://keechma.com"} "Keechma"] " "
+         [:a {:href "http://todomvc.com"} "TodoMVC"]]]])))
+
+(def component
+  (<comp :renderer render
+         :component-deps [:new-todo
+                          :toggle-todos
+                          :todo-list
+                          :footer]
+         :subscription-deps [:has-todos?]))
+```
+
+---
+
+## ✅ Как это работает
+
+| Действие               | Что происходит                                              |
+| ---------------------- | ----------------------------------------------------------- |
+| Ты кликаешь кнопку ✅   | Скрытый `<input type="file">` открывает диалог выбора файла |
+| Выбор файла            | `FileReader` читает содержимое                              |
+| Чтение завершено       | Текст → строки → `create-todo` командой                     |
+| Keechma UI обновляется | Готово 🎉                                                   |
+
+---
+
+## ⏫ Планы на улучшение?
+
+Если хочешь — могу сразу сделать:
+
+✅ игнор пустых строк
+✅ trim кавычек
+✅ исключить дубликаты
+✅ подсвечивать ошибки файла
+✅ показывать прогресс
+✅ отдельный файл-формат (.txt, .csv, .json)
+
+---
+
+Хочешь сделать обратную фичу?
+📤 Export todos → в JSON или TXT?
+
+Скажи — сделаю ❤️
+
+*** 
+
+(defn import-file [ctx e]
+  (let [file (-> e .-target .-files (aget 0))
+        reader (js/FileReader.)
+        onload-evt (fn [evt]
+            (let [content (.. evt -target -result)
+                  lines (.split content "\n")]
+              (doseq [l lines]
+                (let [t (clojure.string/trim l)]
+                  (when-not (empty? t)
+                    (<cmd ctx :create-todo t))))))
+        result (set! (.-onload reader) onload-evt 
+        (.readAsText reader file))
+        )]
+
 * 2025-11-02
 ** file worder-cljs-project.org
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")

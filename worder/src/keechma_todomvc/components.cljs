@@ -7,6 +7,7 @@
             [keechma-todomvc.components.timer-button :as timer-button]
             [keechma-todomvc.components.todo-item :as todo-item]
             [keechma-todomvc.components.todo-list :as todo-list]
+            [keechma-todomvc.components.export-txt :as export-txt]
             [keechma-todomvc.components.import-txt :as import-txt]
             [keechma-todomvc.components.toggle-todos :as toggle-todos]))
 
@@ -20,5 +21,7 @@
    :todo-item (assoc todo-item/component :topic :todos)
    :timer-button (assoc timer-button/component :topic :todos)
    :import-txt (assoc import-txt/component :topic :todos)
+   ;; :export-txt (assoc export-txt/component :topic :todos)
+   :export-txt export-txt/component
    :todo-list todo-list/component
    :toggle-todos (assoc toggle-todos/component :topic :todos)})
