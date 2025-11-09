@@ -14,7 +14,7 @@
   ;; или относительный к /txt/ при проде
   (let [url (if (.startsWith path "/")
               path
-              (str "/txt/" path))]
+              (str "./txt/" path))]
     (-> (js/fetch url)
         (.then (fn [resp]
                  (if (.-ok resp)
