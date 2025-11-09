@@ -13,6 +13,7 @@
                 (js/clearInterval @timer-id)
                 (reset! timer-id nil)
                 (reset! start-ms nil)
+                (<cmd ctx :start-edit todo)
                 (<cmd ctx
                       :update-todo-time
                       {:id (:id todo) :time @seconds :todo todo}))

@@ -40,6 +40,7 @@
                                :on-key-down handle-key-down}])
         focus-input #(let [node (reagent/dom-node %)
                            length (count (.-value node))]
+                       (reset! todo-title (str @todo-title "\t-\t"))
                        (.focus node)
                        (.setSelectionRange node length length))]
     (reagent/create-class

@@ -4,6 +4,7 @@
 * src worder
 ** src project
 *** other
+(find-file-other-frame "./project.clj")
 (find-file-other-frame "dev.cljs.edn")
 /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/dev.cljs.edn
 (find-file-other-frame "test.cljs.edn")
@@ -626,6 +627,7 @@
                                :on-key-down handle-key-down}])
         focus-input #(let [node (reagent/dom-node %)
                            length (count (.-value node))]
+                       (reset! todo-title (str @todo-title "\t-\t"))
                        (.focus node)
                        (.setSelectionRange node length length))]
     (reagent/create-class
@@ -663,6 +665,7 @@
                 (js/clearInterval @timer-id)
                 (reset! timer-id nil)
                 (reset! start-ms nil)
+                (<cmd ctx :start-edit todo)
                 (<cmd ctx
                       :update-todo-time
                       {:id (:id todo) :time @seconds :todo todo}))
@@ -1314,7 +1317,8 @@ If the item is currently being edited, overlays a `todo-edit` component.
   [ctx todo is-editing?]
   [:li {:class [(when is-editing? :editing)
                 (when (:completed todo) :completed)]}
-   [:div.view {:on-double-click #(<cmd ctx :start-edit todo)}
+   [:div.view
+    ;; {:on-double-click #(<cmd ctx :start-edit todo)}
     [:input.toggle {:type :checkbox
                     :checked (:completed todo)
                     :on-change #(<cmd ctx :toggle-todo todo)}]
@@ -1333,6 +1337,55 @@ If the item is currently being edited, overlays a `todo-edit` component.
      
 **** exempls
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/todo_item.cljs")
+*** components/new_todo.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/keechma_todomvc/components/new_todo.cljs
+:END:
+**** file components/new_todo.cljs
+(find-file-other-frame "./src/keechma_todomvc/components/new_todo.cljs")
+**** src components/new_todo.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.new-todo
+  "# New Todo component"
+  (:require [keechma-todomvc.ui :refer [<cmd <comp]]
+            [keechma-todomvc.util :refer [is-enter?]]
+            [reagent.core :as reagent]))
+
+(defn form-2-render
+  "## Renders an input field for a new todo
+
+  Stores the pending new `title` inside a local `atom`. When the user
+  presses `enter`, sends a `:create-todo` command to the `todos`
+  controller to create the new `todo`.
+
+### Form 2 Render
+
+  A `form 2` render function sets up local state and returns a
+  rendering function from its first call. That `inner` rendering
+  function will be called each time `reagent` needs to render the
+  component. The arguments for the `inner` function are the same as
+  for the `form 2` render function except that the `ctx` argument is
+  not present. The local state can be used by the code in the `inner`
+  render function. It will persist until the component is unmounted."
+  [ctx]
+  (let [new-title (reagent/atom "")]
+    (fn []
+      [:input.new-todo
+       {:placeholder "What needs to be Word?"
+        :value @new-title
+        :auto-focus true
+        :on-change #(reset! new-title (.. % -target -value))
+        :on-key-down #(when (is-enter? (.-keyCode %))
+                        (<cmd ctx :create-todo @new-title)
+                        (reset! new-title ""))}])))
+
+(def component
+  (<comp :renderer form-2-render))
+
+#+end_src
+     
+**** exempls
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/example-todomvc/src/keechma_todomvc/components/new_todo.cljs")
 *** other
 (find-file-other-frame "./src/keechma_todomvc/components/new_todo.cljs")
 (find-file-other-frame "./src/keechma_todomvc/components/toggle_todos.cljs")
@@ -2185,6 +2238,7 @@ html .clear-completed:active {
 #+end_src
 * files worder
 ** files core
+(find-file-other-frame "./project.clj")
 (find-file-other-frame "./src/keechma_todomvc/app.cljs")
 (find-file-other-frame "./src/keechma_todomvc/subscriptions.cljs")
 (find-file-other-frame "./src/keechma_todomvc/ui.cljs")
@@ -2212,11 +2266,6 @@ html .clear-completed:active {
 (find-file-other-frame "./target/stale/leiningen.figwheel.clean-on-dependency-change")
 * run worder
 *** run
-lein figwheel
-
-:cljs/quit
-:cljs/restart
-
 #+begin_src elisp :results output silent 
 (evil-previous-line)
 (org-cycle)
@@ -2227,6 +2276,12 @@ lein figwheel
         (evil-quit)
         (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
+
+lein figwheel
+
+:cljs/quit
+:cljs/restart
+
 
 cd worder
 clojure -M:fig:build
@@ -2242,12 +2297,185 @@ lein cljsbuild once
 
 lein deps :refresh
 
+*** build
+надо удолить вручную
+  resources/public/js/app.js
+  и тогда проходит комплиция нормально
+rm resources/public/js/app.js
+
+Добавь :clean-targets в project.clj, чтобы lein clean удалял весь js-папку:
+:clean-targets ^{:protect false} ["resources/public/js" "target"]
+(Это гарантирует, что resources/public/js/app.js удалится при lein clean.)
+
+lein do clean, cljsbuild once min
+
+lein clean
+
+lein cljsbuild once min
+
+  resources/public/js/app.js
+  resources/public/js/min/
+
+2. Можно протестировать локально:
+   python3 -m http.server -d resources/public
+   или
+   npx http-server resources/public
+
 *** clon
 git clone https://github.com/keechma/example-todomvc.git
+*** publish
+**** git
+git remote add origin https://github.com/Buyn/worder.git
+git branch -M main
+git push -u origin main
+
+https://buyn.github.io/
+
+https://<username>.github.io/<repo-name>/.
+https://buyn.github.io/worder.git
+https://buyn.github.io/worder.git/.
+**** orign
+# Sample workflow for building and deploying a Jekyll site to GitHub Pages
+name: Deploy Jekyll with GitHub Pages dependencies preinstalled
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Build with Jekyll
+        uses: actions/jekyll-build-pages@v1
+        with:
+          source: ./
+          destination: ./_site
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+**** static.yml
+
+# Simple workflow for deploying static content to GitHub Pages
+name: Deploy static content to Pages
+
+on:
+  # Runs on pushes targeting the default branch
+  push:
+    branches: ["main"]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# Sets permissions of the GITHUB_TOKEN to allow deployment to GitHub Pages
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment, skipping runs queued between the run in-progress and latest queued.
+# However, do NOT cancel in-progress runs as we want to allow these production deployments to complete.
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Single deploy job since we're just deploying
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Pages
+        uses: actions/configure-pages@v5
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          # Upload entire repository
+          path: '.'
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+**** workflows
+worder/.github/workflows
+.github/workflows/deploy.yml
+**** name: Build and Deploy
+name: Build and Deploy
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Clojure tools
+        uses: DeLaGuardo/setup-clojure@v2
+        with:
+          deps: 'true'
+          tools-deps: 'true'
+
+      - name: Build ClojureScript
+        run: |
+          lein clean
+          lein cljsbuild once min
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./resources/public
+
 * TODO todo worder
-** забилдить для размешения
-** захостить
-возможно нужна будет помошь Уни
+** DONE отключить дабл клик.
+** DONE дабл клик срабатывает по стоп.
+** DONE редактирование добовлет "таб - таб"
+после начального слова. и ставит курсор после этого
+** DONE сделать тхт слов юнга.
+/home/buyn/Desktop/words.txt
+** сделать кнопку загрузки текста.
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/resources/public/txt/words-ung.txt
+** сделать авто загрузку дефалтным состоянием
 ** WAITING помошь уни стиль прижать кнопу в право
 
 * REPL
@@ -5804,6 +6032,175 @@ footer.info button:hover {
     border-color: #777;
 }
 
+** DONE забилдить для размешения
+*** SRC
+**** "./project.clj"
+(defproject keechma-todomvc "0.1.0-SNAPSHOT"
+  :description "TodoMVC implemented in Keechma"
+  :url "http://github.com/keechma/keechma-todomvc"
+  :license {:name "MIT"}
+
+  :min-lein-version "2.5.3"
+
+  :dependencies [[org.clojure/clojure "1.10.1"]
+                 [org.clojure/clojurescript "1.10.597"]
+                 [org.clojure/core.async "0.7.559"
+                  :exclusions [org.clojure/tools.reader]]
+                 [reagent "0.9.1"]
+                 [keechma "0.3.14"
+                  :exclusions [cljsjs/react-with-addons
+                               cljsjs/react-dom
+                               cljsjs/react-dom-server]]
+                 [keechma/entitydb "0.1.6"]]
+
+  :plugins [[lein-figwheel "0.5.19"]
+            [lein-cljsbuild "1.1.7"
+             :exclusions [[org.clojure/clojure]]]
+            [lein-marginalia "0.9.1"]]
+
+  :source-paths ["src"]
+
+  :clean-targets ^{:protect false} ["resources/public/js/compiled" "target"]
+
+  :cljsbuild
+  {:builds
+   [{:id "dev"
+     :source-paths ["src"]
+     :figwheel {:on-jsload "keechma-todomvc.app/restart!"}
+     :compiler {:main                 keechma-todomvc.app
+                :optimizations        :none
+                :output-to            "resources/public/js/app.js"
+                :output-dir           "resources/public/js/dev"
+                :asset-path           "js/dev"
+                :source-map-timestamp true}}
+    ;; This next build is an compressed minified build for
+    ;; production. You can build this with:
+    ;; lein cljsbuild once min
+    {:id "min"
+     :source-paths ["src"]
+     :compiler {:main            keechma-todomvc.app
+                :optimizations   :advanced
+                :output-to       "resources/public/js/app.js"
+                :output-dir      "resources/public/js/min"
+                :elide-asserts   true
+                :closure-defines {goog.DEBUG false}
+                :pretty-print    false}}]}
+
+  :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
+             ;; :server-port 3449 ;; default
+             ;; :server-ip "127.0.0.1"
+
+             :css-dirs ["resources/public/css"] ;; watch and update CSS
+
+             ;; Start an nREPL server into the running figwheel process
+             ;; :nrepl-port 7888
+
+             ;; Server Ring Handler (optional)
+             ;; if you want to embed a ring handler into the figwheel http-kit
+             ;; server, this is for simple ring servers, if this
+             ;; doesn't work for you just run your own server :)
+             ;; :ring-handler hello_world.server/handler
+
+             ;; To be able to open files in your editor from the heads up display
+             ;; you will need to put a script on your path.
+             ;; that script will have to take a file path and a line number
+             ;; ie. in  ~/bin/myfile-opener
+             ;; #! /bin/sh
+             ;; emacsclient -n +$2 $1
+             ;;
+             ;; :open-file-command "myfile-opener"
+
+             ;; if you want to disable the REPL
+             ;; :repl false
+
+             ;; to configure a different figwheel logfile path
+             ;; :server-logfile "tmp/logs/figwheel-logfile.log"
+             })
+*** lein figwheel
+так я запукал этот проект пока его разрабатывал. теперь вопрос.
+я хочу его захостить а значит мне нужно его забилдить и оптимизировать?
+какой командой это сделать?
+*** lein cljsbuild once min
+Да 💯 — всё верно.
+Когда ты разрабатываешь — `lein figwheel` запускает “живой” дев-сервер с live reload.
+А **для деплоя/хостинга** тебе нужно собрать оптимизированную (“minified”) версию, чтобы получить один готовый `app.js` без dev-кода, дебаг-инфо и Figwheel-хуков.
+
+---
+
+### 🚀 Команда для production-сборки
+
+В корне проекта (где лежит `project.clj`) запусти:
+
+```bash
+lein cljsbuild once min
+```
+
+---
+
+### 🧱 Что при этом произойдёт
+
+  * Leiningen запустит **build с id `"min"`**, описанный в твоём `:cljsbuild`.
+  * Он создаст минифицированный JavaScript:
+
+  ```
+  resources/public/js/app.js
+  ```
+
+  и оптимизированный output-директорию:
+
+  ```
+  resources/public/js/min/
+  ```
+  * Исходные карты (`source maps`) и dev-файлы не попадут в билд.
+
+---
+
+### 🧭 После сборки
+
+1. Проверь, что в `resources/public/index.html` подключён именно этот `app.js`:
+
+   ```html
+   <script src="js/app.js"></script>
+   ```
+
+   (а не `js/dev/app.js` или что-то подобное)
+
+2. Можно протестировать локально:
+
+   ```bash
+   npx http-server resources/public
+   ```
+
+   или
+
+   ```bash
+   python3 -m http.server -d resources/public
+   ```
+
+3. После этого просто заливаешь содержимое `resources/public` на любой хостинг (например, Netlify, GitHub Pages, Vercel и т.д.).
+
+---
+
+### 💡 Подсказка
+
+Если хочешь сделать **чистую пересборку**, сначала выполни:
+
+```bash
+lein clean
+```
+
+а потом:
+
+```bash
+lein cljsbuild once min
+```
+
+---
+
+Хочешь — я покажу, как добавить простую цель `lein build` (alias), чтобы вместо длинной команды ты мог просто писать `lein build` для production-сборки?
+*** 
+** DONE захостить
+возможно нужна будет помошь Уни
 * 2025-11-02
 ** file worder-cljs-project.org
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")

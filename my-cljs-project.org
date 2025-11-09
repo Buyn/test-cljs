@@ -2239,7 +2239,6 @@ Clojure = минимализм, иммутабельность, декларат
 Что выберем?
 Могу сразу показать минимальный рабочий пример на выбранном инструменте.
 
-
 * DONE arhiv
 ** DONE Осмотрет проект на котором остановился
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/group-chat/Group-Chat-cljs-project.org")

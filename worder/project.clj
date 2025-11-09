@@ -36,6 +36,14 @@
                 :output-dir           "resources/public/js/dev"
                 :asset-path           "js/dev"
                 :source-map-timestamp true}}
+
+      ;; {:id "min"
+      ;; :source-paths ["src"]
+      ;; :compiler {:output-to "resources/public/js/min/app.js"
+      ;;             ;; :output-dir      "resources/public/js/min"
+      ;;             :optimizations :advanced
+      ;;             :pretty-print false}}
+
     ;; This next build is an compressed minified build for
     ;; production. You can build this with:
     ;; lein cljsbuild once min
@@ -47,7 +55,9 @@
                 :output-dir      "resources/public/js/min"
                 :elide-asserts   true
                 :closure-defines {goog.DEBUG false}
-                :pretty-print    false}}]}
+                ;; :clean-targets ^{:protect false} ["resources/public/js" "target"]
+                :pretty-print    false}}
+    ]}
 
   :figwheel {;; :http-server-root "public" ;; default and assumes "resources"
              ;; :server-port 3449 ;; default

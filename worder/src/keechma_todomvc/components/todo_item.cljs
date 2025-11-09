@@ -27,7 +27,8 @@ If the item is currently being edited, overlays a `todo-edit` component.
   [ctx todo is-editing?]
   [:li {:class [(when is-editing? :editing)
                 (when (:completed todo) :completed)]}
-   [:div.view {:on-double-click #(<cmd ctx :start-edit todo)}
+   [:div.view
+    ;; {:on-double-click #(<cmd ctx :start-edit todo)}
     [:input.toggle {:type :checkbox
                     :checked (:completed todo)
                     :on-change #(<cmd ctx :toggle-todo todo)}]
