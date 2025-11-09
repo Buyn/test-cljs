@@ -24,7 +24,12 @@
    [:section.todoapp
     [:header.header
      [:h1 "Worder"]
-     [comp> ctx :import-txt]
+     [:div.export-panel
+      [comp> ctx :import-txt]
+      [comp> ctx :import-txt {:path "words-ung-ua.txt"
+                              :title "📖Jung UA"}]
+
+      ]
      [comp> ctx :new-todo]]
     (when (sub> ctx :has-todos?)
       [:<>

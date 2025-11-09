@@ -477,7 +477,12 @@
    [:section.todoapp
     [:header.header
      [:h1 "Worder"]
-     [comp> ctx :import-txt]
+     [:div.export-panel
+      [comp> ctx :import-txt]
+      [comp> ctx :import-txt {:path "words-ung-ua.txt"
+                              :title "📖Jung UA"}]
+
+      ]
      [comp> ctx :new-todo]]
     (when (sub> ctx :has-todos?)
       [:<>
@@ -1018,6 +1023,64 @@ running?
 #+begin_src clojure :no-expand t :mkdirp yes 
 (ns keechma-todomvc.components.import-txt
   (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]
+            [reagent.core :as r]
+            [clojure.string :as str]))
+
+(defn process-lines [ctx content]
+  (doseq [line (str/split content #"\n")]
+    (let [t (str/trim line)]
+      (when-not (empty? t)
+        (<cmd ctx :create-todo t)))))
+
+(defn import-from-path [ctx path]
+  ;; путь может быть абсолютный для разработки
+  ;; или относительный к /txt/ при проде
+  (let [url (if (.startsWith path "/")
+              path
+              (str "/txt/" path))]
+    (-> (js/fetch url)
+        (.then (fn [resp]
+                 (if (.-ok resp)
+                   (.text resp)
+                   (throw (js/Error. (str "HTTP error: " (.-status resp)))))))
+        (.then #(process-lines ctx %))
+        (.catch #(js/console.error "Import failed:" %)))))
+
+(defn import-from-dialog [ctx e]
+  (let [file (-> e .-target .-files (aget 0))
+        reader (js/FileReader.)]
+    (set! (.-onload reader)
+          (fn [evt]
+            (let [content (.. evt -target -result)]
+              (process-lines ctx content))))
+    (.readAsText reader file)))
+
+(defn render [ctx {:keys [path title]
+                   :or {title "📎 Import from file"}}]
+  (let [file-input (r/atom nil)]
+    (fn []
+      [:div.import-wrapper
+       (if path
+         [:button {:on-click #(import-from-path ctx path)} title]
+         [:<>
+          [:input {:type "file"
+                   :style {:display "none"}
+                   :ref #(reset! file-input %)
+                   :on-change #(import-from-dialog ctx %)}]
+          [:button {:on-click #(.click @file-input)} title]])])))
+
+(def component
+  (<comp :renderer render))
+
+#+end_src
+**** CANCELED arhiv
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+***** 03 src import_txt.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.import-txt
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]
             [reagent.core :as r]))
 
 (defn import-file [ctx e]
@@ -1047,10 +1110,6 @@ running?
 (def component
   (<comp :renderer render))
 #+end_src
-**** CANCELED arhiv
-:PROPERTIES:
-:header-args: :tangle no
-:END:
 ***** 02 src import_txt.cljs
 #+begin_src clojure :no-expand t :mkdirp yes 
 (ns keechma-todomvc.components.import-txt
@@ -2474,7 +2533,51 @@ jobs:
 ** DONE сделать тхт слов юнга.
 /home/buyn/Desktop/words.txt
 ** сделать кнопку загрузки текста.
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/resources/public/txt/words-ung.txt
+*** path
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/resources/public/txt/words-ung-ua.txt
+*** src
+**** file import_txt.cljs
+(find-file-other-frame "./src/keechma_todomvc/components/import_txt.cljs")
+**** src import_txt.cljs
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns keechma-todomvc.components.import-txt
+  (:require [keechma-todomvc.ui :refer [<comp comp> sub> <cmd]]
+            [reagent.core :as r]))
+
+(defn import-file [ctx e]
+  (let [file (-> e .-target .-files (aget 0))
+        reader (js/FileReader.)
+        onload-evt (fn [evt]
+            (let [content (.. evt -target -result)
+                  lines (.split content "\n")]
+              (doseq [l lines]
+                (let [t (clojure.string/trim l)]
+                  (when-not (empty? t)
+                    (<cmd ctx :create-todo t))))))]
+        (set! (.-onload reader) onload-evt)
+        (println (.readAsText reader file))))
+
+(defn render [ctx]
+  (let [file-input (r/atom nil)]  
+    (fn []
+      [:div
+        [:input {:type "file"
+                :style {:display "none"}
+                :ref #(reset! file-input %)
+                :on-change #(import-file ctx %)}]
+        [:button {:on-click #(.click @file-input)}
+        "📎Import from file"]])))
+
+(def component
+  (<comp :renderer render))
+#+end_src
+*** 
+хочу изменить компонет сделать его универсальным.
+если передаётся путь к файлу. то он его загружает по передоному пути.
+причём важно чтоб он мог загружать фаил с парки ресурсов.
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/resources/public/txt/words-ung-ua.txt
+если же вызвано без указания пути то окрывается окно запроса.
+
 ** сделать авто загрузку дефалтным состоянием
 ** WAITING помошь уни стиль прижать кнопу в право
 
