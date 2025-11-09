@@ -1034,7 +1034,7 @@ running?
 
 (defn import-from-path [ctx path]
   ;; путь может быть абсолютный для разработки
-  ;; или относительный к /txt/ при проде
+  ;; или относительный к ./txt/ при проде
   (let [url (if (.startsWith path "/")
               path
               (str "./txt/" path))]
@@ -1739,6 +1739,7 @@ If the item is currently being edited, overlays a `todo-edit` component.
   <body>
     <div id="app"> 
     </div> <!-- end of app div -->
+    <p>"js app loading..."</p>
     <script src="js/app.js" type="text/javascript"></script>
     <script>keechma_todomvc.app.main()</script>
   </body>

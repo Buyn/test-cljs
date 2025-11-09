@@ -11,7 +11,7 @@
 
 (defn import-from-path [ctx path]
   ;; путь может быть абсолютный для разработки
-  ;; или относительный к /txt/ при проде
+  ;; или относительный к ./txt/ при проде
   (let [url (if (.startsWith path "/")
               path
               (str "./txt/" path))]
