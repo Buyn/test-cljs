@@ -40,6 +40,162 @@ from
 
 :header-args: :tangle  "~/INI/hydra-cfg.el"
 * Source files
+** example-place-my-order
+*** files
+**** client
+***** root
+(find-file-other-frame "./example-place-my-order/client/project.clj")
+***** components
+(find-file-other-frame "./example-place-my-order/client/src/client/components/app.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/cities.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/landing.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/order.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/order_form.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/order_history.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/order_list_item.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/order_report.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/order_shared.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/restaurant_detail.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/restaurant_list.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/restaurant_shared.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/components/states.cljs")
+***** client
+(find-file-other-frame "./example-place-my-order/client/src/client/app.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/core.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/datasources.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/edb.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/less/app.less")
+(find-file-other-frame "./example-place-my-order/client/src/client/subscriptions.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/ui.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/controllers.cljs")
+***** controllers
+(find-file-other-frame "./example-place-my-order/client/src/client/controllers/order.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/controllers/order_history.cljs")
+(find-file-other-frame "./example-place-my-order/client/src/client/controllers/vacuum.cljs")
+**** root
+(find-file-other-frame "./example-place-my-order/.gitignore")
+(find-file-other-frame "./example-place-my-order/README.md")
+(find-file-other-frame "./example-place-my-order/client/.gitignore")
+**** find file
+
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/place-my-order
+
+(find-file-other-frame "./example-place-my-order/filepath.txt")
+
+find "$PWD" -type f >>filepath.txt
+**** server
+(find-file-other-frame "./example-place-my-order/server/.babelrc")
+(find-file-other-frame "./example-place-my-order/server/.gitignore")
+(find-file-other-frame "./example-place-my-order/server/.jshintrc")
+(find-file-other-frame "./example-place-my-order/server/.npmignore")
+(find-file-other-frame "./example-place-my-order/server/.travis.yml")
+(find-file-other-frame "./example-place-my-order/server/LICENSE")
+(find-file-other-frame "./example-place-my-order/server/README.md")
+(find-file-other-frame "./example-place-my-order/server/bin/place-my-order-api")
+(find-file-other-frame "./example-place-my-order/server/package-lock.json")
+(find-file-other-frame "./example-place-my-order/server/package.json")
+(find-file-other-frame "./example-place-my-order/server/public/css/app.css")
+(find-file-other-frame "./example-place-my-order/server/public/index.html")
+(find-file-other-frame "./example-place-my-order/server/public/package.json")
+(find-file-other-frame "./example-place-my-order/server/src/config.js")
+(find-file-other-frame "./example-place-my-order/server/src/generator.js")
+(find-file-other-frame "./example-place-my-order/server/src/hooks.js")
+(find-file-other-frame "./example-place-my-order/server/src/importer.js")
+(find-file-other-frame "./example-place-my-order/server/src/index.js")
+(find-file-other-frame "./example-place-my-order/server/test/api.test.js")
+
+*** risoning
+**** server
+всё похоже страртует гдето на серверной части
+там и хтмл лежит ивсё остальное
+а вот как оно поподает в кложур не совсем очивидно как это связано с гугом который решает что загружать и втом числе обеспечивает запуск фигвила
+но это всё нодовская сторона
+ну тоесть как я понимаю запускается сервер и видеон отдаёт хтмл и видемо мы после билда сами ложим(возможо через скрипт) внужную папку сервера билд скрипта
+
+These are the ClojureScript output files produced by Figwheel — your development live-reload server running at port 3449.
+That’s where the “ClojureScript part” comes in: the browser loads client.core (compiled from src/client/core.cljs), which mounts the Keechma SPA into #app.
+
+2. How the data flows
+
+The server (Node.js) exposes REST or WebSocket APIs (via Feathers.js in this project).
+Files like server/src/index.js, server/src/hooks.js, and server/src/generator.js define endpoints such as /restaurants, /orders, etc.
+
+The ClojureScript client (Keechma app) communicates with this backend via HTTP calls or sockets — the datasources defined in client/src/client/datasources.cljs describe these connections.
+
+So:
+
+Browser loads static HTML from Node.
+
+HTML requests the CLJS bundles from Figwheel.
+
+The Keechma frontend runs, requests data from the Feathers backend, and renders the UI.
+тоесть как я понимаю эти скрипты сейчас хостит фигвил
+  <script src="http://localhost:3449/js/compiled/out/goog/base.js"></script>
+  <script src="http://localhost:3449/js/compiled/out/goog/deps.js"></script>
+  <script src="http://localhost:3449/js/compiled/out/cljs_deps.js"></script>
+а на проде их путь будет доступен сноды и потому нужно будет использовать другйо хтмл - справельными путями
+**** core.cljs
+(find-file-other-frame "./example-place-my-order/client/src/client/core.cljs")
+
+(defn start-app! []
+  (reset! running-app (app-state/start! client.app/definition)))
+**** client.app/definition
+(def definition {:routes [[":page" {:page "home"}]
+                          ":page/:slug"
+                          ":page/:slug/:action"]
+                 :controllers client.controllers
+                 :html-element (.getElementById js/document "app")
+                 :components client.ui
+                 :subscriptions client.subscriptions})
+**** :components client.ui
+(def ui
+   {:main client.components.app/component
+    :landing client.components.landing/component
+    :cities (assoc client.components.cities/component :topic :restaurants)
+    :states (assoc client.components.states/component :topic :restaurants)
+    :restaurant-list (assoc client.components.restaurant-list/component :topic :restaurants)
+    :restaurant-detail client.components.restaurant-detail/component
+    :order client.components.order/component
+    :order-report (assoc client.components.order-report/component :topic :order)
+    :order-form (assoc client.components.order-form/component :topic :order)
+    :order-list-item (assoc client.components.order-list-item/component :topic :order)
+    :order-history client.components.order-history/component})
+
+**** :controllers client.controllers
+**** :subscriptions client.subscriptions
+**** 
+
+*** run
+#+begin_src elisp :results output silent  :dir ./example-place-my-order
+(evil-previous-line)
+(org-cycle)
+(delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+
+cd place-my-order
+  * Checkout the code
+  * Run cd server && npm install
+  * Run cd server/public && npm install
+  * Run lein figwheel dev inside the client folder
+  * Run npm run compile inside the server folder
+  * Run npm start inside the server folder
+  * Go to locahost:3030
+
+About
+
+Keechma example app. Based on
+https://github.com/donejs/place-my-order
+(http://www.place-my-order.com). 
+*** git
+git clone https://github.com/keechma/example-place-my-order.git
+https://github.com/keechma/example-place-my-order
+https://github.com/donejs/place-my-order.git
+https://github.com/donejs/place-my-order
 ** keechma-forms-example
 *** file
 (find-file-other-frame "./example-forms/resources/public/re-frame.html")
@@ -323,11 +479,12 @@ find "$PWD" -type f >>filepath.txt
 *** git
 **** init
 **** clone
-*** ИИ
+*** описание 
+**** ИИ
 если мне интересно сделать компонент для настолькной игры
 например игральная карта. Тоесть основной её функцикй будет возможность перетегивания, при зажатой левой кноаке.
 как можно былобы это проще реализовть?
-*** код ИИ
+**** код ИИ
 Перетаскиваемая карта — это классический **интерактивный компонент**.
 И можно сделать его **очень просто** в Reagent/ClojureScript — без тяжёлых библиотек.
 
@@ -441,6 +598,431 @@ find "$PWD" -type f >>filepath.txt
 
 Хочешь — давай сделаем **рабочий прототип прямо здесь** 🧠⚡
 С тебя идея игры — с меня код и анимации 💜
+**** ИИ 
+мне интересно сделать кложур скрипт приложени на Keechma Симулятор табле топ и борд гейс.
+тоесть должны быть компоненты карты, колоды, кости, тайлы.
+они должны будут делатся на основе некоторого джейсон описания.
+главный функционал скоторого нужно начать. Это возможность перетягивания компонетов.
+это не плохо реализуется на реагенте.
+но мне нужо и "перетягивать столь". Тость менять абсолютное значаенеи коорднат, но некому бесконечному столоу.
+иметь возможно приближать и удолять камеру к столу.
+и тут возникает вопрос не проще ли будет это реализовать на канве?
+или можно изменить копоненты реагента чтоб они так себя вели?
+помоги выбрать наилучшее решение.
+**** Konva.js
+Отличный вопрос — и очень уместный для симулятора настолок, потому что именно сочетание **интерактивности (drag-n-drop)** и **“бесконечного стола” с масштабированием и панорамированием** ставит React/Reagent в довольно спорное положение.
+Разберём по слоям, чтобы выбрать стратегию без компромиссов.
+
+---
+
+### 🔹 Что ты хочешь построить
+
+> Keechma-приложение (архитектурный фреймворк на Reagent/Re-frame основе)
+> с JSON-описываемыми компонентами (карты, колоды, кости, тайлы),
+> которые можно перетаскивать, масштабировать и двигать в “бесконечном столе”.
+
+Это ставит задачу на **рендеринг** (Canvas vs DOM) и **архитектуру взаимодействий** (drag, zoom, pan, snapping и т.д.)
+
+---
+
+### 🔹 Вариант 1: Чисто Reagent (DOM + CSS transforms)
+
+✅ **Плюсы:**
+
+  * Максимальная интеграция с Keechma (state, subscriptions, commands и т.п.).
+  * Drag-n-drop можно сделать через `react-dnd` или `interact.js`.
+  * “Камеру” (пан и зум) можно реализовать через CSS `transform: translate() scale()` на контейнере “стола”.
+
+🚫 **Минусы:**
+
+  * Производительность начнёт страдать, если на столе десятки/сотни компонентов (DOM-ноды дорогие).
+  * При зуме и пане легко словить артефакты с hit-тестами (drag перестаёт совпадать с реальными координатами).
+  * Реализация плавного перемещения/инерции — геморрой.
+
+💡 **Итого:** подходит, если стол компактный и взаимодействий немного (до 100 объектов).
+
+---
+
+### 🔹 Вариант 2: Canvas (через Reagent компонент с `canvas` API)
+
+✅ **Плюсы:**
+
+  * Лёгкий рендеринг даже при сотнях объектов.
+  * Зум и пан — естественны, ты просто меняешь `ctx.scale` и `ctx.translate`.
+  * Проще реализовать “бесконечность стола” и эффекты (тени, подсветки, слои).
+  * Можно использовать библиотеку вроде [Konva.js](https://konvajs.org/) (есть [react-konva](https://github.com/konvajs/react-konva), которую можно обернуть в Reagent).
+
+  🚫 **Минусы:**
+
+  * Нужно вручную писать логику выделения/drag-n-drop (hit testing).
+  * Сложнее интеграция с типичным Keechma flow (состояние придётся хранить отдельно и синхронизировать).
+
+💡 **Итого:** идеален, если тебе важны производительность, реалистичная физика и масштабируемость “мира”.
+
+---
+
+### 🔹 Вариант 3: Гибрид (DOM UI + Canvas стол)
+
+Используется во многих современных tabletop симуляторах (веб-вариантах):
+
+  * Canvas для “мира” (игрового поля, объектов, перемещений, зума).
+  * React/Reagent DOM-оверлей для интерфейса, меню, диалогов, панелей.
+
+💡 Это **золотая середина**:
+
+  * Canvas рендерит контент.
+  * Reagent управляет состоянием (Keechma orchestration, JSON → объекты).
+  * UI остаётся декларативным, а физика и движение — нативно быстрыми.
+
+---
+
+### 🔹 Рекомендация
+
+Для твоей цели:
+
+> “симулятор настолки с перетаскиванием, зумом и бесконечным столом”
+
+✅ **Оптимальный выбор:**
+**Hybrid → Reagent + Konva.js (через react-konva)**
+
+  * Ты можешь хранить всё описание в Keechma’s `EDB` и генерировать объекты на Canvas.
+  * Реализовать drag-n-drop и зум можно за вечер (Konva даёт готовые обработчики).
+  * Панорамирование/масштаб — встроены.
+  * Добавление анимации и визуальных эффектов (например, бросок кости) элементарно.
+
+---
+
+Хочешь — я покажу минимальный пример “Keechma + Reagent + react-konva” проекта,
+где можно:
+
+  * двигать объекты (drag),
+  * зумить колесом,
+  * и перемещать сам “стол” (pan)?
+
+Это даст тебе стартовую точку для будущего симулятора.
+**** Что делает Konva.js
+
+Отличный вопрос — Konva.js — это не просто библиотека, а, можно сказать, **“React для Canvas”**, только заточенный под **интерактивную 2D-графику**, типа твоего “настольного симулятора”.
+
+---
+
+### 🔹 Что делает Konva.js
+
+**Konva.js** — это JavaScript-библиотека для работы с HTML5 Canvas,
+которая добавляет:
+
+  * **Сцену (Stage)** и **слои (Layers)** — как в графических редакторах.
+  * **Объекты (Shapes)**: прямоугольники, изображения, текст, группы.
+  * **События**: `onClick`, `onDragMove`, `onMouseOver`, и даже `onWheel`.
+  * **Трансформации**: `x`, `y`, `scaleX`, `rotation` — всё управляется как свойства React-компонента.
+  * **Хит-тестинг** и **drag-and-drop** реализованы внутри — тебе не нужно вручную вычислять попадания курсора по пикселям.
+
+---
+
+### 🔹 Пример “Hello Konva”
+
+Вот насколько прост пример:
+
+```clojure
+(ns my-game.core
+  (:require ["react-konva" :refer [Stage Layer Rect]]))
+
+(defn canvas-view []
+  [:> Stage {:width 800 :height 600}
+   [:> Layer {}
+    [:> Rect {:x 50 :y 60
+              :width 100 :height 100
+              :fill "red"
+              :draggable true
+              :onClick #(js/alert "clicked!")}]]])
+```
+
+💡 `[:> ...]` — это синтаксис Reagent для вставки React-компонентов.
+Тут:
+
+  * `Stage` — это “сцена”, аналог твоего “стола”.
+  * `Layer` — слой (их можно несколько, как “фоны”, “карты”, “фишки”).
+  * `Rect` — объект, который можно двигать и с которым можно взаимодействовать.
+
+---
+
+### 🔹 Почему он идеален для tabletop
+
+| Возможность                           | Реализация в Konva                                            |
+| ------------------------------------- | ------------------------------------------------------------- |
+| Перетаскивание (drag-and-drop)        | `:draggable true`                                             |
+| Зум и панорама                        | слушатель `onWheel` + `stage.scale()` и `stage.position()`    |
+| “Бесконечный стол”                    | можно просто двигать `stage` или подгружать тайлы динамически |
+| Отрисовка сотен объектов              | Canvas-рендеринг, без DOM overhead                            |
+| Группы (например, колода карт)        | `Group` компонент                                             |
+| Эффекты (тени, прозрачность, фильтры) | встроенные свойства и фильтры                                 |
+
+---
+
+### 🔹 Бонус — React-совместимость
+
+Есть официальная обёртка **[react-konva](https://konvajs.org/docs/react/index.html)**,
+поэтому ты можешь использовать её прямо в **Reagent / Keechma** без боли.
+Всё декларативно и реагирует на изменение состояния, как обычный компонент.
+
+---
+
+### 🔹 Итого
+
+> 💬 **Konva.js** — это движок, который делает Canvas интерактивным и “реактивным”.
+>
+> ⚙️ Подходит идеально для твоего tabletop симулятора, где всё должно двигаться, масштабироваться и не тормозить.
+
+---
+
+Хочешь, я покажу рабочий пример на **Reagent + react-konva**,
+где можно и **перетаскивать фигуры**, и **зумить колесом**, и **двигать “стол”** мышью — как в настоящем настольном симуляторе?
+**** React-Konva вписывается в Reagent/Keechma стек
+Да 😎 — **оно прекрасно вписывается в твой Reagent/Keechma стек**, потому что `react-konva` — это обычные React-компоненты,
+а Reagent умеет рендерить *любой* React-компонент через стандартный хикаповый синтаксис.
+
+Так что да — **ты можешь использовать Hiccup как обычно** и спокойно **форвардить компоненты** из Keechma/Reagent в `react-konva`.
+Давай разберём это чуть глубже, чтобы не оставалось “магии”.
+
+---
+
+### 🔹 1. React-Konva — это просто React-компоненты
+
+Например, в JS они выглядят так:
+
+```jsx
+<Stage>
+  <Layer>
+    <Rect x={10} y={10} width={100} height={100} draggable={true} />
+  </Layer>
+</Stage>
+```
+
+---
+
+### 🔹 2. В Reagent (и Keechma) ты пишешь то же самое в Hiccup
+
+Reagent имеет спец-форму `:>` для вставки нативного React-компонента.
+
+```clojure
+(ns myapp.ui.board
+  (:require ["react-konva" :refer [Stage Layer Rect]]))
+
+(defn board []
+  [:> Stage {:width 800 :height 600}
+   [:> Layer {}
+    [:> Rect {:x 50 :y 50
+              :width 100 :height 100
+              :fill "skyblue"
+              :draggable true
+              :onClick #(js/console.log "Clicked!")}]])
+```
+
+💡 Здесь `:>` означает “используй этот компонент напрямую”,
+а все `props` (`:width`, `:height`, `:fill`, `:onClick`) передаются 1:1.
+
+---
+
+### 🔹 3. Keechma-интеграция — нативная
+
+Keechma работает на Reagent-компонентах, поэтому `react-konva`
+можно использовать **прямо внутри Keechma views**.
+
+Например:
+
+```clojure
+(ns app.ui.main
+  (:require
+   [keechma.ui-component :as ui]
+   ["react-konva" :refer [Stage Layer Circle]]))
+
+(defn render [ctx]
+  [:div.game-container
+   [:> Stage {:width 800 :height 600}
+    [:> Layer {}
+     [:> Circle {:x 100 :y 100
+                 :radius 40
+                 :fill "tomato"
+                 :draggable true
+                 :onDragMove
+                   (fn [e]
+                     (ui/dispatch ctx :move-token
+                       {:x (.. e -target -x)
+                        :y (.. e -target -y)}))}]]]])
+```
+
+💡 Здесь ты:
+
+  * Используешь Keechma `ctx` как обычно.
+  * Обрабатываешь события Konva (например `onDragMove`).
+  * Диспатчишь команды Keechma (через `ui/dispatch`).
+
+---
+
+### 🔹 4. Да, можно “форвардить” компоненты
+
+Ты можешь спокойно создавать свои `[:> Group]` или `[:> Rect]`
+компоненты и прокидывать их как дочерние — как будто это обычный DOM:
+
+```clojure
+(defn card [props]
+  [:> Group props
+   [:> Rect {:width 60 :height 90 :fill "white" :stroke "black"}]
+   [:> Text {:text (:title props) :x 5 :y 5 :fontSize 14}]])
+```
+
+А потом использовать:
+
+```clojure
+[:> Layer {}
+ [card {:x 100 :y 100 :title "Ace of Spades"}]
+ [card {:x 200 :y 120 :title "Queen of Hearts"}]]
+```
+
+То есть — да, **ты можешь форвардить свои Reagent-компоненты прямо в Canvas-иерархию Konva**, как будто это обычные React-компоненты.
+
+---
+
+### 🔹 5. Микс Keechma + JSON описаний
+
+Ты даже можешь хранить JSON вроде:
+
+```json
+[
+  {"type": "card", "x": 100, "y": 100, "title": "Ace"},
+  {"type": "dice", "x": 300, "y": 150, "sides": 6}
+]
+```
+
+и рендерить динамически:
+
+```clojure
+(for [item items]
+  (case (:type item)
+    "card" [card item]
+    "dice" [dice item]))
+```
+
+Так ты получишь динамическое создание объектов на Canvas
+по JSON-описаниям — как ты и хотел изначально.
+
+---
+
+Хочешь — я покажу тебе минимальный **Keechma + Reagent + react-konva** пример проекта,
+где есть “стол”, перетаскиваемые карточки и камера (пан/зум)?
+Можно прямо на базе skeleton’а Keechma.
+**** Идеальная структура tabletop-приложения
+Отличный вопрос — и ты на самом деле уже мысленно стоишь **на границе двух миров**:
+🧠 *декларативного Reagent/React UI* и 🎮 *императивного Canvas-мира Konva*.
+Понять, где кончается одно и начинается другое — это ключ к красивой архитектуре tabletop-симулятора.
+
+Давай аккуратно разделим роли, чтобы ты чётко видел, **где Reagent незаменим**, а где **Konva рулит**.
+
+---
+
+## 🔹 Где нужен **Reagent** (и значит Keechma)
+
+Reagent остаётся твоим “мозгом” и “панелью управления”:
+
+  * Управляет **состоянием** (Keechma EDB, subscriptions, commands).
+  * Рисует **UI вне Canvas** — меню, панели, попапы, модалки, настройки, чаты, лог действий, селекторы колод и т.д.
+  * Реализует **реактивную бизнес-логику** — например, если карта выложена на стол, Keechma обновляет её позицию, синхронизирует с сервером, триггерит анимации и т.д.
+  * Хранит всё как **декларативное состояние**, а не императивные Canvas-команды.
+
+💡 Проще говоря:
+
+> Reagent/Keechma управляет “моделью игры”, а Konva только рисует текущее состояние этой модели.
+
+---
+
+## 🔹 Где нужен **Konva.js**
+
+Konva — это твой **рендерер и физический слой**:
+
+  * Всё, что **движется, перетаскивается, масштабируется**.
+  * Всё, где важна **производительность** (Canvas быстрее DOM).
+  * Всё, где UI должен быть “игровым”, а не “формовым”.
+
+Примеры:
+
+  * Карты, фишки, кости, тайлы, маркеры.
+  * Стол с панорамой и зумом.
+  * Анимации бросков, подсветки, столкновений и т.д.
+
+---
+
+## 🔹 Что проще не делать на Konva вручную
+
+Konva — шикарен, но не стоит насиловать его для вещей, где React лучше.
+Вот что **лучше оставить Reagent-у**:
+
+| Задача                                        | Почему Reagent проще                                              |
+| --------------------------------------------- | ----------------------------------------------------------------- |
+| Меню, кнопки, тулбары, выпадашки              | DOM имеет готовую семантику, стили и фокус-менеджмент             |
+| Настройки и формы                             | Реактивный state и input-контроль проще в React                   |
+| Окна диалогов (“Save Game?”, “Invite Player”) | Keechma уже умеет управлять такими состояниями                    |
+| Tooltip’ы, всплывающие подсказки              | DOM-оверлей проще позиционировать поверх Canvas                   |
+| Серверное взаимодействие                      | Keechma commands/subscriptions — лучший способ для сетевой логики |
+
+---
+
+## 🔹 Где **Reagent и Konva должны работать вместе**
+
+Там, где нужно реактивное управление Canvas-объектами.
+Например:
+
+```clojure
+(defn card [ctx {:keys [x y title selected?]}]
+  [:> Group {:x x :y y :draggable true
+             :onClick #(ui/dispatch ctx :select-card title)}
+   [:> Rect {:width 60 :height 90
+             :fill (if selected? "gold" "white")
+             :stroke "black"}]
+   [:> Text {:text title :x 5 :y 5 :fontSize 14}]])
+```
+
+💡 Здесь Reagent рендерит Konva-объект,
+но `selected?` берётся из **Keechma state** — т.е. UI остаётся декларативным.
+Если `selected?` поменялся, Reagent сам обновит `fill`, не нужно руками перерисовывать Canvas.
+
+---
+
+## 🔹 Идеальная структура tabletop-приложения
+
+```
+Keechma (App state)
+├── UI (Reagent)
+│   ├── Панели, меню, модалки
+│   └── HUD, настройки, чат
+└── Scene (Konva)
+    ├── Слой стола (background, grid)
+    ├── Слой объектов (карты, кости, фигуры)
+    └── Слой эффектов (highlight, selection)
+```
+
+📦 Вся логика — в Keechma.
+🎨 Визуализация — в Konva.
+🧩 Синхронизация — через Reagent.
+
+---
+
+## 🔹 Вывод
+
+Используй Reagent:
+
+  * как **архитектуру** (Keechma);
+  * как **интерфейс** для всего вне игрового поля;
+  * как **декларативную прослойку** к Konva.
+
+Используй Konva:
+
+  * как **рендеринг-движок** и **поведение** для объектов внутри поля.
+
+---
+
+Если хочешь, я покажу **живой пример архитектуры**
+(с Keechma routes, EDB, Reagent views и react-konva сценой),
+где есть панель инструментов (Reagent) и поле с перетаскиваемыми карточками (Konva)?
 
 ** Worder
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
@@ -2218,6 +2800,8 @@ button {
 *** contacts_test.cljs
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
 * TODO todo
+** DONE таки убедится тот ли это пример
+*** если нет изучить нужный
 ** TODO Keechma exampls
 *** todo
 https://keechma.com/guides/application-walkthrough/
@@ -2231,12 +2815,6 @@ Application that implements the login workflow.
 ,* [[https://keechma.com/annotated/login/][Annotated source]]
 
 
-Forms
-
-Application that shows how to use the [[https://github.com/keechma/forms][Keechma Forms]] Library.
-
-,* [[https://github.com/keechma/keechma-forms-example][Source code]]
-,* [[https://keechma.com/annotated/form-example/][Annotated source]]
 *** done
 Graph data
 
@@ -2261,6 +2839,27 @@ Counter application example.
 
 ,* [[https://github.com/keechma/keechma-counter][Source code]]
 ,* [[https://keechma.com/annotated/counter/][Annotated source]]
+Forms
+
+Application that shows how to use the [[https://github.com/keechma/forms][Keechma Forms]] Library.
+
+,* [[https://github.com/keechma/keechma-forms-example][Source code]]
+,* [[https://keechma.com/annotated/form-example/][Annotated source]]
+** сделать тестовый проект магазина орг
+*** firebase store proeject
+поидее должен быть котовое решение для магазина 
+и вообще готовый термен для поиска
+
+*** cljs-firebase-client
+
+Используй cljs-firebase-client: Эта библиотека упростит интеграцию с Firebase в ClojureScript.
+
+
+MVP	Каталог книг (json или Firestore)	всё локально
+1	Корзина, хранение заказов	Firestore
+2	Авторизация пользователей	Firebase Auth
+3	Деплой	Firebase Hosting
+4	Красота и метаданные	SEO, OpenGraph, manifest.json
 ** DELEGATED програма психологияеская
 *** file
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
@@ -2333,22 +2932,7 @@ Counter application example.
 **** захостить
 возможно нужна будет помошь Уни
 **** передать вале
-** сделать тестовый проект магазина орг
-*** firebase store proeject
-поидее должен быть котовое решение для магазина 
-и вообще готовый термен для поиска
-
-*** cljs-firebase-client
-
-Используй cljs-firebase-client: Эта библиотека упростит интеграцию с Firebase в ClojureScript.
-
-
-MVP	Каталог книг (json или Firestore)	всё локально
-1	Корзина, хранение заказов	Firestore
-2	Авторизация пользователей	Firebase Auth
-3	Деплой	Firebase Hosting
-4	Красота и метаданные	SEO, OpenGraph, manifest.json
-** сделать табле топ игру
+** DONE сделать табле топ игру
 ** сделать сайт для портфолио
 ** програма измерения прочитанного
 *** продумать интерфейс

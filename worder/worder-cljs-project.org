@@ -2139,6 +2139,12 @@ html .clear-completed:active {
 #+end_src
 ***** /* === Timer Component Styling Fit for WorderMVC === */
 #+begin_src css :no-expand t :mkdirp yes 
+
+.todo-list li label {
+    display: flex;
+    padding-right: 27px;
+    }
+
 .todo-list li .timer {
     display: inline-flex;
     align-items: center;
