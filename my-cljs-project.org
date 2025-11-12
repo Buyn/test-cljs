@@ -163,8 +163,6 @@ The Keechma frontend runs, requests data from the Feathers backend, and renders 
 
 **** :controllers client.controllers
 **** :subscriptions client.subscriptions
-**** 
-
 *** run
 #+begin_src elisp :results output silent  :dir ./example-place-my-order
 (evil-previous-line)
@@ -2860,6 +2858,11 @@ MVP	Каталог книг (json или Firestore)	всё локально
 2	Авторизация пользователей	Firebase Auth
 3	Деплой	Firebase Hosting
 4	Красота и метаданные	SEO, OpenGraph, manifest.json
+
+*** boot strep
+
+*** Firestore
+
 ** DELEGATED програма психологияеская
 *** file
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")

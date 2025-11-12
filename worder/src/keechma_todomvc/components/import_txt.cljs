@@ -4,7 +4,7 @@
             [clojure.string :as str]))
 
 (defn process-lines [ctx content]
-  (doseq [line (str/split content #"\n")]
+  (doseq [line (reverse (str/split content #"\n"))]
     (let [t (str/trim line)]
       (when-not (empty? t)
         (<cmd ctx :create-todo t)))))
