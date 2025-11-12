@@ -2187,6 +2187,8 @@ html .clear-completed:active {
     margin-left: 8px;
     font-size: 14px;
     color: #777;
+    min-width: 70px;
+    text-align: right;
 }
 
 
@@ -2424,6 +2426,14 @@ lein deps :refresh
 
 *** build
 :cljs/quit
+rm resources/public/js/app.js
+lein do clean, cljsbuild once min
+cp resources/public/js/app.js "~/Dev/ClojureScript/worder/js/app.js"
+cp resources/public/index.html "~/Dev/ClojureScript/worder/index.html"
+cp -r resources/public/txt "~/Dev/ClojureScript/worder/"
+cp -r resources/public/css "~/Dev/ClojureScript/worder/"
+
+
 надо удолить вручную
   resources/public/js/app.js
   и тогда проходит комплиция нормально
