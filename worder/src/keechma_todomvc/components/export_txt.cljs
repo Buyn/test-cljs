@@ -5,6 +5,7 @@
 (defn export-file [todos {:keys [sep ext eof]}]
   (let [lines (map (fn [{:keys [title time]}]
                      (str title sep (or time 0)))
+                   ;; (reverse todos)
                    todos)
         content (str/join eof lines)
         blob (js/Blob. #js [content] #js {:type "text/plain;charset=utf-8"})
@@ -21,6 +22,7 @@
     ;; удаляем элемент из DOM и освобождаем URL чуть позже
     (.remove a)
     (js/setTimeout #(js/URL.revokeObjectURL url) 2000)))
+
 
 (defn render [ctx {:keys [title] :as props}]
   (let [route-status (keyword (route> ctx :status))

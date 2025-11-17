@@ -40,6 +40,10 @@ from
 
 :header-args: :tangle  "~/INI/hydra-cfg.el"
 * Source files
+** giggin
+*** org giggin
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/giggin/giggin.org")
+~/Dev/ClojureScript/tutorials/my-cljs-project/giggin/giggin.org
 ** example-place-my-order
 *** files
 **** client
@@ -2798,52 +2802,11 @@ button {
 *** contacts_test.cljs
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/contacts/src/learn_cljs/contacts.cljs")
 * TODO todo
-** DONE таки убедится тот ли это пример
-*** если нет изучить нужный
-** TODO Keechma exampls
-*** todo
-https://keechma.com/guides/application-walkthrough/
-https://github.com/keechma/example-place-my-order
-
-Login
-
-Application that implements the login workflow.
-
-,* [[https://github.com/keechma/keechma-login][Source code]]
-,* [[https://keechma.com/annotated/login/][Annotated source]]
-
-
-*** done
-Graph data
-
-Application that shows how to render the graph data in Keechma.
-
-,* [[https://github.com/keechma/keechma-graph-data][Source code]]
-,* [[https://keechma.com/annotated/graph-data/][Annotated source]]
-
-https://github.com/keechma/example-graph-data
-
-TodoMVC
-
-TodoMVC application example.
-
-,* [[https://github.com/keechma/keechma-todomvc][Source code]]
-,* [[https://keechma.com/annotated/todomvc/][Annotated source]]
-
-https://keechma.com/annotated/
-Counter
-
-Counter application example.
-
-,* [[https://github.com/keechma/keechma-counter][Source code]]
-,* [[https://keechma.com/annotated/counter/][Annotated source]]
-Forms
-
-Application that shows how to use the [[https://github.com/keechma/forms][Keechma Forms]] Library.
-
-,* [[https://github.com/keechma/keechma-forms-example][Source code]]
-,* [[https://keechma.com/annotated/form-example/][Annotated source]]
-** сделать тестовый проект магазина орг
+** DELEGATED сделать тестовый проект магазина орг
+*** DONE 
+**** сделать орг в некротехе
+**** перенести всё отсюда
+**** сделать авто запуск
 *** firebase store proeject
 поидее должен быть котовое решение для магазина 
 и вообще готовый термен для поиска
@@ -2863,6 +2826,311 @@ MVP	Каталог книг (json или Firestore)	всё локально
 
 *** Firestore
 
+*** DONE Структура приложения
+
+Главная страница: Приветствие, информация о кофейне и книжном магазине.
+Каталог книг: Список доступных книг с фильтрацией и поиском.
+Корзина: Возможность добавления книг в корзину и оформления заказа.
+Аутентификация: Регистрация и вход пользователей (если требуется).
+найти нас
+сделать и оплатить заказ кофе
+меню
+вызвать официанат
+** DONE сделат орг для learn-reagent-free
+*** git clone в кложур
+git clone https://github.com/jacekschae/learn-reagent-course-files.git
+git clone git@github.com:jacekschae/learn-reagent-course-files.git
+
+https://github.com/jacekschae/learn-reagent-course-files?tab=readme-ov-file
+/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files
+*** сделать проект в туториале
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin
+
+скопироваров из [[*git clone в кложур][git clone в кложур]]
+/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin
+*** сделать орг learn-reagent-free
+**** в туторал
+**** сделать сылку в туторалс
+**** суопировать и настроить орг
+можно взять за основу пустой
+если его нет
+склонить
+внести измения в орг
+**** comment
+Learn simple, clean, and robust way to build SPA (Single-Page Applications) with ClojureScript & Reagent. Build GIGGIN an app that shows local gigs. Step-by-step, component-by-component we'll learn how to build SPAs with ClojureScript. We'll work with remote API. Learn how easy it is to interop with JS and npm and much more … . This video course will take you from zero to deployment in a few afternoons.
+Course files
+
+The code in this repo is split into two folders - giggin - starting point of the videos (this is what you should open when you start to code along with the vidoes) and - increments - code for the start of each video (if you get lost somewhere along the way just copy the content of the video you are starting and continue).
+**** Clone
+
+$ git clone git@github.com:jacekschae/learn-reagent-course-files.git
+
+$ cd learn-reagent-course-files/giggin/
+**** Install dependesis
+
+learn-reagent-course-files/giggin/ $ npm install
+
+or with yarn
+
+learn-reagent-course-files/giggin/ $ yarn install
+
+Run development server
+
+learn-reagent-course-files/giggin/ $ npm run dev
+
+or with yarn
+
+learn-reagent-course-files/giggin/ $ yarn dev
+
+
+** TODO изучить learn-reagent-free
+*** giggin.org
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/giggin/giggin.org")
+
+*** video
+https://www.jacekschae.com/view/courses/learn-reagent-free/21667-setup/61162-01-dev-setup
+*** learn-reagent-free
+**** git
+jacekschae/learn-reagent-course-files: :cinema: Learn Reagent course files for building GIGGIN app
+https://github.com/jacekschae/learn-reagent-course-files
+** WAITING изучить shadow-cljs
+*** читать
+**** manual
+https://shadow-cljs.github.io/docs/UsersGuide.html
+**** tutorial
+***** learn-reagent-free
+****** git
+jacekschae/learn-reagent-course-files: :cinema: Learn Reagent course files for building GIGGIN app
+https://github.com/jacekschae/learn-reagent-course-files
+****** video
+https://www.jacekschae.com/view/courses/learn-reagent-free/21667-setup/61162-01-dev-setup
+****** org
+
+***** ClojureScript for React Developer
+https://www.youtube.com/watch?v=EUdsLZUsiRQ&list=PLUGfdBfjve9VGzp7G1C9FYfH8Yk1Px-11
+
+*** new
+**** 
+2. Installation
+
+2.1. Standalone via npm
+
+You will need:
+
+  * node.js (v6.0.0+, most recent version preferred)
+
+  * npm (comes with node by default) or yarn
+
+  * Any Java SDK (Version 21 or higher, LTS release recommended). https://adoptium.net/
+
+In your project directory you’ll need a package.json. If you do not have one yet you can create one by
+running npm init -y. If you don’t have a project directory yet consider creating it by running
+
+$ npx create-cljs-project my-project
+
+This will create all the necessary basic files and you can skip the following commands.
+
+If you have a package.json already and just want to add shadow-cljs run
+
+NPM
+$ npm install --save-dev shadow-cljs
+Yarn
+$ yarn add --dev shadow-cljs
+
+For convenience, you can run npm install -g shadow-cljs or yarn global add shadow-cljs. This will
+let you run the shadow-cljs command directly later. There should always be a shadow-cljs version
+installed in your project, the global install is optional.
+
+2.2. Library
+
+Although it is recommended to run the standalone version via npm you can also embed shadow-cljs into
+any other Clojure JVM tool (eg. lein, boot, …​).
+
+The artifact can be found at:
+
+shadow cljs
+shadow cljs
+
+
+**** Quick Start
+***** raw
+Creating your project can be done quickly using the npx create-cljs-project utility. npx is part of npm and lets us run utility scripts quickly without worrying about installing them first. The installer will create a basic project scaffold and install the latest version of shadow-cljs in the project.
+
+$ npx create-cljs-project acme-app
+npx: installed 1 in 5.887s
+shadow-cljs - creating project: .../acme-app
+Creating: .../acme-app/package.json
+Creating: .../acme-app/shadow-cljs.edn
+Creating: .../acme-app/.gitignore
+Creating: .../acme-app/src/main
+Creating: .../acme-app/src/test
+----
+Installing shadow-cljs in project.
+
+npm notice created a lockfile as package-lock.json. You should commit this file.
++ shadow-cljs@<version>
+added 88 packages from 103 contributors and audited 636 packages in 6.287s
+found 0 vulnerabilities
+
+----
+Done.
+----
+
+The resulting project has the following structure
+
+.
+├── node_modules (omitted ...)
+├── package.json
+├── package-lock.json
+├── shadow-cljs.edn
+└── src
+    ├── main
+    └── test
+
+shadow-cljs.edn will be used to configure your CLJS builds and CLJS dependencies. package.json is used by npm to manage JS dependencies.
+
+Everything is ready to go if you just want to start playing with a REPL
+
+$ npx shadow-cljs node-repl
+# or
+$ npx shadow-cljs browser-repl
+
+When building actual projects we need to configure the build first and create at least one source file.
+
+The default source paths are configured to use src/main as the primary source directory. It is recommended to follow the Java Naming Conventions to organize your CLJS namespaces. It is recommended to start all namespaces with a unique enough prefix (eg. company name, project name) to avoid conflicts with generic names such as app.core. Suppose you were building a Web Frontend for Acme Inc. using acme.frontend.app might be a good starting point as it can easily grow to include acme.backend.* later on.
+
+Using the above example the expected filename for acme.frontend.app is src/main/acme/frontend/app.cljs.
+
+Lets start with a simple example for a browser-based build.
+
+(ns acme.frontend.app)
+
+(defn init []
+  (println "Hello World"))
+
+Inside the shadow-cljs.edn :builds section add
+
+{...
+ :builds
+ {:frontend
+  {:target :browser
+   :modules {:main {:init-fn acme.frontend.app/init}}
+   }}}
+
+This config tells the compiler to call (acme.frontend.app/init) when the generated JS code is loaded. Since no :output-dir is configured the default public/js is used. You can start the development process by running:
+
+$ npx shadow-cljs watch frontend
+...
+a few moments later ...
+...
+[:frontend] Build completed. (134 files, 35 compiled, 0 warnings, 5.80s)
+
+The compilation will create the public/js/main.js we configured above (:main becomes main.js in the :output-dir). Since we want to load this in the browser we need to create a HTML file in public/index.html.
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>acme frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
+
+We also need a simple HTTP server to serve our HTML since modern Browsers all place a few restrictions on files loaded directly from disk which will lead to issues later. shadow-cljs provides such a server but you can use anything you like at this point. It only matters that the files from the public directory are served properly. To start the built-in web server just adjust the build config from above.
+
+{...
+ :dev-http {8080 "public"}
+ :builds
+ {:frontend
+  {:target :browser
+   :modules {:main {:init-fn acme.frontend.app/init}}
+   }}}
+
+Once the config is saved the server will automatically start and serve the content at http://localhost:8080. There is no need to restart shadow-cljs. When opening the above URL the Browser Console should show "Hello World".
+
+To be continued ...
+***** npx
+$ npx create-cljs-project acme-app
+
+Everything is ready to go if you just want to start playing with a REPL
+
+$ npx shadow-cljs node-repl
+# or
+$ npx shadow-cljs browser-repl
+***** source file
+When building actual projects we need to configure the build first and create at least one source file.
+
+The default source paths are configured to use src/main as the primary source directory. It is recommended to follow the Java Naming Conventions to organize your CLJS namespaces. It is recommended to start all namespaces with a unique enough prefix (eg. company name, project name) to avoid conflicts with generic names such as app.core. Suppose you were building a Web Frontend for Acme Inc. using acme.frontend.app might be a good starting point as it can easily grow to include acme.backend.* later on.
+
+Using the above example the expected filename for acme.frontend.app is src/main/acme/frontend/app.cljs.
+
+Lets start with a simple example for a browser-based build.
+
+(ns acme.frontend.app)
+
+(defn init []
+  (println "Hello World"))
+
+Inside the shadow-cljs.edn :builds section add
+
+{...
+ :builds
+ {:frontend
+  {:target :browser
+   :modules {:main {:init-fn acme.frontend.app/init}}
+   }}}
+
+This config tells the compiler to call (acme.frontend.app/init) when the generated JS code is loaded. Since no :output-dir is configured the default public/js is used. You can start the development process by running:
+***** watch frontend
+$ npx shadow-cljs watch frontend
+...
+a few moments later ...
+...
+[:frontend] Build completed. (134 files, 35 compiled, 0 warnings, 5.80s)
+
+The compilation will create the public/js/main.js we configured above (:main becomes main.js in the :output-dir). Since we want to load this in the browser we need to create a HTML file in public/index.html.
+
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>acme frontend</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script src="/js/main.js"></script>
+  </body>
+</html>
+
+We also need a simple HTTP server to serve our HTML since modern Browsers all place a few restrictions on files loaded directly from disk which will lead to issues later. shadow-cljs provides such a server but you can use anything you like at this point. It only matters that the files from the public directory are served properly. To start the built-in web server just adjust the build config from above.
+
+{...
+ :dev-http {8080 "public"}
+ :builds
+ {:frontend
+  {:target :browser
+   :modules {:main {:init-fn acme.frontend.app/init}}
+   }}}
+
+Once the config is saved the server will automatically start and serve the content at http://localhost:8080. There is no need to restart shadow-cljs. When opening the above URL the Browser Console should show "Hello World".
+
+*** темплатс
+https://github.com/shadow-cljs/quickstart-browser
+
+*** найти туториал проект
+*** сделать туриал проект
+*** собрать его в релизный вариант
+*** игры реакт туториал
+https://www.youtube.com/watch?v=9aN6GOaNoTM&pp=ygULc2hhZG93LWNsanM%3D
+*** tools
+**** shadow-cljs-ext
+https://github.com/thheller/shadow-cljs-ext?tab=readme-ov-file
+** DONE таки убедится тот ли это пример
+*** если нет изучить нужный
 ** DELEGATED програма психологияеская
 *** file
 (find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/worder/worder-cljs-project.org")
@@ -2975,6 +3243,7 @@ https://m1.material.io/material-design/introduction.html#
 ** прочитать
 https://clojurescript.org/guides/quick-start
 
+** [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*manuals reagent][manuals reagent]]
 ** кложур для андроида
 https://habr.com/ru/articles/705448/
 ** figwheel
@@ -2987,19 +3256,17 @@ http://rigsomelight.com/2014/05/01/interactive-programming-flappy-bird-clojuresc
 https://www.youtube.com/watch?v=j-kj2qwJa_E
 https://www.youtube.com/watch?v=KZjFVdU8VLI
 https://github.com/bhauman/figwheel-main
-
-** TODO Структура приложения
-
-Главная страница: Приветствие, информация о кофейне и книжном магазине.
-Каталог книг: Список доступных книг с фильтрацией и поиском.
-Корзина: Возможность добавления книг в корзину и оформления заказа.
-Аутентификация: Регистрация и вход пользователей (если требуется).
-найти нас
-сделать и оплатить заказ кофе
-меню
-вызвать официанат
+** testing
+*** re-frame
+https://day8.github.io/re-frame/Testing/
+** luminus
+*** 
+*** tutorial
+https://luminusweb.com/docs/guestbook
+https://luminusweb.com/docs/repl.html
 ** Изучить re-frame
 *** читать
+https://day8.github.io/re-frame/Testing/
 https://day8.github.io/re-frame/dominoes-30k/
 https://day8.github.io/re-frame/start-coding/
 https://github.com/day8/re-frame/blob/master/docs/External-Resources.md
@@ -3036,17 +3303,55 @@ reagent-material-ui - поскольку позволит сильно упра�
 стандартное 
 clj -X:new :template figwheel-main :name freeman/tolk :args '["+deps" "--reagent"]'
 ? или посоветуешь что-то другое?
-** изучить shadow-cljs
-*** читать
-https://shadow-cljs.github.io/docs/UsersGuide.html
-*** сделать туриал проект
-*** собрать его в релизный вариант
 ** kee-frame
 вроде это рефрейм но унего нет проблем с фигвилом
 
 https://cljdoc.org/d/kee-frame/kee-frame/0.3.4-SNAPSHOT/doc/readme
 
 https://github.com/ingesolvoll/kee-frame
+** Keechma exampls
+*** todo
+https://keechma.com/guides/application-walkthrough/
+https://github.com/keechma/example-place-my-order
+
+Login
+
+Application that implements the login workflow.
+
+,* [[https://github.com/keechma/keechma-login][Source code]]
+,* [[https://keechma.com/annotated/login/][Annotated source]]
+
+
+*** done
+Graph data
+
+Application that shows how to render the graph data in Keechma.
+
+,* [[https://github.com/keechma/keechma-graph-data][Source code]]
+,* [[https://keechma.com/annotated/graph-data/][Annotated source]]
+
+https://github.com/keechma/example-graph-data
+
+TodoMVC
+
+TodoMVC application example.
+
+,* [[https://github.com/keechma/keechma-todomvc][Source code]]
+,* [[https://keechma.com/annotated/todomvc/][Annotated source]]
+
+https://keechma.com/annotated/
+Counter
+
+Counter application example.
+
+,* [[https://github.com/keechma/keechma-counter][Source code]]
+,* [[https://keechma.com/annotated/counter/][Annotated source]]
+Forms
+
+Application that shows how to use the [[https://github.com/keechma/forms][Keechma Forms]] Library.
+
+,* [[https://github.com/keechma/keechma-forms-example][Source code]]
+,* [[https://keechma.com/annotated/form-example/][Annotated source]]
 ** изучить Fulcro
 **Angular-подобный фреймворк** для Clojure/ClojureScript — то ответ:
 
@@ -6385,11 +6690,11 @@ nil
                             "keyup"
                             pass-checker-one)
 #+end_src
-* NEXT Log
+* DONE Log
 :PROPERTIES:
 :header-args: :tangle no 
 :END:
-** NEXT reagent-test
+** DONE reagent-test
 *** new project
 clj -X:new :template figwheel-main :name learn-cljs/reagent-test :args '["+deps"]'
 cd reagent-test
@@ -6746,7 +7051,7 @@ clj -A:fig:build
 #+begin_src elisp :results output silent :dir reagent-test
 clj -A:fig:build
 #+end_src
-*** NEXT todo
+*** DONE todo
 **** разобратся с танглом
 какого чёрта оно отвалилос
 (prn (binding [*out* (java.io.StringWriter.)

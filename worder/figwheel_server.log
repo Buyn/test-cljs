@@ -1290,3 +1290,25 @@ Compiling build :dev to "resources/public/js/app.js" from ["src"]...
 notifying browser that file changed:  resources/public/js/dev/goog/deps.js
 notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
 notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/import_txt.js
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[36m----  Compiler Warning on   src/keechma_todomvc/components/export_txt.cljs   line:27  column:20  ----[0m
+
+  [1mUse of undeclared Var keechma-todomvc.components.export-txt/render[0m
+
+  [36m23[0m  [36m    (.remove a)[0m
+  [36m24[0m  [36m    (js/setTimeout #(js/URL.revokeObjectURL url) 2000)))[0m
+  [36m25[0m  [36m[0m
+  [36m26[0m  [36m(def component[0m
+  [33m27[0m  [1m  (<comp :renderer render[0m
+  [0m  [0m  [33m                   ^--- Use of undeclared Var keechma-todomvc.components.export-txt/render[0m
+  [36m28[0m  [36m         :subscription-deps [:todos-by-status]))[0m
+
+[36m----  Compiler Warning : Please see src/keechma_todomvc/components/export_txt.cljs  ----[0m
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 1.662 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/goog/deps.js
+notifying browser that file changed:  resources/public/js/dev/cljs_deps.js
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
+Figwheel: Can't open  ("src/keechma_todomvc/components/export_txt.cljs" 27 20) No :open-file-command supplied in the config.
+Compiling build :dev to "resources/public/js/app.js" from ["src"]...
+[32mSuccessfully compiled build :dev to "resources/public/js/app.js" in 0.778 seconds.[0m
+notifying browser that file changed:  resources/public/js/dev/keechma_todomvc/components/export_txt.js
