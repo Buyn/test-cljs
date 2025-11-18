@@ -9,75 +9,63 @@
 (find-file-other-frame "./shadow-cljs.edn")
 (find-file-other-frame "./giggin.org")
 ** src core
-*** CANCELED components.cljs
+*** core.cljs
 :PROPERTIES:
-:header-args: :tangle no
+:header-args: :tangle ./src/giggin/core.cljs
 :END:
-:header-args: :tangle src/keechma_todomvc/components.cljs
-**** file components.cljs
-(find-file-other-frame "./src/keechma_todomvc/components.cljs")
-**** src components.cljs
+**** file core.cljs
+(find-file-other-frame "./src/giggin/core.cljs")
+**** src core.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
-(ns keechma-todomvc.components
-  "# Todo UI Component system"
-  (:require 
-            ;; [keechma-todomvc.components.footer :as footer]
-            ;; [keechma-todomvc.components.new-todo :as new-todo]
-            ;; [keechma-todomvc.components.todo-edit :as todo-edit]
-            ;; [keechma-todomvc.components.timer-button :as timer-button]
-            ;; [keechma-todomvc.components.todo-item :as todo-item]
-            ;; [keechma-todomvc.components.todo-list :as todo-list]
-            ;; [keechma-todomvc.components.export-txt :as export-txt]
-            ;; [keechma-todomvc.components.import-txt :as import-txt]
-            ;; [keechma-todomvc.components.toggle-todos :as toggle-todos]
-            [keechma-todomvc.components.app :as app]))
+(ns giggin.core
+  (:require [reagent.core :as r]))
 
-(def system
-  "Defines the component `system`. All the components that send commands
-  are configured to send them to the `:todos` topic controller."
-  {:main app/component
-   ;; :footer (assoc footer/component :topic :todos)
-   ;; :new-todo (assoc new-todo/component :topic :todos)
-   ;; :todo-edit (assoc todo-edit/component :topic :todos)
-   ;; :todo-item (assoc todo-item/component :topic :todos)
-   ;; :timer-button (assoc timer-button/component :topic :todos)
-   ;; :import-txt (assoc import-txt/component :topic :todos)
-   ;; :export-txt export-txt/component
-   ;; :todo-list todo-list/component
-   ;; :toggle-todos (assoc toggle-todos/component :topic :todos)
-   })
+(defn app
+  []
+  [:div.container])
+
+(defn ^:export main
+  []
+  (r/render
+    [app]
+    (.getElementById js/document "app")))
 
 
 #+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+
 *** other
-(find-file-other-frame "./src/giggin/core.cljs")
 (find-file-other-frame "./src/giggin/state.cljs")
 ** src resources
-*** CANCELED index.html
+*** index.html
 :PROPERTIES:
-:header-args: :tangle no
+:header-args: :tangle ./public/index.html
 :END:
-:header-args: :tangle ./resources/public/index.html
 **** file
-(find-file-other-frame "./resources/public/index.html")
+(find-file-other-frame "./public/index.html")
 **** src
 #+begin_src html :no-expand t :mkdirp yes 
 <!DOCTYPE html>
-<html>
+<html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>Giggin • Keechma</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link href="css/style.css" rel="stylesheet" type="text/css">
-    <link rel="icon" href="https://clojurescript.org/images/cljs-logo-icon-32.png">
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins" >
+    <link rel="icon" href="/img/giggin-icon.png">
+    <title>Giggin</title>
   </head>
   <body>
-    <div id="app"> 
-      <h2>requires browser support for Java script</h2>
-      <p>js app loading...</p>
-    </div> <!-- end of app div -->
-    <script src="js/app.js" type="text/javascript"></script>
-    <script>keechma_todomvc.app.main()</script>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+
+    <div id="app">
+      Loding app...
+    </div>
+
+    <script src="/js/main.js" type="text/javascript"></script>
+    <script>window.onload = function() { giggin.core.main(); }</script>
   </body>
 </html>
 #+end_src
@@ -489,7 +477,6 @@ html .clear-completed:active {
 (find-file-other-frame "./public/img/giggin-logo.svg")
 (find-file-other-frame "./public/img/paypal.svg")
 (find-file-other-frame "./public/img/stripe.svg")
-(find-file-other-frame "./public/index.html")
 * files giggin
 ** files root
 (find-file-other-frame "./.gitignore")
@@ -543,10 +530,16 @@ lein cljsbuild once
 
 lein deps :refresh
 ** run
-lein figwheel
+npm run dev
+
+http://localhost:3000/
+
+shadow-cljs - nREPL server started on port 3333
 
 :cljs/quit
 :cljs/restart
+
+lein figwheel
 ** git
 *** init
 git init
@@ -744,6 +737,8 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./resources/public
 
+** deps
+npm install
 * описание
 ** ИИ
 если мне интересно сделать компонент для настолькной игры
@@ -1333,10 +1328,12 @@ learn-reagent-course-files/giggin/ $ yarn dev
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
 * TODO
-** изчать видео
-** открыть проект
-** настроить проект 
+** DONE push to git
+** DONE открыть проект
+** установить зависимости
 ** запустить проек
+** настроить проект 
+** изчать видео
 * DONE arhiv
 ** DONE git clone в кложур
 git clone https://github.com/jacekschae/learn-reagent-course-files.git
