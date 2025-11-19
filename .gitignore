@@ -7,3 +7,5 @@
 /worder/.rebel_readline_history
 /worder/target/public/
 /giggin/filepath.txt
+/giggin/.clj-kondo/
+/giggin/.lsp/

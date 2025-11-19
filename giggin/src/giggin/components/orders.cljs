@@ -3,4 +3,3 @@
 (defn orders
   []
   [:orders "orders"])
-  ;; [:footer "footer"]
