@@ -18,11 +18,19 @@
 **** src core.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.core
-  (:require [reagent.core :as r]))
+  (:require [reagent.core :as r]
+            [giggin.components.gigs :refer [gigs]]
+            [giggin.components.header :refer [header]]
+            [giggin.components.orders :refer [orders]]
+            [giggin.components.footer :refer [footer]]))
 
 (defn app
   []
-  [:div.container])
+  [:div.container
+   [header]
+   [gigs]
+   [orders]
+   [footer]])
 
 (defn ^:export main
   []
@@ -35,9 +43,95 @@
 
 #+RESULTS:
 : Please reevaluate when nREPL is connected
-
+**** reple
+(in-ns 'giggin.core)
+app
+(app)
+(require '[giggin.components.gigs :refer [gigs]])
 *** other
 (find-file-other-frame "./src/giggin/state.cljs")
+** components
+*** gigs.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/components/gigs.cljs
+:END:
+**** file gigs.cljs
+(find-file-other-frame "./src/giggin/components/gigs.cljs")
+**** src gigs.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.gigs)
+
+(defn gigs
+  []
+  [:gigs "gigs"])
+
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+*** header.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/components/header.cljs
+:END:
+**** file header.cljs
+(find-file-other-frame "./src/giggin/components/header.cljs")
+**** src header.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.header)
+
+(defn header
+  []
+  [:header "header"])
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+*** orders.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/components/orders.cljs
+:END:
+**** file orders.cljs
+(find-file-other-frame "./src/giggin/components/orders.cljs")
+**** src orders.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.orders)
+
+(defn orders
+  []
+  [:orders "orders"])
+  ;; [:footer "footer"]
+
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+*** footer.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/components/footer.cljs
+:END:
+**** file footer.cljs
+(find-file-other-frame "./src/giggin/components/footer.cljs")
+**** src footer.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.footer)
+
+(defn footer
+  []
+  [:footer "footer"])
+
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+*** exampls
+/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/admin_panel.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/checkout_modal.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/footer.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/gig_editor.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/gigs.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/header.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/orders.cljs
 ** src resources
 *** index.html
 :PROPERTIES:
@@ -535,6 +629,11 @@ npm run dev
 http://localhost:3000/
 
 shadow-cljs - nREPL server started on port 3333
+
+shadow-cljs restart
+shadow-cljs cljs-repl app
+
+(shadow/watch :app)
 
 :cljs/quit
 :cljs/restart
@@ -1334,6 +1433,85 @@ learn-reagent-course-files/giggin/ $ yarn dev
 ** запустить проек
 ** настроить проект 
 ** изчать видео
+** error
+*** src
+(ns giggin.core.components.gigs)
+
+(defn gigs
+  []
+  [:gigs "gigs"])
+  ;; [:header "header"]
+  ;; [:orders "orders"]
+  ;; [:footer "footer"]
+*** error
+(require '[giggin.core.components.gigs :refer [gigs]])
+
+------ REPL Error while processing ---------------------------------------------
+(require '[giggin.core.components.gigs :refer [gigs]])
+The required namespace "giggin.core.components.gigs" is not available, it was required by "giggin/core.cljs".
+
+nil
+giggin.core> 
+*** почему ловлю ошибку?
+помоги понять причину ошибки в Shadow-CLJS репл.
+
+** error web
+*** src
+**** file gigs.cljs
+(find-file-other-frame "./src/giggin/components/gigs.cljs")
+**** src gigs.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.core.components.gigs)
+
+(defn gigs
+  []
+  [:gigs "gigs"])
+  ;; [:header "header"]
+  ;; [:orders "orders"]
+  ;; [:footer "footer"]
+
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+
+**** file core.cljs
+(find-file-other-frame "./src/giggin/core.cljs")
+**** src core.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.core
+  (:require [reagent.core :as r]
+            [giggin.core.components.gigs :refer [gigs]]))
+
+(defn app
+  []
+  [:div.container
+   [:header "header"]
+   ;; [:gigs "gigs"]
+   [gigs]
+   [:orders "orders"]
+   [:footer "footer"]])
+
+(defn ^:export main
+  []
+  (r/render
+    [app]
+    (.getElementById js/document "app")))
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+*** error
+Compilation failed!
+
+The required namespace "giggin.core.components.gigs" is not available, it was required by "giggin/core.cljs".
+*** почему ловлю ошибку?
+помоги понять причину ошибки в Shadow-CLJS в браузере эта ошибка тоже есть.
+
 * DONE arhiv
 ** DONE git clone в кложур
 git clone https://github.com/jacekschae/learn-reagent-course-files.git
