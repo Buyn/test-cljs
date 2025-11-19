@@ -3204,6 +3204,50 @@ https://github.com/thheller/shadow-cljs-ext?tab=readme-ov-file
 возможно нужна будет помошь Уни
 **** передать вале
 ** DONE сделать табле топ игру
+** cljss
+https://github.com/clj-commons/cljss?tab=readme-ov-file
+cljss logo
+
+CSS-in-JS for ClojureScript
+
+Clojars cljdoc badge CircleCI
+
+Ask questions on #cljss chat at Clojuarians Slack
+
+[clj-commons/cljss "1.6.4"]
+Table of Contents
+
+    Why write CSS in ClojureScript?
+    Features
+    How it works
+    Usage
+    Composing styles
+    Development workflow
+    Production build
+    Roadmap
+    Contributing
+    Supporters
+    License
+
+Why write CSS in ClojureScript?
+
+Writing styles this way has the same benefits as writing components that keep together view logic and presentation. It all comes to developer efficiency and maintainability.
+
+Thease are some resources that can give you more context:
+
+    “A Unified Styling Language” by Mark Dalgleish
+    “A Unified Styling Language” (talk) by Mark Dalgleish
+    “The road to styled components: CSS in component-based systems” by Glen Maddern
+
+Features
+Automatic scoped styles by generating unique names
+CSS pseudo-classes and pseudo-elements
+CSS animations via @keyframes at-rule
+CSS Media Queries
+Nested CSS selectors
+Injects styles into <style> tag at run-time
+Debuggable styles in development (set via goog.DEBUG)
+Fast, 1000 insertions in under 100ms
 ** сделать сайт для портфолио
 ** програма измерения прочитанного
 *** продумать интерфейс
