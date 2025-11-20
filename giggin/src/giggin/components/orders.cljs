@@ -5,19 +5,32 @@
   [id q]
   (if (> q 1)
     (swap! state/orders update id dec)
-    (swap! state/orders dissoc id)
-    )
-  )
+    (swap! state/orders dissoc id)))
+
+(defn order-item
+  [id quant gigs]
+  (let [title (get-in gigs [id :title])
+        src   (get-in gigs [id :img])
+        price (get-in gigs [id :price])]
+      [:div.item {:key id}
+        [:div.img
+          [:img { :src src
+                  :alt title}]]
+        [:div.content
+          [:p.title (str
+            title " \u00D7 " quant)]]
+        [:div.action
+          [:div.price (* quant price)]
+          [:button.btn.btn--link.tooltip
+                { :data-tooltip "Remove"
+                  :on-click #(remove-order id quant)}
+              [:i.icon.icon--cross]]]]))
+
 (defn orders
   []
-  [:div "orders"
-   (for [id (keys @state/orders)]
-     [:div {:key id}
-        [:div.btn.btn--primary.tooltip
-              { :data-tooltip "Remove from order!"
-                :on-click #(remove-order id (id @state/orders))}
-              [:i.icon.icon--cross]]
-        (:title (id @state/gigs))
-        " - "
-        (id @state/orders)
-        ])])
+  [:aside
+    [:div.order 
+      [:div.body
+        (for [[id quant] @state/orders]
+            (order-item id quant @state/gigs))
+       "sumup"]]])

@@ -238,22 +238,36 @@ app
   [id q]
   (if (> q 1)
     (swap! state/orders update id dec)
-    (swap! state/orders dissoc id)
-    )
-  )
+    (swap! state/orders dissoc id)))
+
+(defn order-item
+  [id quant gigs]
+  (let [title (get-in gigs [id :title])
+        src   (get-in gigs [id :img])
+        price (get-in gigs [id :price])]
+      [:div.item {:key id}
+        [:div.img
+          [:img { :src src
+                  :alt title}]]
+        [:div.content
+          [:p.title (str
+            title " \u00D7 " quant)]]
+        [:div.action
+          [:div.price (* quant price)]
+          [:button.btn.btn--link.tooltip
+                { :data-tooltip "Remove"
+                  :on-click #(remove-order id quant)}
+              [:i.icon.icon--cross]]]]))
+
 (defn orders
   []
-  [:div "orders"
-   (for [id (keys @state/orders)]
-     [:div {:key id}
-        [:div.btn.btn--primary.tooltip
-              { :data-tooltip "Remove from order!"
-                :on-click #(remove-order id (id @state/orders))}
-              [:i.icon.icon--cross]]
-        (:title (id @state/gigs))
-        " - "
-        (id @state/orders)
-        ])])
+  [:aside
+    [:div.order 
+      [:div.body
+        (for [[id quant] @state/orders]
+            (order-item id quant @state/gigs))
+       "sumup"
+       ]]])
 
 
 
@@ -1805,11 +1819,15 @@ find "$PWD" -type f >>filepath.txt
 * run giggin
 ** run server and reple
 #+begin_src elisp :results output silent
-(buyn-shell-start "konsole -e /bin/bash --rcfile <(npm run dev)")
+(buyn-shell-start "konsole -e bash -c \"npm run dev\"")
 (evil-previous-line)
 (org-cycle)
 (delete-other-windows)
 #+end_src
+
+konsole -e bash -c "npm run dev"
+(buyn-shell-start "konsole -e /bin/bash --rcfile <(npm run dev)")
+
 ** repl
 #+begin_src elisp :results output silent 
 (evil-previous-line)
@@ -2651,7 +2669,16 @@ learn-reagent-course-files/giggin/ $ yarn dev
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
 * TODO
-** TODO пройти по видео7
+** DONE пройти по видео7
+** TODO пройти по видео8
+** DONE Запуска сервера
+
+(buyn-shell-start "konsole -e /bin/bash --rcfile <(npm run dev)")
+
+"konsole -e /bin/bash --rcfile <(npm run dev)"
+я запускаю сервер в отдельном терменальном окне такой командой.
+серевер запускается но похоже в какомто другом процесе. сервер работает но сообщение в это окно терменала на приходят.
+есть идеи как это поправить?
 ** TODO изчать видео
 * DONE arhiv
 ** DONE push to git
