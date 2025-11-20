@@ -2,18 +2,22 @@
   (:require [giggin.state :as state ]))
 
 (defn gig
-  [gig]
-  [:div.gig {:key (:id gig)}
-    [:img.gig__artwork {:src (:img gig) :alt (:title gig)}]
+  [{:keys [id img title price desc] :as el}]
+  [:div.gig {:key id}
+    [:img.gig__artwork {:src img :alt title}]
     [:div.gig__body
      [:div.gig__title
-      [:div.btn.btn--primary.float--right.tooltip {:data-tooltip "Add to order"}
+      [:div.btn.btn--primary.float--right.tooltip {:data-tooltip "Add to order!"}
        [:i.icon.icon--plus]]
-      (:title gig)]]
-   [:p.gig__price (:price gig)]
-   [:p.gig__desc (:desc gig)]])
+      title]]
+   [:p.gig__price price]
+   [:p.gig__desc desc]])
 
 (defn gigs
   []
   [:main
-    [:div.gigs (map gig (vals @state/gigs))]])
+    [:div.gigs
+     (for [el (vals @state/gigs)]
+       (gig el))
+     ;; (map gig (vals @state/gigs))
+     ]])
