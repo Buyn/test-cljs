@@ -9,7 +9,7 @@
      [:div.gig__title
       [:div.btn.btn--primary.float--right.tooltip
         {:data-tooltip "Add to order!"
-         :on-click (fn [] (swap! state/orders update id inc))}
+         :on-click #(swap! state/orders update id inc)}
        [:i.icon.icon--plus]]
       title]]
    [:p.gig__price price]

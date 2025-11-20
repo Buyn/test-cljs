@@ -153,10 +153,12 @@ app
 #+RESULTS:
 : Please reevaluate when nREPL is connected
 **** reple
-(in-ns 'giggin.core)
+@giggin.state/orders
+
+
+(in-ns 'giggin.state)
 app
 (app)
-@giggin.state/orders
 (require '[giggin.components.gigs :refer [gigs]])
 
 (defn f [] (js/console.log "called"))
@@ -181,7 +183,7 @@ app
      [:div.gig__title
       [:div.btn.btn--primary.float--right.tooltip
         {:data-tooltip "Add to order!"
-         :on-click (fn [] (swap! state/orders update id inc))}
+         :on-click #(swap! state/orders update id inc)}
        [:i.icon.icon--plus]]
       title]]
    [:p.gig__price price]
@@ -229,11 +231,29 @@ app
 (find-file-other-frame "./src/giggin/components/orders.cljs")
 **** src orders.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
-(ns giggin.components.orders)
+(ns giggin.components.orders
+  (:require [giggin.state :as state ]))
 
+(defn remove-order
+  [id q]
+  (if (> q 1)
+    (swap! state/orders update id dec)
+    (swap! state/orders dissoc id)
+    )
+  )
 (defn orders
   []
-  [:orders "orders"])
+  [:div "orders"
+   (for [id (keys @state/orders)]
+     [:div {:key id}
+        [:div.btn.btn--primary.tooltip
+              { :data-tooltip "Remove from order!"
+                :on-click #(remove-order id (id @state/orders))}
+              [:i.icon.icon--cross]]
+        (:title (id @state/gigs))
+        " - "
+        (id @state/orders)
+        ])])
 
 
 
@@ -1838,7 +1858,9 @@ shadow-cljs cljs-repl app
 
 lein figwheel
 ** connect to nREPL
-(cider cider-connect-cljs)
+(cider)
+(cider-connect-cljs)
+(cider-connect-cljs (:host "localhost" :port 3333 :cljs-repl-type ’shadow))
 (shadow.cljs.devtools.api/nrepl-select :app)
 ** git
 *** init
