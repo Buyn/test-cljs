@@ -1,5 +1,7 @@
 (ns giggin.components.orders
-  (:require [giggin.state :as state ]))
+  (:require [giggin.state :as state ]
+            [giggin.helpers :refer [price-format] ]))
+
 
 (defn orders-total
   [orders gigs]
@@ -7,13 +9,6 @@
        (map (fn [[id quant]]
               (* quant (get-in gigs [id :price]))))
        (apply + 0)))
-
-;; (defn orders-total [orders gigs]
-;;   (->> orders
-;;        (map (fn [[id q]]
-;;               (* q (get-in gigs [id :price]))))
-;;        (reduce + 0)))
-
 
 (defn remove-order
   [id q]
@@ -34,7 +29,7 @@
           [:p.title (str
             title " \u00D7 " quant)]]
         [:div.action
-          [:div.price (* quant price)]
+          [:div.price (price-format (* quant price))]
           [:button.btn.btn--link.tooltip
                 { :data-tooltip "Remove"
                   :on-click #(remove-order id quant)}
@@ -55,9 +50,8 @@
             [:div.content "Total: "]
             [:div.action
              [:div.price
-              (orders-total @orders @gigs)]]
+              (price-format (orders-total @orders @gigs))]]
             [:button.btn.btn--link.tooltip
                 { :data-tooltip "Remove all"
                   :on-click #(reset! orders {})}
-              [:i.icon.icon--delete]]
-           ]]]]]))
+              [:i.icon.icon--delete]]]]]]]))

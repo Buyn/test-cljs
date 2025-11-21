@@ -163,6 +163,27 @@ app
 
 (defn f [] (js/console.log "called"))
 (f 1 2 3)
+*** helpers.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/helpers.cljs
+:END:
+**** file helpers.cljs
+(find-file-other-frame "./src/giggin/helpers.cljs")
+**** src helpers.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.helpers)
+
+(defn price-format
+  "convert cens to evro"
+  [cents]
+  (str "$" (/ cents 100)))
+
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
 ** components
 *** gigs.cljs
 :PROPERTIES:
@@ -173,7 +194,8 @@ app
 **** src gigs.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.components.gigs
-  (:require [giggin.state :as state ]))
+  (:require [giggin.state :as state ]
+            [giggin.helpers :refer [price-format]]))
 
 (defn gig
   [{:keys [id img title price desc] :as el}]
@@ -186,7 +208,7 @@ app
          :on-click #(swap! state/orders update id inc)}
        [:i.icon.icon--plus]]
       title]]
-   [:p.gig__price price]
+   [:p.gig__price (price-format price)]
    [:p.gig__desc desc]])
 
 (defn gigs
@@ -194,13 +216,12 @@ app
   [:main
     [:div.gigs
      (for [el (vals @state/gigs)]
-       (gig el))
-     ;; (map gig (vals @state/gigs))
-     ]])
+       (gig el))]])
 
 
 
 #+end_src
+     ;; (map gig (vals @state/gigs))
 
 #+RESULTS:
 : Please reevaluate when nREPL is connected
@@ -232,7 +253,9 @@ app
 **** src orders.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.components.orders
-  (:require [giggin.state :as state ]))
+  (:require [giggin.state :as state ]
+            [giggin.helpers :refer [price-format] ]))
+
 
 (defn orders-total
   [orders gigs]
@@ -240,13 +263,6 @@ app
        (map (fn [[id quant]]
               (* quant (get-in gigs [id :price]))))
        (apply + 0)))
-
-;; (defn orders-total [orders gigs]
-;;   (->> orders
-;;        (map (fn [[id q]]
-;;               (* q (get-in gigs [id :price]))))
-;;        (reduce + 0)))
-
 
 (defn remove-order
   [id q]
@@ -267,7 +283,7 @@ app
           [:p.title (str
             title " \u00D7 " quant)]]
         [:div.action
-          [:div.price (* quant price)]
+          [:div.price (price-format (* quant price))]
           [:button.btn.btn--link.tooltip
                 { :data-tooltip "Remove"
                   :on-click #(remove-order id quant)}
@@ -288,7 +304,7 @@ app
             [:div.content "Total: "]
             [:div.action
              [:div.price
-              (orders-total @orders @gigs)]]
+              (price-format (orders-total @orders @gigs))]]
             [:button.btn.btn--link.tooltip
                 { :data-tooltip "Remove all"
                   :on-click #(reset! orders {})}
@@ -2695,7 +2711,7 @@ learn-reagent-course-files/giggin/ $ yarn dev
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
 * TODO
 ** DONE пройти по видео7
-** TODO пройти по видео8
+** DONE пройти по видео8
 ** DONE Запуска сервера
 
 (buyn-shell-start "konsole -e /bin/bash --rcfile <(npm run dev)")
@@ -2704,6 +2720,13 @@ learn-reagent-course-files/giggin/ $ yarn dev
 я запускаю сервер в отдельном терменальном окне такой командой.
 серевер запускается но похоже в какомто другом процесе. сервер работает но сообщение в это окно терменала на приходят.
 есть идеи как это поправить?
+** TODO пройти по видео10
+*** сделать отдельный фаил хелпер
+*** сделать формат цен
+*** приминить к ордерс х2
+*** приминить к гигс
+*** неотображать если пустое
+*** 
 ** TODO изчать видео
 * DONE arhiv
 ** DONE push to git
