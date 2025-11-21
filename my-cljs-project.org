@@ -3204,6 +3204,10 @@ https://github.com/thheller/shadow-cljs-ext?tab=readme-ov-file
 возможно нужна будет помошь Уни
 **** передать вале
 ** DONE сделать табле топ игру
+** Aider
+по зарез нужно добавить в скилы
+нужно списовк файлов в контекст
+и генерить кложур по запросу прям в имакс
 ** cljss
 https://github.com/clj-commons/cljss?tab=readme-ov-file
 cljss logo

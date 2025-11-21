@@ -289,26 +289,32 @@ app
                   :on-click #(remove-order id quant)}
               [:i.icon.icon--cross]]]]))
 
+
+
 (defn orders
   []
   (let [orders state/orders
         gigs   state/gigs]
    [:aside
     [:div.order 
-      [:div.body
-        (for [[id quant] @orders]
-            (order-item id quant @gigs))
-        [:div.total
-          [:hr]
-          [:div.item
-            [:div.content "Total: "]
-            [:div.action
-             [:div.price
-              (price-format (orders-total @orders @gigs))]]
-            [:button.btn.btn--link.tooltip
-                { :data-tooltip "Remove all"
-                  :on-click #(reset! orders {})}
-              [:i.icon.icon--delete]]]]]]]))
+      (if (empty? @orders)
+        [:div.empty
+         [:div.title "You don't have any orders."]
+         [:div.subtitle "Click on a + to add an order"]]
+        [:div.body
+          (for [[id quant] @orders]
+              (order-item id quant @gigs))
+          [:div.total
+            [:hr]
+            [:div.item
+              [:div.content "Total: "]
+              [:div.action
+              [:div.price
+                (price-format (orders-total @orders @gigs))]]
+              [:button.btn.btn--link.tooltip
+                  { :data-tooltip "Remove all"
+                    :on-click #(reset! orders {})}
+                [:i.icon.icon--delete]]]]])]]))
 
 
 
@@ -2721,10 +2727,10 @@ learn-reagent-course-files/giggin/ $ yarn dev
 серевер запускается но похоже в какомто другом процесе. сервер работает но сообщение в это окно терменала на приходят.
 есть идеи как это поправить?
 ** TODO пройти по видео10
-*** сделать отдельный фаил хелпер
-*** сделать формат цен
-*** приминить к ордерс х2
-*** приминить к гигс
+*** DONE сделать отдельный фаил хелпер
+*** DONE сделать формат цен
+*** DONE приминить к ордерс х2
+*** DONE приминить к гигс
 *** неотображать если пустое
 *** 
 ** TODO изчать видео

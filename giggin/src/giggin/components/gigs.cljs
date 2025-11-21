@@ -21,6 +21,4 @@
   [:main
     [:div.gigs
      (for [el (vals @state/gigs)]
-       (gig el))
-     ;; (map gig (vals @state/gigs))
-     ]])
+       (gig el))]])

@@ -35,23 +35,29 @@
                   :on-click #(remove-order id quant)}
               [:i.icon.icon--cross]]]]))
 
+
+
 (defn orders
   []
   (let [orders state/orders
         gigs   state/gigs]
    [:aside
     [:div.order 
-      [:div.body
-        (for [[id quant] @orders]
-            (order-item id quant @gigs))
-        [:div.total
-          [:hr]
-          [:div.item
-            [:div.content "Total: "]
-            [:div.action
-             [:div.price
-              (price-format (orders-total @orders @gigs))]]
-            [:button.btn.btn--link.tooltip
-                { :data-tooltip "Remove all"
-                  :on-click #(reset! orders {})}
-              [:i.icon.icon--delete]]]]]]]))
+      (if (empty? @orders)
+        [:div.empty
+         [:div.title "You don't have any orders."]
+         [:div.subtitle "Click on a + to add an order"]]
+        [:div.body
+          (for [[id quant] @orders]
+              (order-item id quant @gigs))
+          [:div.total
+            [:hr]
+            [:div.item
+              [:div.content "Total: "]
+              [:div.action
+              [:div.price
+                (price-format (orders-total @orders @gigs))]]
+              [:button.btn.btn--link.tooltip
+                  { :data-tooltip "Remove all"
+                    :on-click #(reset! orders {})}
+                [:i.icon.icon--delete]]]]])]]))
