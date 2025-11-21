@@ -234,6 +234,20 @@ app
 (ns giggin.components.orders
   (:require [giggin.state :as state ]))
 
+(defn orders-total
+  [orders gigs]
+  (->> orders
+       (map (fn [[id quant]]
+              (* quant (get-in gigs [id :price]))))
+       (apply + 0)))
+
+;; (defn orders-total [orders gigs]
+;;   (->> orders
+;;        (map (fn [[id q]]
+;;               (* q (get-in gigs [id :price]))))
+;;        (reduce + 0)))
+
+
 (defn remove-order
   [id q]
   (if (> q 1)
@@ -261,13 +275,24 @@ app
 
 (defn orders
   []
-  [:aside
+  (let [orders state/orders
+        gigs   state/gigs]
+   [:aside
     [:div.order 
       [:div.body
-        (for [[id quant] @state/orders]
-            (order-item id quant @state/gigs))
-       "sumup"
-       ]]])
+        (for [[id quant] @orders]
+            (order-item id quant @gigs))
+        [:div.total
+          [:hr]
+          [:div.item
+            [:div.content "Total: "]
+            [:div.action
+             [:div.price
+              (orders-total @orders @gigs)]]
+            [:button.btn.btn--link.tooltip
+                { :data-tooltip "Remove all"
+                  :on-click #(reset! orders {})}
+              [:i.icon.icon--delete]]]]]]]))
 
 
 
