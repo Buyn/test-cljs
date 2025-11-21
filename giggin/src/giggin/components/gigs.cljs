@@ -1,6 +1,6 @@
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
-            [giggin.helpers :refer [price-format]]))
+            [giggin.helpers :refer [format-price]]))
 
 (defn gig
   [{:keys [id img title price desc] :as el}]
@@ -13,7 +13,7 @@
          :on-click #(swap! state/orders update id inc)}
        [:i.icon.icon--plus]]
       title]]
-   [:p.gig__price (price-format price)]
+   [:p.gig__price (format-price price)]
    [:p.gig__desc desc]])
 
 (defn gigs

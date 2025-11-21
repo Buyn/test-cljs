@@ -1,6 +1,6 @@
 (ns giggin.helpers)
 
-(defn price-format
+(defn format-price
   "convert cens to evro"
   [cents]
   (str "$" (/ cents 100)))

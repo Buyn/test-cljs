@@ -173,7 +173,7 @@ app
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.helpers)
 
-(defn price-format
+(defn format-price
   "convert cens to evro"
   [cents]
   (str "$" (/ cents 100)))
@@ -195,7 +195,7 @@ app
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
-            [giggin.helpers :refer [price-format]]))
+            [giggin.helpers :refer [format-price]]))
 
 (defn gig
   [{:keys [id img title price desc] :as el}]
@@ -208,7 +208,7 @@ app
          :on-click #(swap! state/orders update id inc)}
        [:i.icon.icon--plus]]
       title]]
-   [:p.gig__price (price-format price)]
+   [:p.gig__price (format-price price)]
    [:p.gig__desc desc]])
 
 (defn gigs
@@ -254,7 +254,7 @@ app
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.components.orders
   (:require [giggin.state :as state ]
-            [giggin.helpers :refer [price-format] ]))
+            [giggin.helpers :refer [format-price] ]))
 
 
 (defn orders-total
@@ -283,7 +283,7 @@ app
           [:p.title (str
             title " \u00D7 " quant)]]
         [:div.action
-          [:div.price (price-format (* quant price))]
+          [:div.price (format-price (* quant price))]
           [:button.btn.btn--link.tooltip
                 { :data-tooltip "Remove"
                   :on-click #(remove-order id quant)}
@@ -310,7 +310,7 @@ app
               [:div.content "Total: "]
               [:div.action
               [:div.price
-                (price-format (orders-total @orders @gigs))]]
+                (format-price (orders-total @orders @gigs))]]
               [:button.btn.btn--link.tooltip
                   { :data-tooltip "Remove all"
                     :on-click #(reset! orders {})}
