@@ -195,11 +195,12 @@ app
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
+            [giggin.components.gig-editor :refer [gig-editor]]
+            [reagent.core :as r]
             [giggin.helpers :refer [format-price]]))
 
-(defn gig
-  [{:keys [id img title price desc] :as el}]
-    (let [add-to-order #(swap! state/orders update id inc)]
+(defn gig [{:keys [id img title price desc] :as el}]
+  (let [add-to-order #(swap! state/orders update id inc)]
     [:div.gig {:key id}
       [:img.gig__artwork {:src img :alt title}]
       [:div.gig__body
@@ -212,20 +213,28 @@ app
       [:p.gig__price (format-price price)]
       [:p.gig__desc desc]]))
 
-(defn gigs
-  []
+(defn btn-add-gig []
+  (let [modal (r/atom false)
+        values (r/atom {:id nil :title "" :desc "" :price 0 :img "" :sold-out false})]
+        [:div.gig
+          [:button.add-gig
+              {:on-click #(reset! modal true)}
+              [:div.add__title
+            [:i.icon.icon--plus]
+            [:h1 "Add gig"]]]
+          [gig-editor modal values]]))
+
+(defn gigs []
   [:main
     [:div.gigs
-     (for [el (vals @state/gigs)]
-       (gig el))]])
+      [btn-add-gig]
+      (for [el (vals @state/gigs)]
+        (gig el))]])
 
 
 
 #+end_src
-     ;; (map gig (vals @state/gigs))
 
-#+RESULTS:
-: Please reevaluate when nREPL is connected
 *** header.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/components/header.cljs
@@ -379,6 +388,67 @@ app
           [:button.btn.btn--link.float--left
            {:on-click #(toggle-modal false)}
            "Cancel"]]]]])))
+
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+*** gig_editor.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/components/gig_editor.cljs
+:END:
+**** file gig_editor.cljs
+(find-file-other-frame "./src/giggin/components/gig_editor.cljs")
+**** src gig_editor.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.gig-editor)
+
+(defn form-group
+  [{:keys [id type value values]}]
+  [:div.form__group
+   [:label.form__label {:for id} id]
+   [:input.form__input {:type type
+                        :id id
+                        :value value
+                        :on-change #(swap! values assoc (keyword id) (.. % -target -value))}]])
+
+(defn gig-editor
+  [modal values]
+  [:div.modal (when @modal {:class "active"})
+   [:div.modal__overlay]
+   [:div.modal__container
+    [:div.modal__body
+     [form-group {:id "title"
+                  :type "text"
+                  :value (:title @values)
+                  :values values}]
+     [form-group {:id "desc"
+                  :type "text"
+                  :value (:desc @values)
+                  :values values}]
+     [form-group {:id "img"
+                  :type "text"
+                  :value (:img @values)
+                  :values values}]
+     [form-group {:id "price"
+                  :type "number"
+                  :value (:price @values)
+                  :values values}]
+     [:div.form__group
+      [:label.form__label {:for "sold-out"} "sold-out"]
+      [:label.form__switch
+       [:input {:type :checkbox
+                :checked (:sold-out @values)
+                :on-change #(swap! values assoc :sold-out (.. % -target -checked))}]
+       [:i.form__icon]]]]
+    [:div.modal__footer
+     [:button.btn.btn--link.float--left
+      {:on-click #(reset! modal false)}
+      "Cancel"]
+     [:button.btn.btn--secondary
+      "Save"]]]])
 
 
 
