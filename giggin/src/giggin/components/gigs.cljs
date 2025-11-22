@@ -5,18 +5,18 @@
             [giggin.helpers :refer [format-price]]))
 
 (defn gig [{:keys [id img title price desc] :as el}]
-    (let [add-to-order #(swap! state/orders update id inc)]
-      [:div.gig {:key id}
-        [:img.gig__artwork {:src img :alt title}]
-        [:div.gig__body
-          [:div.gig__title
-            [:div.btn.btn--primary.float--right.tooltip
-              { :data-tooltip "Add to order!"
-                :on-click add-to-order}
-              [:i.icon.icon--plus]]
-            title]]
-        [:p.gig__price (format-price price)]
-        [:p.gig__desc desc]]))
+  (let [add-to-order #(swap! state/orders update id inc)]
+    [:div.gig {:key id}
+      [:img.gig__artwork {:src img :alt title}]
+      [:div.gig__body
+        [:div.gig__title
+          [:div.btn.btn--primary.float--right.tooltip
+            { :data-tooltip "Add to order!"
+              :on-click add-to-order}
+            [:i.icon.icon--plus]]
+          title]]
+      [:p.gig__price (format-price price)]
+      [:p.gig__desc desc]]))
 
 (defn btn-add-gig []
   (let [modal (r/atom false)
@@ -30,8 +30,8 @@
           [gig-editor modal values]]))
 
 (defn gigs []
-    [:main
-      [:div.gigs
-        [btn-add-gig]
-        (for [el (vals @state/gigs)]
-          (gig el))]])
+  [:main
+    [:div.gigs
+      [btn-add-gig]
+      (for [el (vals @state/gigs)]
+        (gig el))]])
