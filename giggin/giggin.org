@@ -197,6 +197,7 @@ app
   (:require [giggin.state :as state ]
             [giggin.components.gig-editor :refer [gig-editor]]
             [reagent.core :as r]
+            [clojure.string :as str]
             [giggin.helpers :refer [format-price]]))
 
 (defn gig [{:keys [id img title price desc] :as el}]
@@ -213,16 +214,28 @@ app
       [:p.gig__price (format-price price)]
       [:p.gig__desc desc]]))
 
+(defn insert-gig
+  [{:keys [id title desc price img sold-out]}]
+  (swap! state/gigs
+         assoc id { :id id
+                    :title (str/trim title)
+                    :desc (str/trim desc)
+                    :img (str/trim img)
+                    :price (js/parseInt price)
+                    :sold-out sold-out}))
+
+
 (defn btn-add-gig []
   (let [modal (r/atom false)
-        values (r/atom {:id nil :title "" :desc "" :price 0 :img "" :sold-out false})]
+        values (r/atom {:id (str "gig-" (random-uuid))
+                        :title "" :desc "" :price 0 :img "" :sold-out false})]
         [:div.gig
           [:button.add-gig
               {:on-click #(reset! modal true)}
               [:div.add__title
             [:i.icon.icon--plus]
             [:h1 "Add gig"]]]
-          [gig-editor modal values]]))
+          [gig-editor modal values insert-gig]]))
 
 (defn gigs []
   [:main
@@ -248,7 +261,11 @@ app
 (defn header
   []
   [:header
-   [:img {:src "img/giggin-logo.svg" :alt "Giggin logo"}]])
+   [:div {:display "flex"}
+    ;; [:img.logo { :src "img/portal-logo.jpg"
+    ;;             :alt "Poratl logo"}]
+    [:img      { :src "img/portal-logo-title.jpg"
+                  :alt "Poratl title logo"}]]])
 
 #+end_src
 
@@ -347,14 +364,10 @@ app
 (defn footer
   []
   [:footer
-   [:img {:src "img/giggin-icon.png" :alt "Giggin logo"}]])
-
-
+   [:img {:src "img/portal-logo.jpg" :alt "portal icon"}]])
 
 #+end_src
 
-#+RESULTS:
-: Please reevaluate when nREPL is connected
 *** checkout_modal.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/components/checkout_modal.cljs
@@ -461,7 +474,7 @@ app
 
 
 (defn gig-editor
-  [modal values]
+  [modal values insert-gig]
   [:div.modal (when @modal {:class "active"})
    [:div.modal__overlay]
    [:div.modal__container
@@ -473,6 +486,9 @@ app
         {:on-click #(reset! modal false)}
         "Cancel"]
       [:button.btn.btn--secondary
+        {:on-click #(do
+                      (insert-gig @values)
+                      (reset! modal false))}
         "Save"]]]])
 
 #+end_src
@@ -495,7 +511,8 @@ app
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel="stylesheet" href="/css/style.css" type="text/css">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Poppins" >
-    <link rel="icon" href="/img/giggin-icon.png">
+    <link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+    <link rel="icon" href="/img/portal-logo.jpg">
     <title>Giggin</title>
   </head>
   <body>
@@ -573,7 +590,7 @@ table {
 html {
   box-sizing: border-box;
 }
-*, *:before, *:after {
+,*, *:before, *:after {
   box-sizing: inherit;
 }
 
@@ -589,6 +606,7 @@ button:focus {
   --secondary: #00ffb0;
         --secondary-alpha: rgba(0, 255,126, 0.5);
   --gray: #f6f6f6;
+  --black: #000;
   --gray-alpha: rgba(246, 246, 246, 0.9);
   --black-color: #222223;
         --red-color: #ff4d4f
@@ -603,9 +621,13 @@ button:focus {
 }
 
 body, button {
-  font-family: 'Poppins', sans-serif;
+  /* font-family: 'Poppins', sans-serif; */
+  /* font-family: 'Merriweather', Merriweather */
+  /* font-family: 'Playfair', Playfair; */
+  font-family: 'UnifrakturCook', cursive;
+
   font-size: 1.4rem;
-        background: var(--gray);
+        background: var(--black);
   color: var(--primary)
 }
 
@@ -1593,386 +1615,6 @@ figure {
 :PROPERTIES:
 :header-args: :tangle no
 :END:
-***** all
-#+begin_src css :no-expand t :mkdirp yes 
-/* Source: https://github.com/tastejs/todomvc-app-css/blob/v2.1.0/index.css */
-html,
-body {
-    margin: 0;
-    padding: 0;
-}
-
-button {
-    margin: 0;
-    padding: 0;
-    border: 0;
-    background: none;
-    font-size: 100%;
-    vertical-align: baseline;
-    font-family: inherit;
-    font-weight: inherit;
-    color: inherit;
-    -webkit-appearance: none;
-    appearance: none;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-    font: 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
-    line-height: 1.4em;
-    background: #f5f5f5;
-    color: #4d4d4d;
-    min-width: 230px;
-    max-width: 550px;
-    margin: 0 auto;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-    font-weight: 300;
-}
-
-:focus {
-    outline: 0;
-}
-
-.hidden {
-    display: none;
-}
-
-.todoapp {
-    background: #fff;
-    margin: 130px 0 40px 0;
-    position: relative;
-    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2),
-                0 25px 50px 0 rgba(0, 0, 0, 0.1);
-}
-
-.todoapp input::-webkit-input-placeholder {
-    font-style: italic;
-    font-weight: 300;
-    color: #e6e6e6;
-}
-
-.todoapp input::-moz-placeholder {
-    font-style: italic;
-    font-weight: 300;
-    color: #e6e6e6;
-}
-
-.todoapp input::input-placeholder {
-    font-style: italic;
-    font-weight: 300;
-    color: #e6e6e6;
-}
-
-.todoapp h1 {
-    position: absolute;
-    top: -155px;
-    width: 100%;
-    font-size: 100px;
-    font-weight: 100;
-    text-align: center;
-    color: rgba(175, 47, 47, 0.15);
-    -webkit-text-rendering: optimizeLegibility;
-    -moz-text-rendering: optimizeLegibility;
-    text-rendering: optimizeLegibility;
-}
-
-.new-todo,
-.edit {
-    position: relative;
-    margin: 0;
-    width: 100%;
-    font-size: 24px;
-    font-family: inherit;
-    font-weight: inherit;
-    line-height: 1.4em;
-    border: 0;
-    color: inherit;
-    padding: 6px;
-    border: 1px solid #999;
-    box-shadow: inset 0 -1px 5px 0 rgba(0, 0, 0, 0.2);
-    box-sizing: border-box;
-    -webkit-font-smoothing: antialiased;
-    -moz-osx-font-smoothing: grayscale;
-}
-
-.new-todo {
-    padding: 16px 16px 16px 60px;
-    border: none;
-    background: rgba(0, 0, 0, 0.003);
-    box-shadow: inset 0 -2px 1px rgba(0,0,0,0.03);
-}
-
-.main {
-    position: relative;
-    z-index: 2;
-    border-top: 1px solid #e6e6e6;
-}
-
-.toggle-all {
-    text-align: center;
-    border: none; /* Mobile Safari */
-    opacity: 0;
-    position: absolute;
-}
-
-.toggle-all + label {
-    width: 60px;
-    height: 34px;
-    font-size: 0;
-    position: absolute;
-    top: -52px;
-    left: -13px;
-    -webkit-transform: rotate(90deg);
-    transform: rotate(90deg);
-}
-
-.toggle-all + label:before {
-    content: '❯';
-    font-size: 22px;
-    color: #e6e6e6;
-    padding: 10px 27px 10px 27px;
-}
-
-.toggle-all:checked + label:before {
-    color: #737373;
-}
-
-.todo-list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.todo-list li {
-    position: relative;
-    font-size: 24px;
-    border-bottom: 1px solid #ededed;
-}
-
-.todo-list li:last-child {
-    border-bottom: none;
-}
-
-.todo-list li.editing {
-    border-bottom: none;
-    padding: 0;
-}
-
-.todo-list li.editing .edit {
-    display: block;
-    width: 506px;
-    padding: 12px 16px;
-    margin: 0 0 0 43px;
-}
-
-.todo-list li.editing .view {
-    display: none;
-}
-
-.todo-list li .toggle {
-    text-align: center;
-    width: 40px;
-    /* auto, since non-WebKit browsers doesn't support input styling */
-    height: auto;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    margin: auto 0;
-    border: none; /* Mobile Safari */
-    -webkit-appearance: none;
-    appearance: none;
-}
-
-.todo-list li .toggle {
-    opacity: 0;
-}
-
-.todo-list li .toggle + label {
-    /*
-        Firefox requires `#` to be escaped - https://bugzilla.mozilla.org/show_bug.cgi?id=922433
-        IE and Edge requires *everything* to be escaped to render, so we do that instead of just the `#` - https://developer.microsoft.com/en-us/microsoft-edge/platform/issues/7157459/
-   ,*/
-    background-image: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23ededed%22%20stroke-width%3D%223%22/%3E%3C/svg%3E');
-    background-repeat: no-repeat;
-    background-position: center left;
-}
-
-.todo-list li .toggle:checked + label {
-    background-image: url('data:image/svg+xml;utf8,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2240%22%20height%3D%2240%22%20viewBox%3D%22-10%20-18%20100%20135%22%3E%3Ccircle%20cx%3D%2250%22%20cy%3D%2250%22%20r%3D%2250%22%20fill%3D%22none%22%20stroke%3D%22%23bddad5%22%20stroke-width%3D%223%22/%3E%3Cpath%20fill%3D%22%235dc2af%22%20d%3D%22M72%2025L42%2071%2027%2056l-4%204%2020%2020%2034-52z%22/%3E%3C/svg%3E');
-}
-
-.todo-list li label {
-    word-break: break-all;
-    padding: 15px 15px 15px 60px;
-    display: block;
-    line-height: 1.2;
-    transition: color 0.4s;
-}
-
-.todo-list li.completed label {
-    color: #d9d9d9;
-    text-decoration: line-through;
-}
-
-.todo-list li .destroy {
-    display: none;
-    position: absolute;
-    top: 0;
-    right: 10px;
-    bottom: 0;
-    width: 40px;
-    height: 40px;
-    margin: auto 0;
-    font-size: 30px;
-    color: #cc9a9a;
-    margin-bottom: 11px;
-    transition: color 0.2s ease-out;
-}
-
-.todo-list li .destroy:hover {
-    color: #af5b5e;
-}
-
-.todo-list li .destroy:after {
-    content: '×';
-}
-
-.todo-list li:hover .destroy {
-    display: block;
-}
-
-.todo-list li .edit {
-    display: none;
-}
-
-.todo-list li.editing:last-child {
-    margin-bottom: -1px;
-}
-
-.footer {
-    color: #777;
-    padding: 10px 15px;
-    height: 20px;
-    text-align: center;
-    border-top: 1px solid #e6e6e6;
-}
-
-.footer:before {
-    content: '';
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    left: 0;
-    height: 50px;
-    overflow: hidden;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2),
-                0 8px 0 -3px #f6f6f6,
-                0 9px 1px -3px rgba(0, 0, 0, 0.2),
-                0 16px 0 -6px #f6f6f6,
-                0 17px 2px -6px rgba(0, 0, 0, 0.2);
-}
-
-.todo-count {
-    float: left;
-    text-align: left;
-}
-
-.todo-count strong {
-    font-weight: 300;
-}
-
-.filters {
-    margin: 0;
-    padding: 0;
-    list-style: none;
-    position: absolute;
-    right: 0;
-    left: 0;
-}
-
-.filters li {
-    display: inline;
-}
-
-.filters li a {
-    color: inherit;
-    margin: 3px;
-    padding: 3px 7px;
-    text-decoration: none;
-    border: 1px solid transparent;
-    border-radius: 3px;
-}
-
-.filters li a:hover {
-    border-color: rgba(175, 47, 47, 0.1);
-}
-
-.filters li a.selected {
-    border-color: rgba(175, 47, 47, 0.2);
-}
-
-.clear-completed,
-html .clear-completed:active {
-    float: right;
-    position: relative;
-    line-height: 20px;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.clear-completed:hover {
-    text-decoration: underline;
-}
-
-.info {
-    margin: 65px auto 0;
-    color: #bfbfbf;
-    font-size: 10px;
-    text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
-    text-align: center;
-}
-
-.info p {
-    line-height: 1;
-}
-
-.info a {
-    color: inherit;
-    text-decoration: none;
-    font-weight: 400;
-}
-
-.info a:hover {
-    text-decoration: underline;
-}
-
-/*
-    Hack to remove background from Mobile Safari.
-    Can't use it globally since it destroys checkboxes in Firefox
-,*/
-@media screen and (-webkit-min-device-pixel-ratio:0) {
-    .toggle-all,
-    .todo-list li .toggle {
-        background: none;
-    }
-
-    .todo-list li .toggle {
-        height: 40px;
-    }
-}
-
-@media (max-width: 430px) {
-    .footer {
-        height: 50px;
-    }
-
-    .filters {
-        bottom: 10px;
-    }
-}
-#+end_src
 *** other
 (find-file-other-frame "./public/img/giggin-icon.png")
 (find-file-other-frame "./public/img/giggin-logo.svg")
@@ -2263,549 +1905,7 @@ jobs:
 npm install
 
 * описание
-** ИИ
-если мне интересно сделать компонент для настолькной игры
-например игральная карта. Тоесть основной её функцикй будет возможность перетегивания, при зажатой левой кноаке.
-как можно былобы это проще реализовть?
-** код ИИ
-Перетаскиваемая карта — это классический **интерактивный компонент**.
-И можно сделать его **очень просто** в Reagent/ClojureScript — без тяжёлых библиотек.
-
-Вот визуально, о чём речь:
-
----
-
-## ✅ Самый простой путь: HTML5 Drag & Drop + Reagent
-
-### 🔹 Карта как React/Reagent компонент
-
-```clojure
-(ns game.components.card
-  (:require [reagent.core :as r]))
-
-(defn card [{:keys [id suit rank]}]
-  [:div.card
-   {:draggable true
-    :on-drag-start #(js/console.log "drag start" id)}
-   (str rank " " suit)])
-```
-
-ВСЁ ✅
-Уже перетаскивается!
-Пока что без логики — просто событие.
-
----
-
-## ➕ Чтобы **карта могла менять своё положение** на столе
-
-Мы храним позицию карты в **atom**:
-
-```clojure
-(defonce positions (r/atom {}))
-
-(defn set-position! [id x y]
-  (swap! positions assoc id {:x x :y y}))
-```
-
----
-
-## 🔥 Карта с абсолютным позиционированием и поведением drag-move
-
-```clojure
-(defn draggable-card [{:keys [id suit rank]}]
-  (let [{:keys [x y]} (get @positions id {:x 100 :y 100})]
-    [:div.card
-     {:style {:position "absolute"
-              :cursor "grab"
-              :left x
-              :top y}
-      :on-mouse-down
-      (fn [e]
-        (let [start-x (.-clientX e)
-              start-y (.-clientY e)
-              on-move
-              (fn [e2]
-                (set-position! id
-                               (+ x (- (.-clientX e2) start-x))
-                               (+ y (- (.-clientY e2) start-y))))
-              on-up
-              (fn [_]
-                (.removeEventListener js/window "mousemove" on-move)
-                (.removeEventListener js/window "mouseup" on-up))]
-
-          (.addEventListener js/window "mousemove" on-move)
-          (.addEventListener js/window "mouseup" on-up)))}]
-     (str rank " " suit)]))
-```
-
----
-
-### ✅ Что умеет эта версия
-
-✔ Берём карту мышкой
-✔ Тянем — карта двигается под курсором
-✔ Отпустили — карта остаётся на своём новом месте
-
-Никаких зависимостей!
-Просто Reagent + DOM events.
-
----
-
-## 🚀 Улучшения, которые легко добавить
-
-| Возможность                | Как сделать                    |
-| -------------------------- | ------------------------------ |
-| Слои (карта поверх других) | z-index, счётчик слоёв         |
-| Повороты                   | CSS transform: rotate          |
-| Перетаскивание в зоны      | Проверять координаты drop      |
-| Touch-поддержка            | on-touch-start / on-touch-move |
-| Анимация движения          | Position → CSS transition      |
-
-Хочешь — сделаю **красивый UI** с бейсами карт 🎨
-
----
-
-## ❓ Спрошу на будущее:
-
-Какую конкретно игру ты планируешь?
-
-1️⃣ Карточная (пасьянс, MTG, Uno …)?
-2️⃣ Настольная (плитки, фишки, поля)?
-3️⃣ Пошаговая стратегия?
-
-И сколько карт может быть одновременно на столе?
-
-Если расскажешь — спроектирую **правильную архитектуру** (Keystates, Event-bus, FSM для правил, стеки действий).
-
----
-
-Хочешь — давай сделаем **рабочий прототип прямо здесь** 🧠⚡
-С тебя идея игры — с меня код и анимации 💜
-** ИИ 
-мне интересно сделать кложур скрипт приложени на Keechma Симулятор табле топ и борд гейс.
-тоесть должны быть компоненты карты, колоды, кости, тайлы.
-они должны будут делатся на основе некоторого джейсон описания.
-главный функционал скоторого нужно начать. Это возможность перетягивания компонетов.
-это не плохо реализуется на реагенте.
-но мне нужо и "перетягивать столь". Тость менять абсолютное значаенеи коорднат, но некому бесконечному столоу.
-иметь возможно приближать и удолять камеру к столу.
-и тут возникает вопрос не проще ли будет это реализовать на канве?
-или можно изменить копоненты реагента чтоб они так себя вели?
-помоги выбрать наилучшее решение.
-** Konva.js
-Отличный вопрос — и очень уместный для симулятора настолок, потому что именно сочетание **интерактивности (drag-n-drop)** и **“бесконечного стола” с масштабированием и панорамированием** ставит React/Reagent в довольно спорное положение.
-Разберём по слоям, чтобы выбрать стратегию без компромиссов.
-
----
-
-### 🔹 Что ты хочешь построить
-
-> Keechma-приложение (архитектурный фреймворк на Reagent/Re-frame основе)
-> с JSON-описываемыми компонентами (карты, колоды, кости, тайлы),
-> которые можно перетаскивать, масштабировать и двигать в “бесконечном столе”.
-
-Это ставит задачу на **рендеринг** (Canvas vs DOM) и **архитектуру взаимодействий** (drag, zoom, pan, snapping и т.д.)
-
----
-
-### 🔹 Вариант 1: Чисто Reagent (DOM + CSS transforms)
-
-✅ **Плюсы:**
-
-  * Максимальная интеграция с Keechma (state, subscriptions, commands и т.п.).
-  * Drag-n-drop можно сделать через `react-dnd` или `interact.js`.
-  * “Камеру” (пан и зум) можно реализовать через CSS `transform: translate() scale()` на контейнере “стола”.
-
-🚫 **Минусы:**
-
-  * Производительность начнёт страдать, если на столе десятки/сотни компонентов (DOM-ноды дорогие).
-  * При зуме и пане легко словить артефакты с hit-тестами (drag перестаёт совпадать с реальными координатами).
-  * Реализация плавного перемещения/инерции — геморрой.
-
-💡 **Итого:** подходит, если стол компактный и взаимодействий немного (до 100 объектов).
-
----
-
-### 🔹 Вариант 2: Canvas (через Reagent компонент с `canvas` API)
-
-✅ **Плюсы:**
-
-  * Лёгкий рендеринг даже при сотнях объектов.
-  * Зум и пан — естественны, ты просто меняешь `ctx.scale` и `ctx.translate`.
-  * Проще реализовать “бесконечность стола” и эффекты (тени, подсветки, слои).
-  * Можно использовать библиотеку вроде [Konva.js](https://konvajs.org/) (есть [react-konva](https://github.com/konvajs/react-konva), которую можно обернуть в Reagent).
-
-  🚫 **Минусы:**
-
-  * Нужно вручную писать логику выделения/drag-n-drop (hit testing).
-  * Сложнее интеграция с типичным Keechma flow (состояние придётся хранить отдельно и синхронизировать).
-
-💡 **Итого:** идеален, если тебе важны производительность, реалистичная физика и масштабируемость “мира”.
-
----
-
-### 🔹 Вариант 3: Гибрид (DOM UI + Canvas стол)
-
-Используется во многих современных tabletop симуляторах (веб-вариантах):
-
-  * Canvas для “мира” (игрового поля, объектов, перемещений, зума).
-  * React/Reagent DOM-оверлей для интерфейса, меню, диалогов, панелей.
-
-💡 Это **золотая середина**:
-
-  * Canvas рендерит контент.
-  * Reagent управляет состоянием (Keechma orchestration, JSON → объекты).
-  * UI остаётся декларативным, а физика и движение — нативно быстрыми.
-
----
-
-### 🔹 Рекомендация
-
-Для твоей цели:
-
-> “симулятор настолки с перетаскиванием, зумом и бесконечным столом”
-
-✅ **Оптимальный выбор:**
-**Hybrid → Reagent + Konva.js (через react-konva)**
-
-  * Ты можешь хранить всё описание в Keechma’s `EDB` и генерировать объекты на Canvas.
-  * Реализовать drag-n-drop и зум можно за вечер (Konva даёт готовые обработчики).
-  * Панорамирование/масштаб — встроены.
-  * Добавление анимации и визуальных эффектов (например, бросок кости) элементарно.
-
----
-
-Хочешь — я покажу минимальный пример “Keechma + Reagent + react-konva” проекта,
-где можно:
-
-  * двигать объекты (drag),
-  * зумить колесом,
-  * и перемещать сам “стол” (pan)?
-
-Это даст тебе стартовую точку для будущего симулятора.
-** Что делает Konva.js
-
-Отличный вопрос — Konva.js — это не просто библиотека, а, можно сказать, **“React для Canvas”**, только заточенный под **интерактивную 2D-графику**, типа твоего “настольного симулятора”.
-
----
-
-### 🔹 Что делает Konva.js
-
-**Konva.js** — это JavaScript-библиотека для работы с HTML5 Canvas,
-которая добавляет:
-
-  * **Сцену (Stage)** и **слои (Layers)** — как в графических редакторах.
-  * **Объекты (Shapes)**: прямоугольники, изображения, текст, группы.
-  * **События**: `onClick`, `onDragMove`, `onMouseOver`, и даже `onWheel`.
-  * **Трансформации**: `x`, `y`, `scaleX`, `rotation` — всё управляется как свойства React-компонента.
-  * **Хит-тестинг** и **drag-and-drop** реализованы внутри — тебе не нужно вручную вычислять попадания курсора по пикселям.
-
----
-
-### 🔹 Пример “Hello Konva”
-
-Вот насколько прост пример:
-
-```clojure
-(ns my-game.core
-  (:require ["react-konva" :refer [Stage Layer Rect]]))
-
-(defn canvas-view []
-  [:> Stage {:width 800 :height 600}
-   [:> Layer {}
-    [:> Rect {:x 50 :y 60
-              :width 100 :height 100
-              :fill "red"
-              :draggable true
-              :onClick #(js/alert "clicked!")}]]])
-```
-
-💡 `[:> ...]` — это синтаксис Reagent для вставки React-компонентов.
-Тут:
-
-  * `Stage` — это “сцена”, аналог твоего “стола”.
-  * `Layer` — слой (их можно несколько, как “фоны”, “карты”, “фишки”).
-  * `Rect` — объект, который можно двигать и с которым можно взаимодействовать.
-
----
-
-### 🔹 Почему он идеален для tabletop
-
-| Возможность                           | Реализация в Konva                                            |
-| ------------------------------------- | ------------------------------------------------------------- |
-| Перетаскивание (drag-and-drop)        | `:draggable true`                                             |
-| Зум и панорама                        | слушатель `onWheel` + `stage.scale()` и `stage.position()`    |
-| “Бесконечный стол”                    | можно просто двигать `stage` или подгружать тайлы динамически |
-| Отрисовка сотен объектов              | Canvas-рендеринг, без DOM overhead                            |
-| Группы (например, колода карт)        | `Group` компонент                                             |
-| Эффекты (тени, прозрачность, фильтры) | встроенные свойства и фильтры                                 |
-
----
-
-### 🔹 Бонус — React-совместимость
-
-Есть официальная обёртка **[react-konva](https://konvajs.org/docs/react/index.html)**,
-поэтому ты можешь использовать её прямо в **Reagent / Keechma** без боли.
-Всё декларативно и реагирует на изменение состояния, как обычный компонент.
-
----
-
-### 🔹 Итого
-
-> 💬 **Konva.js** — это движок, который делает Canvas интерактивным и “реактивным”.
->
-> ⚙️ Подходит идеально для твоего tabletop симулятора, где всё должно двигаться, масштабироваться и не тормозить.
-
----
-
-Хочешь, я покажу рабочий пример на **Reagent + react-konva**,
-где можно и **перетаскивать фигуры**, и **зумить колесом**, и **двигать “стол”** мышью — как в настоящем настольном симуляторе?
-** React-Konva вписывается в Reagent/Keechma стек
-Да 😎 — **оно прекрасно вписывается в твой Reagent/Keechma стек**, потому что `react-konva` — это обычные React-компоненты,
-а Reagent умеет рендерить *любой* React-компонент через стандартный хикаповый синтаксис.
-
-Так что да — **ты можешь использовать Hiccup как обычно** и спокойно **форвардить компоненты** из Keechma/Reagent в `react-konva`.
-Давай разберём это чуть глубже, чтобы не оставалось “магии”.
-
----
-
-### 🔹 1. React-Konva — это просто React-компоненты
-
-Например, в JS они выглядят так:
-
-```jsx
-<Stage>
-  <Layer>
-    <Rect x={10} y={10} width={100} height={100} draggable={true} />
-  </Layer>
-</Stage>
-```
-
----
-
-### 🔹 2. В Reagent (и Keechma) ты пишешь то же самое в Hiccup
-
-Reagent имеет спец-форму `:>` для вставки нативного React-компонента.
-
-```clojure
-(ns myapp.ui.board
-  (:require ["react-konva" :refer [Stage Layer Rect]]))
-
-(defn board []
-  [:> Stage {:width 800 :height 600}
-   [:> Layer {}
-    [:> Rect {:x 50 :y 50
-              :width 100 :height 100
-              :fill "skyblue"
-              :draggable true
-              :onClick #(js/console.log "Clicked!")}]])
-```
-
-💡 Здесь `:>` означает “используй этот компонент напрямую”,
-а все `props` (`:width`, `:height`, `:fill`, `:onClick`) передаются 1:1.
-
----
-
-### 🔹 3. Keechma-интеграция — нативная
-
-Keechma работает на Reagent-компонентах, поэтому `react-konva`
-можно использовать **прямо внутри Keechma views**.
-
-Например:
-
-```clojure
-(ns app.ui.main
-  (:require
-   [keechma.ui-component :as ui]
-   ["react-konva" :refer [Stage Layer Circle]]))
-
-(defn render [ctx]
-  [:div.game-container
-   [:> Stage {:width 800 :height 600}
-    [:> Layer {}
-     [:> Circle {:x 100 :y 100
-                 :radius 40
-                 :fill "tomato"
-                 :draggable true
-                 :onDragMove
-                   (fn [e]
-                     (ui/dispatch ctx :move-token
-                       {:x (.. e -target -x)
-                        :y (.. e -target -y)}))}]]]])
-```
-
-💡 Здесь ты:
-
-  * Используешь Keechma `ctx` как обычно.
-  * Обрабатываешь события Konva (например `onDragMove`).
-  * Диспатчишь команды Keechma (через `ui/dispatch`).
-
----
-
-### 🔹 4. Да, можно “форвардить” компоненты
-
-Ты можешь спокойно создавать свои `[:> Group]` или `[:> Rect]`
-компоненты и прокидывать их как дочерние — как будто это обычный DOM:
-
-```clojure
-(defn card [props]
-  [:> Group props
-   [:> Rect {:width 60 :height 90 :fill "white" :stroke "black"}]
-   [:> Text {:text (:title props) :x 5 :y 5 :fontSize 14}]])
-```
-
-А потом использовать:
-
-```clojure
-[:> Layer {}
- [card {:x 100 :y 100 :title "Ace of Spades"}]
- [card {:x 200 :y 120 :title "Queen of Hearts"}]]
-```
-
-То есть — да, **ты можешь форвардить свои Reagent-компоненты прямо в Canvas-иерархию Konva**, как будто это обычные React-компоненты.
-
----
-
-### 🔹 5. Микс Keechma + JSON описаний
-
-Ты даже можешь хранить JSON вроде:
-
-```json
-[
-  {"type": "card", "x": 100, "y": 100, "title": "Ace"},
-  {"type": "dice", "x": 300, "y": 150, "sides": 6}
-]
-```
-
-и рендерить динамически:
-
-```clojure
-(for [item items]
-  (case (:type item)
-    "card" [card item]
-    "dice" [dice item]))
-```
-
-Так ты получишь динамическое создание объектов на Canvas
-по JSON-описаниям — как ты и хотел изначально.
-
----
-
-Хочешь — я покажу тебе минимальный **Keechma + Reagent + react-konva** пример проекта,
-где есть “стол”, перетаскиваемые карточки и камера (пан/зум)?
-Можно прямо на базе skeleton’а Keechma.
-** Идеальная структура tabletop-приложения
-Отличный вопрос — и ты на самом деле уже мысленно стоишь **на границе двух миров**:
-🧠 *декларативного Reagent/React UI* и 🎮 *императивного Canvas-мира Konva*.
-Понять, где кончается одно и начинается другое — это ключ к красивой архитектуре tabletop-симулятора.
-
-Давай аккуратно разделим роли, чтобы ты чётко видел, **где Reagent незаменим**, а где **Konva рулит**.
-
----
-
-## 🔹 Где нужен **Reagent** (и значит Keechma)
-
-Reagent остаётся твоим “мозгом” и “панелью управления”:
-
-  * Управляет **состоянием** (Keechma EDB, subscriptions, commands).
-  * Рисует **UI вне Canvas** — меню, панели, попапы, модалки, настройки, чаты, лог действий, селекторы колод и т.д.
-  * Реализует **реактивную бизнес-логику** — например, если карта выложена на стол, Keechma обновляет её позицию, синхронизирует с сервером, триггерит анимации и т.д.
-  * Хранит всё как **декларативное состояние**, а не императивные Canvas-команды.
-
-💡 Проще говоря:
-
-> Reagent/Keechma управляет “моделью игры”, а Konva только рисует текущее состояние этой модели.
-
----
-
-## 🔹 Где нужен **Konva.js**
-
-Konva — это твой **рендерер и физический слой**:
-
-  * Всё, что **движется, перетаскивается, масштабируется**.
-  * Всё, где важна **производительность** (Canvas быстрее DOM).
-  * Всё, где UI должен быть “игровым”, а не “формовым”.
-
-Примеры:
-
-  * Карты, фишки, кости, тайлы, маркеры.
-  * Стол с панорамой и зумом.
-  * Анимации бросков, подсветки, столкновений и т.д.
-
----
-
-## 🔹 Что проще не делать на Konva вручную
-
-Konva — шикарен, но не стоит насиловать его для вещей, где React лучше.
-Вот что **лучше оставить Reagent-у**:
-
-| Задача                                        | Почему Reagent проще                                              |
-| --------------------------------------------- | ----------------------------------------------------------------- |
-| Меню, кнопки, тулбары, выпадашки              | DOM имеет готовую семантику, стили и фокус-менеджмент             |
-| Настройки и формы                             | Реактивный state и input-контроль проще в React                   |
-| Окна диалогов (“Save Game?”, “Invite Player”) | Keechma уже умеет управлять такими состояниями                    |
-| Tooltip’ы, всплывающие подсказки              | DOM-оверлей проще позиционировать поверх Canvas                   |
-| Серверное взаимодействие                      | Keechma commands/subscriptions — лучший способ для сетевой логики |
-
----
-
-## 🔹 Где **Reagent и Konva должны работать вместе**
-
-Там, где нужно реактивное управление Canvas-объектами.
-Например:
-
-```clojure
-(defn card [ctx {:keys [x y title selected?]}]
-  [:> Group {:x x :y y :draggable true
-             :onClick #(ui/dispatch ctx :select-card title)}
-   [:> Rect {:width 60 :height 90
-             :fill (if selected? "gold" "white")
-             :stroke "black"}]
-   [:> Text {:text title :x 5 :y 5 :fontSize 14}]])
-```
-
-💡 Здесь Reagent рендерит Konva-объект,
-но `selected?` берётся из **Keechma state** — т.е. UI остаётся декларативным.
-Если `selected?` поменялся, Reagent сам обновит `fill`, не нужно руками перерисовывать Canvas.
-
----
-
-## 🔹 Идеальная структура tabletop-приложения
-
-```
-Keechma (App state)
-├── UI (Reagent)
-│   ├── Панели, меню, модалки
-│   └── HUD, настройки, чат
-└── Scene (Konva)
-    ├── Слой стола (background, grid)
-    ├── Слой объектов (карты, кости, фигуры)
-    └── Слой эффектов (highlight, selection)
-```
-
-📦 Вся логика — в Keechma.
-🎨 Визуализация — в Konva.
-🧩 Синхронизация — через Reagent.
-
----
-
-## 🔹 Вывод
-
-Используй Reagent:
-
-  * как **архитектуру** (Keechma);
-  * как **интерфейс** для всего вне игрового поля;
-  * как **декларативную прослойку** к Konva.
-
-Используй Konva:
-
-  * как **рендеринг-движок** и **поведение** для объектов внутри поля.
-
----
-
-Если хочешь, я покажу **живой пример архитектуры**
-(с Keechma routes, EDB, Reagent views и react-konva сценой),
-где есть панель инструментов (Reagent) и поле с перетаскиваемыми карточками (Konva)?
+** 
 * Docs
 ** туториалс
 *** konva
@@ -4079,8 +3179,9 @@ https://github.com/jacekschae/learn-reagent-course-files?tab=readme-ov-file
 :header-args: :tangle no
 :END:
 ** diff dirs recersiv
+(ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
 cd /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/
-diff -r 14-gig-editor 15-save-gig
+diff -r 15-save-gig 16-update-gig
 /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/15-save-gig
 
 02-app-setup           09-remove-from-order   14-gig-editor     19-ajax-transformations  24-firebase-auth     complete

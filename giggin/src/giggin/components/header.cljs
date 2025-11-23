@@ -3,4 +3,8 @@
 (defn header
   []
   [:header
-   [:img {:src "img/giggin-logo.svg" :alt "Giggin logo"}]])
+   [:div {:display "flex"}
+    ;; [:img.logo { :src "img/portal-logo.jpg"
+    ;;             :alt "Poratl logo"}]
+    [:img      { :src "img/portal-logo-title.jpg"
+                  :alt "Poratl title logo"}]]])

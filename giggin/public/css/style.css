@@ -64,6 +64,7 @@ button:focus {
   --secondary: #00ffb0;
         --secondary-alpha: rgba(0, 255,126, 0.5);
   --gray: #f6f6f6;
+  --black: #000;
   --gray-alpha: rgba(246, 246, 246, 0.9);
   --black-color: #222223;
         --red-color: #ff4d4f
@@ -78,9 +79,13 @@ button:focus {
 }
 
 body, button {
-  font-family: 'Poppins', sans-serif;
+  /* font-family: 'Poppins', sans-serif; */
+  /* font-family: 'Merriweather', Merriweather */
+  /* font-family: 'Playfair', Playfair; */
+  font-family: 'UnifrakturCook', cursive;
+
   font-size: 1.4rem;
-        background: var(--gray);
+        background: var(--black);
   color: var(--primary)
 }
 

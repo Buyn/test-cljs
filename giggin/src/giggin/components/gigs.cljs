@@ -2,6 +2,7 @@
   (:require [giggin.state :as state ]
             [giggin.components.gig-editor :refer [gig-editor]]
             [reagent.core :as r]
+            [clojure.string :as str]
             [giggin.helpers :refer [format-price]]))
 
 (defn gig [{:keys [id img title price desc] :as el}]
@@ -18,16 +19,28 @@
       [:p.gig__price (format-price price)]
       [:p.gig__desc desc]]))
 
+(defn insert-gig
+  [{:keys [id title desc price img sold-out]}]
+  (swap! state/gigs
+         assoc id { :id id
+                    :title (str/trim title)
+                    :desc (str/trim desc)
+                    :img (str/trim img)
+                    :price (js/parseInt price)
+                    :sold-out sold-out}))
+
+
 (defn btn-add-gig []
   (let [modal (r/atom false)
-        values (r/atom {:id nil :title "" :desc "" :price 0 :img "" :sold-out false})]
+        values (r/atom {:id (str "gig-" (random-uuid))
+                        :title "" :desc "" :price 0 :img "" :sold-out false})]
         [:div.gig
           [:button.add-gig
               {:on-click #(reset! modal true)}
               [:div.add__title
             [:i.icon.icon--plus]
             [:h1 "Add gig"]]]
-          [gig-editor modal values]]))
+          [gig-editor modal values insert-gig]]))
 
 (defn gigs []
   [:main
