@@ -16,7 +16,7 @@
 
 (defn form-sold-out
   [values]
-  (let [toggle-target-checked
+  (let [toggle-checkbox
           #(swap! values
                   assoc
                     :sold-out
@@ -24,9 +24,11 @@
    [:div.form__group
       [:label.form__label {:for "sold-out"} "sold-out"]
       [:label.form__switch
-       [:input {:type :checkbox
+       [:input#sold-out {
+                         ;; :id "sold-out"
+                :type :checkbox
                 :checked (:sold-out @values)
-                :on-change toggle-target-checked}]
+                :on-change toggle-checkbox}]
        [:i.form__icon]]]))
 
 
@@ -57,18 +59,20 @@
 
 (defn gig-editor
   [modal values insert-gig]
-  [:div.modal (when @modal {:class "active"})
-   [:div.modal__overlay]
-   [:div.modal__container
-    [:div.modal__body
-      [form-group values]
-      [form-sold-out values]]
-    [:div.modal__footer
-      [:button.btn.btn--link.float--left
-        {:on-click #(reset! modal false)}
-        "Cancel"]
-      [:button.btn.btn--secondary
-        {:on-click #(do
-                      (insert-gig @values)
-                      (reset! modal false))}
-        "Save"]]]])
+  (let [close-modal #(reset! modal false)
+        save-and-close (fn []
+                          (insert-gig @values)
+                          (close-modal))]
+      [:div.modal (when @modal {:class "active"})
+    [:div.modal__overlay]
+    [:div.modal__container
+      [:div.modal__body
+        [form-group values]
+        [form-sold-out values]]
+      [:div.modal__footer
+        [:button.btn.btn--link.float--left
+          {:on-click close-modal}
+          "Cancel"]
+        [:button.btn.btn--secondary
+          {:on-click save-and-close}
+          "Save"]]]]))
