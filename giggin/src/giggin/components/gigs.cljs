@@ -21,14 +21,19 @@
 
 (defn insert-gig
   [{:keys [id title desc price img sold-out]}]
-  (swap! state/gigs
-         assoc id { :id id
+    (swap! state/gigs
+         assoc id { :id (or id (str "gig-" (random-uuid)))
                     :title (str/trim title)
                     :desc (str/trim desc)
                     :img (str/trim img)
                     :price (js/parseInt price)
                     :sold-out sold-out}))
 
+;; (defn toggle-modal 
+;;         []
+;;   (let [modal (r/atom false)]
+;;         (swap! modal assoc :active active)
+;;         (reset! values gig)))
 
 (defn btn-add-gig []
   (let [modal (r/atom false)

@@ -25,7 +25,6 @@
       [:label.form__label {:for "sold-out"} "sold-out"]
       [:label.form__switch
        [:input#sold-out {
-                         ;; :id "sold-out"
                 :type :checkbox
                 :checked (:sold-out @values)
                 :on-change toggle-checkbox}]

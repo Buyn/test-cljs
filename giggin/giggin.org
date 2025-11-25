@@ -216,14 +216,19 @@ app
 
 (defn insert-gig
   [{:keys [id title desc price img sold-out]}]
-  (swap! state/gigs
-         assoc id { :id id
+    (swap! state/gigs
+         assoc id { :id (or id (str "gig-" (random-uuid)))
                     :title (str/trim title)
                     :desc (str/trim desc)
                     :img (str/trim img)
                     :price (js/parseInt price)
                     :sold-out sold-out}))
 
+;; (defn toggle-modal 
+;;         []
+;;   (let [modal (r/atom false)]
+;;         (swap! modal assoc :active active)
+;;         (reset! values gig)))
 
 (defn btn-add-gig []
   (let [modal (r/atom false)
@@ -1623,26 +1628,6 @@ figure {
 (find-file-other-frame "./public/img/giggin-logo.svg")
 (find-file-other-frame "./public/img/paypal.svg")
 (find-file-other-frame "./public/img/stripe.svg")
-* files giggin
-** files root
-(find-file-other-frame "./.gitignore")
-(find-file-other-frame "./package.json")
-(find-file-other-frame "./shadow-cljs.edn")
-(find-file-other-frame "./giggin.org")
-** core
-(find-file-other-frame "./src/giggin/core.cljs")
-(find-file-other-frame "./src/giggin/state.cljs")
-** resurs
-(find-file-other-frame "./public/css/style.css")
-(find-file-other-frame "./public/img/giggin-icon.png")
-(find-file-other-frame "./public/img/giggin-logo.svg")
-(find-file-other-frame "./public/img/paypal.svg")
-(find-file-other-frame "./public/img/stripe.svg")
-(find-file-other-frame "./public/index.html")
-
-** files other
-find "$PWD" -type f >>filepath.txt
-(find-file-other-frame "filepath.txt")
 * run giggin
 ** run server and reple
 #+begin_src elisp :results output silent
@@ -1907,6 +1892,26 @@ jobs:
 ** deps
 npm install
 
+* files giggin
+** files root
+(find-file-other-frame "./.gitignore")
+(find-file-other-frame "./package.json")
+(find-file-other-frame "./shadow-cljs.edn")
+(find-file-other-frame "./giggin.org")
+** core
+(find-file-other-frame "./src/giggin/core.cljs")
+(find-file-other-frame "./src/giggin/state.cljs")
+** resurs
+(find-file-other-frame "./public/css/style.css")
+(find-file-other-frame "./public/img/giggin-icon.png")
+(find-file-other-frame "./public/img/giggin-logo.svg")
+(find-file-other-frame "./public/img/paypal.svg")
+(find-file-other-frame "./public/img/stripe.svg")
+(find-file-other-frame "./public/index.html")
+
+** files other
+find "$PWD" -type f >>filepath.txt
+(find-file-other-frame "filepath.txt")
 * описание
 ** 
 * Docs
@@ -3053,7 +3058,13 @@ figure {
   z-index: 1;
 }
 #+end_src
+** TODO Разобрать 17
+[[*diff dirs recersiv][diff dirs recersiv]]
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gigs.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gig_editor.cljs")
 ** TODO Дотренировать приложение до конца
+[[*diff dirs recersiv][diff dirs recersiv]]
+(ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
 * DONE arhiv
 ** DONE пройти по видео7
 ** DONE пройти по видео8
@@ -3184,7 +3195,7 @@ https://github.com/jacekschae/learn-reagent-course-files?tab=readme-ov-file
 ** diff dirs recersiv
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
 cd /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/
-diff -r 15-save-gig 16-update-gig
+diff -r 16-update-gig 17-refactor-gigs
 /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/15-save-gig
 
 02-app-setup           09-remove-from-order   14-gig-editor     19-ajax-transformations  24-firebase-auth     complete
@@ -3228,7 +3239,6 @@ grep --include=\*.cljs -rnw ./ -e "reagent.core"
 | ./target/public/cljs-out/dev/keechma_todomvc/components/todo_edit.cljs:5:  | [reagent.core    | :as             | reagent])) |         |        |           |
 | ./target/public/cljs-out/dev/keechma/app_state/react_native_router.cljs:3: | [reagent.core    | :as             | r]         |         |        |           |
 | ./target/public/cljs-out/dev/keechma/app_state.cljs:2:                     | (:require        | [reagent.core   | :as        | reagent | :refer | [cursor]] |
-
 
 ** files other
 find "$PWD" -type f >>filepath.txt
