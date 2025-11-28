@@ -61,6 +61,14 @@ app
 
 (def orders (r/atom {}))
 
+(def app_state (r/atom
+                 {:gig-editor
+                    {:modal
+                      (r/atom false)
+                     :values
+                      (r/atom {:id (str "gig-" (random-uuid))
+                        :title "" :desc "" :price 0 :img "" :sold-out false})}}))
+
 (def gigs (r/atom {:gig-01 {:id :gig-01
                             :title "Macaron"
                             :artist "Baher Khairy"
@@ -192,6 +200,7 @@ app
 **** file gigs.cljs
 (find-file-other-frame "./src/giggin/components/gigs.cljs")
 **** src gigs.cljs
+***** all
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
@@ -224,11 +233,18 @@ app
                     :price (js/parseInt price)
                     :sold-out sold-out}))
 
-;; (defn toggle-modal 
-;;         []
-;;   (let [modal (r/atom false)]
-;;         (swap! modal assoc :active active)
-;;         (reset! values gig)))
+
+(defn btn-add-gig []
+  (let [modal (r/atom false)
+        values (r/atom {:id (str "gig-" (random-uuid))
+                        :title "" :desc "" :price 0 :img "" :sold-out false})]
+        [:div.gig
+          [:button.add-gig
+              {:on-click #(reset! modal true)}
+              [:div.add__title
+            [:i.icon.icon--plus]
+            [:h1 "Add gig"]]]
+          [gig-editor modal values insert-gig]]))
 
 (defn btn-add-gig []
   (let [modal (r/atom false)
@@ -253,6 +269,89 @@ app
 
 #+end_src
 
+***** CANCELED new gig-editor
+#+begin_src clojure :no-expand t :mkdirp yes :tangle no
+(ns giggin.components.gigs
+  (:require [giggin.state :as state ]
+            [giggin.components.gig-editor :refer [gig-editor]]
+            [reagent.core :as r]
+            [clojure.string :as str]
+            [giggin.helpers :refer [format-price]]))
+
+
+(defn gig [app {:keys [id img title price desc] :as el}]
+  (let [add-to-order #(swap! state/orders update id inc)]
+    [:div.gig {:key id}
+      [:img.gig__artwork {:src img :alt title}]
+      [:div.gig__body
+        [:div.gig__title
+          [:div.btn.btn--primary.float--right.tooltip
+            { :data-tooltip "Add to order!"
+              :on-click add-to-order}
+            [:i.icon.icon--plus]]
+          title]]
+      [:p.gig__price (format-price price)]
+      [:p.gig__desc desc]]))
+
+
+(defn insert-gig
+  [{:keys [id title desc price img sold-out]}]
+    (swap! state/gigs
+         assoc id { :id (or id (str "gig-" (random-uuid)))
+                    :title (str/trim title)
+                    :desc (str/trim desc)
+                    :img (str/trim img)
+                    :price (js/parseInt price)
+                    :sold-out sold-out}))
+
+;; (defn gig-editor-control
+;;         [values]
+;;   (let  [modal (r/atom false)
+            ;; values (r/atom {:id (str "gig-" (random-uuid))
+            ;;             :title "" :desc "" :price 0 :img "" :sold-out false}]
+;;         (swap! modal assoc :active active)
+;;         (reset! values gig)))
+
+;; (defn gig-edit-create
+;;         []
+;;   (let  [modal (r/atom false)
+            ;; values (r/atom {:id (str "gig-" (random-uuid))
+            ;;             :title "" :desc "" :price 0 :img "" :sold-out false}]
+;;         (swap! modal assoc :active active)
+;;         (reset! values gig)))
+
+(defn add-new-gig [app]
+  [:div.gig
+    [:button.add-gig
+        {:on-click #(reset! modal true)}
+        [:div.add__title
+      [:i.icon.icon--plus]
+      [:h1 "Add gig"]]]
+    [gig-editor app]])
+
+;; (defn btn-add-gig []
+;;   (let [modal (r/atom false)
+;;         values (r/atom {:id (str "gig-" (random-uuid))
+;;                         :title "" :desc "" :price 0 :img "" :sold-out false})]
+;;         [:div.gig
+;;           [:button.add-gig
+;;               {:on-click #(reset! modal true)}
+;;               [:div.add__title
+;;             [:i.icon.icon--plus]
+;;             [:h1 "Add gig"]]]
+;;           [gig-editor modal values insert-gig]]))
+
+(defn gigs []
+  (let [app-state state/app-state]
+    [:main
+      [:div.gigs
+        [add-new-gig app-state]
+        (for [el (vals @state/gigs)]
+          (gig app el))]]))
+
+
+
+#+end_src
 *** header.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/components/header.cljs
@@ -3059,9 +3158,19 @@ figure {
 }
 #+end_src
 ** TODO Разобрать 17
+*** file
 [[*diff dirs recersiv][diff dirs recersiv]]
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gigs.cljs")
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gig_editor.cljs")
+*** todo
+**** убится что всё работаег
+**** сделать комит
+**** собрать убится что всё работаег
+**** сделать бранч
+**** передеалать эдитор на основе новой перменной
+**** перенести всё в новую перменную
+**** передеалать всё на основе новой перменной
+**** убрать старые переменые
 ** TODO Дотренировать приложение до конца
 [[*diff dirs recersiv][diff dirs recersiv]]
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
