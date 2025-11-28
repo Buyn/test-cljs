@@ -3,6 +3,14 @@
 
 (def orders (r/atom {}))
 
+(def app_state (r/atom
+                 {:gig-editor
+                    {:modal
+                      (r/atom false)
+                     :values
+                      (r/atom {:id (str "gig-" (random-uuid))
+                        :title "" :desc "" :price 0 :img "" :sold-out false})}}))
+
 (def gigs (r/atom {:gig-01 {:id :gig-01
                             :title "Macaron"
                             :artist "Baher Khairy"

@@ -29,11 +29,6 @@
                     :price (js/parseInt price)
                     :sold-out sold-out}))
 
-;; (defn toggle-modal 
-;;         []
-;;   (let [modal (r/atom false)]
-;;         (swap! modal assoc :active active)
-;;         (reset! values gig)))
 
 (defn btn-add-gig []
   (let [modal (r/atom false)

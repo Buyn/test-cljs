@@ -246,18 +246,6 @@ app
             [:h1 "Add gig"]]]
           [gig-editor modal values insert-gig]]))
 
-(defn btn-add-gig []
-  (let [modal (r/atom false)
-        values (r/atom {:id (str "gig-" (random-uuid))
-                        :title "" :desc "" :price 0 :img "" :sold-out false})]
-        [:div.gig
-          [:button.add-gig
-              {:on-click #(reset! modal true)}
-              [:div.add__title
-            [:i.icon.icon--plus]
-            [:h1 "Add gig"]]]
-          [gig-editor modal values insert-gig]]))
-
 (defn gigs []
   [:main
     [:div.gigs
@@ -3162,9 +3150,9 @@ figure {
 [[*diff dirs recersiv][diff dirs recersiv]]
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gigs.cljs")
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gig_editor.cljs")
-*** todo
-**** убится что всё работаег
-**** сделать комит
+*** TODO
+**** DONE убится что всё работаег
+**** DONE сделать комит
 **** собрать убится что всё работаег
 **** сделать бранч
 **** передеалать эдитор на основе новой перменной
