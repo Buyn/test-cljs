@@ -3,13 +3,13 @@
 
 (def orders (r/atom {}))
 
-(def app_state (r/atom {
+(def app-state (r/atom {
                 :gig-editor {
                      :modal
                        false
                      :values
                       {:id (str "gig-" (random-uuid))
-                               :title "" :desc "" :price 0 :img "" :sold-out false}}}
+                               :title "" :desc "" :price 0 :img "" :sold-out false}}
                 :gigs {
                    :gig-01 {:id :gig-01
                             :title "Macaron"
@@ -95,7 +95,7 @@
                             :desc "Shine Tang offers a grand exploration of classical music"
                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552696/giggin/shine-tang-425878.jpg"
                             :price 9000
-                            :sold-out false}}))
+                            :sold-out false}}}))
 
 
 (def gigs (r/atom {:gig-01 {:id :gig-01

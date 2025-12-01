@@ -1,11 +1,10 @@
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
-            [giggin.components.gig-editor :refer [gig-editor]]
+            [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
             [reagent.core :as r]
-            [clojure.string :as str]
             [giggin.helpers :refer [format-price]]))
 
-(defn gig [{:keys [id img title price desc] :as el}]
+(defn gig [app {:keys [id img title price desc] :as el}]
   (let [add-to-order #(swap! state/orders update id inc)]
     [:div.gig {:key id}
       [:img.gig__artwork {:src img :alt title}]
@@ -19,32 +18,19 @@
       [:p.gig__price (format-price price)]
       [:p.gig__desc desc]]))
 
-(defn insert-gig
-  [{:keys [id title desc price img sold-out]}]
-    (swap! state/gigs
-         assoc id { :id (or id (str "gig-" (random-uuid)))
-                    :title (str/trim title)
-                    :desc (str/trim desc)
-                    :img (str/trim img)
-                    :price (js/parseInt price)
-                    :sold-out sold-out}))
-
-
-(defn btn-add-gig []
-  (let [modal (r/atom false)
-        values (r/atom {:id (str "gig-" (random-uuid))
-                        :title "" :desc "" :price 0 :img "" :sold-out false})]
-        [:div.gig
-          [:button.add-gig
-              {:on-click #(reset! modal true)}
-              [:div.add__title
-            [:i.icon.icon--plus]
-            [:h1 "Add gig"]]]
-          [gig-editor modal values insert-gig]]))
+(defn add-new-gig [app]
+  [:div.gig
+    [:button.add-gig
+        {:on-click #(gig-editor-new app)}
+        [:div.add__title
+      [:i.icon.icon--plus]
+      [:h1 "Add gig"]]]])
 
 (defn gigs []
-  [:main
-    [:div.gigs
-      [btn-add-gig]
-      (for [el (vals @state/gigs)]
-        (gig el))]])
+  (let [app state/app-state]
+    [:main
+      [gig-editor-component app]
+      [:div.gigs
+        [add-new-gig app]
+        (for [el (vals (:gigs @app))]
+          (gig app el))]]))

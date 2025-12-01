@@ -61,13 +61,13 @@ app
 
 (def orders (r/atom {}))
 
-(def app_state (r/atom {
+(def app-state (r/atom {
                 :gig-editor {
                      :modal
                        false
                      :values
                       {:id (str "gig-" (random-uuid))
-                               :title "" :desc "" :price 0 :img "" :sold-out false}}}
+                               :title "" :desc "" :price 0 :img "" :sold-out false}}
                 :gigs {
                    :gig-01 {:id :gig-01
                             :title "Macaron"
@@ -153,7 +153,7 @@ app
                             :desc "Shine Tang offers a grand exploration of classical music"
                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552696/giggin/shine-tang-425878.jpg"
                             :price 9000
-                            :sold-out false}}))
+                            :sold-out false}}}))
 
 
 (def gigs (r/atom {:gig-01 {:id :gig-01
@@ -285,8 +285,8 @@ app
 **** file gigs.cljs
 (find-file-other-frame "./src/giggin/components/gigs.cljs")
 **** src gigs.cljs
-***** all
-#+begin_src clojure :no-expand t :mkdirp yes
+***** CANCELED all
+#+begin_src clojure :no-expand t :mkdirp yes :tangle no
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
             [giggin.components.gig-editor :refer [gig-editor]]
@@ -322,7 +322,6 @@ app
             [:h1 "Add gig"]]]
           [gig-editor-new app]]))
 
-
 (defn gigs []
   (let [app-state state/app-state]
       [:main
@@ -333,18 +332,15 @@ app
             (gig el))]]))
 
 
-
 #+end_src
 
-***** CANCELED new gig-editor
-#+begin_src clojure :no-expand t :mkdirp yes :tangle no
+***** new gig-editor
+#+begin_src clojure :no-expand t :mkdirp yes 
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
-            [giggin.components.gig-editor :refer [gig-editor-new gig-editor-component]]
+            [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
             [reagent.core :as r]
-            [clojure.string :as str]
             [giggin.helpers :refer [format-price]]))
-
 
 (defn gig [app {:keys [id img title price desc] :as el}]
   (let [add-to-order #(swap! state/orders update id inc)]
@@ -360,65 +356,6 @@ app
       [:p.gig__price (format-price price)]
       [:p.gig__desc desc]]))
 
-
-;; (defn insert-gig
-;;   [{:keys [id title desc price img sold-out]}]
-;;     (swap! state/gigs
-;;          assoc id { :id (or id (str "gig-" (random-uuid)))
-;;                     :title (str/trim title)
-;;                     :desc (str/trim desc)
-;;                     :img (str/trim img)
-;;                     :price (js/parseInt price)
-;;                     :sold-out sold-out}))
-
-;; (defn gig-editor-insert
-;;   [app {:keys [id title desc price img sold-out]}]
-;;     (swap! state/gigs
-;;          assoc id { :id (or id (str "gig-" (random-uuid)))
-;;                     :title (str/trim title)
-;;                     :desc (str/trim desc)
-;;                     :img (str/trim img)
-;;                     :price (js/parseInt price)
-;;                     :sold-out sold-out}))
-
-;; (defn gig-editor-insert
-;;   [app {:keys [id title desc price img sold-out]}]
-;;   (swap! app
-;;          assoc-in [:gigs id]
-;;          {:id       (or id (str "gig-" (random-uuid)))
-;;           :title    (str/trim title)
-;;           :desc     (str/trim desc)
-;;           :img      (str/trim img)
-;;           :price    (js/parseInt price)
-;;           :sold-out sold-out}))
-
-;; (defn gig-editor-insert
-;;   [app {:keys [id title desc price img sold-out]}]
-;;   (swap! app
-;;          update-in [:gigs]
-;;          assoc id {:id       (or id (str "gig-" (random-uuid)))
-;;                    :title    (str/trim title)
-;;                    :desc     (str/trim desc)
-;;                    :img      (str/trim img)
-;;                    :price    (js/parseInt price)
-;;                    :sold-out sold-out}))
-
-;; (defn gig-editor-control
-;;         [values]
-;;   (let  [modal (r/atom false)
-            ;; values (r/atom {:id (str "gig-" (random-uuid))
-            ;;             :title "" :desc "" :price 0 :img "" :sold-out false}]
-;;         (swap! modal assoc :active active)
-;;         (reset! values gig)))
-
-;; (defn gig-edit-create
-;;         []
-;;   (let  [modal (r/atom false)
-            ;; values (r/atom {:id (str "gig-" (random-uuid))
-            ;;             :title "" :desc "" :price 0 :img "" :sold-out false}]
-;;         (swap! modal assoc :active active)
-;;         (reset! values gig)))
-
 (defn add-new-gig [app]
   [:div.gig
     [:button.add-gig
@@ -427,22 +364,10 @@ app
       [:i.icon.icon--plus]
       [:h1 "Add gig"]]]])
 
-;; (defn btn-add-gig []
-;;   (let [modal (r/atom false)
-;;         values (r/atom {:id (str "gig-" (random-uuid))
-;;                         :title "" :desc "" :price 0 :img "" :sold-out false})]
-;;         [:div.gig
-;;           [:button.add-gig
-;;               {:on-click #(reset! modal true)}
-;;               [:div.add__title
-;;             [:i.icon.icon--plus]
-;;             [:h1 "Add gig"]]]
-;;           [gig-editor modal values insert-gig]]))
-
 (defn gigs []
   (let [app state/app-state]
     [:main
-      [gig-editor-component app (:gig-editor @app)]
+      [gig-editor-component app]
       [:div.gigs
         [add-new-gig app]
         (for [el (vals (:gigs @app))]
@@ -619,7 +544,9 @@ app
 (find-file-other-frame "./src/giggin/components/gig_editor.cljs")
 **** src gig_editor.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
-(ns giggin.components.gig-editor)
+(ns giggin.components.gig-editor
+  (:require [reagent.core :as r]
+            [clojure.string :as str]))
 
 (defn form-group-item
   [{:keys [id type value values]}]
@@ -647,7 +574,7 @@ app
       [:label.form__switch
        [:input#sold-out {
                 :type :checkbox
-                :checked (:sold-out @values)
+                :checked (:sold-out values)
                 :on-change toggle-checkbox}]
        [:i.form__icon]]]))
 
@@ -676,16 +603,19 @@ app
           :value (:price @values)
           :values values}]])
 
-;; (defn gig-editor-new
-;;   [app]
-;;   (gig-editor-insert app))
+
+(defn gig-editor-toggle
+  [app & [status]]
+  (swap! app update-in [:gig-editor :modal]
+         #(if (some? status) status (not %))))
+
 
 (defn gig-editor-open
   ([app]
    (gig-editor-toggle app true))
   ([app {:keys [id title desc price img sold-out]}]
     (swap! app
-          assoc-in [:gig-editor :value]
+          update-in [:gig-editor :values]
           { :id       (or id (str "gig-" (random-uuid)))
             :title    (str/trim title)
             :desc     (str/trim desc)
@@ -694,17 +624,15 @@ app
             :sold-out sold-out})
    (gig-editor-toggle app true)))
 
-;; (defn insert-gig
-;;   [app {:keys [id title desc price img sold-out]}]
-;;     (swap! app
-;;          assoc id { :id (or id (str "gig-" (random-uuid)))
-;;                     :title (str/trim title)
-;;                     :desc (str/trim desc)
-;;                     :img (str/trim img)
-;;                     :price (js/parseInt price)
-;;                     :sold-out sold-out}))
+(defn gig-editor-new
+  [app]
+  (gig-editor-open app
+                   {:id (str "gig-" (random-uuid))
+                    :title "" :desc "" :price 0 :img "" :sold-out false}))
 
 (defn gig-editor-insert
+  "записывает значение из сруктуры гигэдитора в структуру гиг
+    или если передано значение то записывает переданое в структуру гиг"
   ([app] (gig-editor-insert app (get-in @app [:gig-editor :values])))
   ([app {:keys [id title desc price img sold-out]}]
     (swap! app
@@ -716,26 +644,17 @@ app
               :price    (js/parseInt price)
               :sold-out sold-out})))
 
-;; (defn gig-editor-toggl
-;;   [app [& status]]
-;;   (swap! app
-;;          assoc-in [:gig-editor :modal]
-;;          not))
-
-(defn gig-editor-toggle
-  [app & [status]]
-  (swap! app update-in [:gig-editor :modal]
-         #(if (some? status) status (not %))))
 
 
 (defn gig-editor-component
-  [app {:keys modal values}]
-  (let [close-modal #(gig-editor-toggle app false)
+  [app]
+  (let [modal (r/cursor app [:gig-editor :modal])
+        values (r/cursor app [:gig-editor :values])
+        close-modal #(gig-editor-toggle app false)
         save-and-close (fn []
-                          ;; (gig-editor-insert app )
                           (gig-editor-insert app )
                           (close-modal))]
-      [:div.modal (when modal {:class "active"})
+      [:div.modal (when @modal {:class "active"})
     [:div.modal__overlay]
     [:div.modal__container
       [:div.modal__body
@@ -750,6 +669,28 @@ app
           "Save"]]]]))
 
 #+end_src
+**** arhiv
+  ;; (swap! app
+  ;;           update-in [:gig-editor :values] {})
+
+                          ;; (gig-editor-insert app )
+
+;; (defn gig-editor-toggl
+;;   [app [& status]]
+;;   (swap! app
+;;          assoc-in [:gig-editor :modal]
+;;          not))
+
+;; (defn insert-gig
+;;   [app {:keys [id title desc price img sold-out]}]
+;;     (swap! app
+;;          assoc id { :id (or id (str "gig-" (random-uuid)))
+;;                     :title (str/trim title)
+;;                     :desc (str/trim desc)
+;;                     :img (str/trim img)
+;;                     :price (js/parseInt price)
+;;                     :sold-out sold-out}))
+
 
 *** exampls
 /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/admin_panel.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/checkout_modal.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/footer.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/gig_editor.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/gigs.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/header.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/orders.cljs
@@ -3429,6 +3370,284 @@ gigs из app_state
 ***** как поменять тамже перменую
 (reset! modal false)
 с ключом :modal на противоположную?
+***** error
+Installing CLJS DevTools 0.9.10 and enabling features :formatters :hints :async util.cljs:187:64
+Feature :formatters cannot be installed. Unsupported Javascript context: Mozilla/5.0 (X11; Linux x86_64; rv:142.0) Gecko/20100101 Firefox/142.0. util.cljs:248:15
+Download the React DevTools for a better development experience: https://reactjs.org/link/react-devtools react-dom.development.js:26245:17
+shadow-cljs: #6 ready! browser.cljs:20:8
+Error rendering component (in giggin.components.gig_editor.form_group) component.cljs:126:15
+Error rendering component (in giggin.components.gig_editor.form_group) component.cljs:126:15
+Uncaught Error: No protocol method IDeref.-deref defined for type cljs.core/PersistentArrayMap: {:id "gig-a86a0055-28de-4b15-9d64-277d3def0ab8", :title "", :desc "", :price 0, :img "", :sold-out false}
+    cljs$core$missing_protocol core.cljs:324
+    cljs$core$IDeref$_deref$dyn_12195 core.cljs:686
+    cljs$core$_deref core.cljs:686
+    cljs$core$deref core.cljs:1477
+    giggin$components$gig_editor$form_group gig_editor.cljs:41
+    res component.cljs:98
+    reagent$impl$component$wrap_render reagent.impl.component.js:145
+    reagent$impl$component$do_render component.cljs:121
+    render component.cljs:143
+    reagent$ratom$in_context ratom.cljs:37
+    reagent$ratom$deref_capture ratom.cljs:43
+    reagent$ratom$run_in_reaction ratom.cljs:504
+    reagent$impl$component$render component.cljs:143
+    React 17
+    reagent$dom$render_comp dom.cljs:20
+    cljs$core$IFn$_invoke$arity$3 dom.cljs:44
+    cljs$core$IFn$_invoke$arity$2 dom.cljs:39
+    cljs$core$IFn$_invoke$arity$2 core.cljs:74
+    giggin$core$main core.cljs:18
+    onload (index):20
+core.cljs:324:4
+Error rendering component (in giggin.components.gig_editor.form_sold_out) component.cljs:126:15
+Error rendering component (in giggin.components.gig_editor.form_sold_out) component.cljs:126:15
+Uncaught Error: No protocol method IDeref.-deref defined for type cljs.core/PersistentArrayMap: {:id "gig-a86a0055-28de-4b15-9d64-277d3def0ab8", :title "", :desc "", :price 0, :img "", :sold-out false}
+    cljs$core$missing_protocol core.cljs:324
+    cljs$core$IDeref$_deref$dyn_12195 core.cljs:686
+    cljs$core$_deref core.cljs:686
+    cljs$core$deref core.cljs:1477
+    giggin$components$gig_editor$form_sold_out gig_editor.cljs:30
+    res component.cljs:98
+    reagent$impl$component$wrap_render reagent.impl.component.js:145
+    reagent$impl$component$do_render component.cljs:121
+    render component.cljs:143
+    reagent$ratom$in_context ratom.cljs:37
+    reagent$ratom$deref_capture ratom.cljs:43
+    reagent$ratom$run_in_reaction ratom.cljs:504
+    reagent$impl$component$render component.cljs:143
+    React 17
+    reagent$dom$render_comp dom.cljs:20
+    cljs$core$IFn$_invoke$arity$3 dom.cljs:44
+    cljs$core$IFn$_invoke$arity$2 dom.cljs:39
+    cljs$core$IFn$_invoke$arity$2 core.cljs:74
+    giggin$core$main core.cljs:18
+    onload (index):20
+core.cljs:324:4
+Warning: componentWillMount has been renamed, and is not recommended for use. See https://reactjs.org/link/unsafe-component-lifecycles for details.
+
+  * Move code with side effects to componentDidMount, and set initial state in the constructor.
+  * Rename componentWillMount to UNSAFE_componentWillMount to suppress this warning in non-strict mode. In React 18.x, only the UNSAFE_ name will work. To rename all deprecated lifecycles to their new names, you can run `npx react-codemod rename-unsafe-lifecycles` in your project source folder.
+
+Please update the following components: giggin.components.footer.footer, giggin.components.gig_editor.form_group, giggin.components.gig_editor.form_sold_out, giggin.components.gig_editor.gig_editor_component, giggin.components.gigs.add_new_gig, giggin.components.gigs.gigs, giggin.components.header.header, giggin.components.orders.orders, giggin.core.app react-dom.development.js:68:30
+The above error occurred in the <giggin.components.gig_editor.form_group> component:
+
+giggin.components.gig_editor.form_group
+div
+div
+div
+giggin.components.gig_editor.gig_editor_component
+main
+giggin.components.gigs.gigs
+div
+giggin.core.app
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. react-dom.development.js:20086:7
+The above error occurred in the <giggin.components.gig_editor.form_sold_out> component:
+
+giggin.components.gig_editor.form_sold_out
+div
+div
+div
+giggin.components.gig_editor.gig_editor_component
+main
+giggin.components.gigs.gigs
+div
+giggin.core.app
+
+Consider adding an error boundary to your tree to customize error handling behavior.
+Visit https://reactjs.org/link/error-boundaries to learn more about error boundaries. react-dom.development.js:20086:7
+Uncaught Error: No protocol method IDeref.-deref defined for type cljs.core/PersistentArrayMap: {:id "gig-a86a0055-28de-4b15-9d64-277d3def0ab8", :title "", :desc "", :price 0, :img "", :sold-out false}
+    cljs$core$missing_protocol core.cljs:324
+    cljs$core$IDeref$_deref$dyn_12195 core.cljs:686
+    cljs$core$_deref core.cljs:686
+    cljs$core$deref core.cljs:1477
+    giggin$components$gig_editor$form_group gig_editor.cljs:41
+    res component.cljs:98
+    reagent$impl$component$wrap_render reagent.impl.component.js:145
+    reagent$impl$component$do_render component.cljs:121
+    render component.cljs:143
+    reagent$ratom$in_context ratom.cljs:37
+    reagent$ratom$deref_capture ratom.cljs:43
+    reagent$ratom$run_in_reaction ratom.cljs:504
+    reagent$impl$component$render component.cljs:143
+    React 17
+    reagent$dom$render_comp dom.cljs:20
+    cljs$core$IFn$_invoke$arity$3 dom.cljs:44
+    cljs$core$IFn$_invoke$arity$2 dom.cljs:39
+    cljs$core$IFn$_invoke$arity$2 core.cljs:74
+    giggin$core$main core.cljs:18
+    onload (index):20
+core.cljs:324:4
+CLJS DevTools: some custom formatters were not rendered.
+https://github.com/binaryage/cljs-devtools/blob/master/docs/faq.md#why-some-custom-formatters-were-not-rendered
+***** new gig-editor
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns giggin.components.gigs
+  (:require [giggin.state :as state ]
+            [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open]]
+            [reagent.core :as r]
+            [giggin.helpers :refer [format-price]]))
+
+
+(defn gig [app {:keys [id img title price desc] :as el}]
+  (let [add-to-order #(swap! state/orders update id inc)]
+    [:div.gig {:key id}
+      [:img.gig__artwork {:src img :alt title}]
+      [:div.gig__body
+        [:div.gig__title
+          [:div.btn.btn--primary.float--right.tooltip
+            { :data-tooltip "Add to order!"
+              :on-click add-to-order}
+            [:i.icon.icon--plus]]
+          title]]
+      [:p.gig__price (format-price price)]
+      [:p.gig__desc desc]]))
+
+(defn add-new-gig [app]
+  [:div.gig
+    [:button.add-gig
+        {:on-click #(gig-editor-open app)}
+        [:div.add__title
+      [:i.icon.icon--plus]
+      [:h1 "Add gig"]]]])
+
+(defn gigs []
+  (let [app state/app-state]
+    [:main
+      [gig-editor-component app (:gig-editor @app)]
+      [:div.gigs
+        [add-new-gig app]
+        (for [el (vals (:gigs @app))]
+          (gig app el))]]))
+
+
+
+#+end_src
+***** src gig_editor.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.gig-editor
+  (:require [clojure.string :as str]))
+
+(defn form-group-item
+  [{:keys [id type value values]}]
+  (let [chenge-value-to-atom
+          #(swap! values
+                  assoc
+                    (keyword id)
+                    (.. % -target -value))]
+    [:div.form__group
+   [:label.form__label {:for id} id]
+   [:input.form__input {:type type
+                        :id id
+                        :value value
+                        :on-change chenge-value-to-atom}]]))
+
+(defn form-sold-out
+  [values]
+  (let [toggle-checkbox
+          #(swap! values
+                  assoc
+                    :sold-out
+                    (.. % -target -checked))]
+   [:div.form__group
+      [:label.form__label {:for "sold-out"} "sold-out"]
+      [:label.form__switch
+       [:input#sold-out {
+                :type :checkbox
+                :checked (:sold-out @values)
+                :on-change toggle-checkbox}]
+       [:i.form__icon]]]))
+
+
+(defn form-group
+  [values]
+  [:div
+     [form-group-item
+        { :id "title"
+          :type "text"
+          :value (:title @values)
+          :values values}]
+     [form-group-item
+        { :id "desc"
+          :type "text"
+          :value (:desc @values)
+          :values values}]
+     [form-group-item
+        { :id "img"
+          :type "text"
+          :value (:img @values)
+          :values values}]
+     [form-group-item
+        { :id "price"
+          :type "number"
+          :value (:price @values)
+          :values values}]])
+
+(defn gig-editor-toggle
+  [app & [status]]
+  (swap! app update-in [:gig-editor :modal]
+         #(if (some? status) status (not %))))
+
+
+(defn gig-editor-open
+  ([app]
+   (gig-editor-toggle app true))
+  ([app {:keys [id title desc price img sold-out]}]
+    (swap! app
+          assoc-in [:gig-editor :value]
+          { :id       (or id (str "gig-" (random-uuid)))
+            :title    (str/trim title)
+            :desc     (str/trim desc)
+            :img      (str/trim img)
+            :price    (js/parseInt price)
+            :sold-out sold-out})
+   (gig-editor-toggle app true)))
+
+(defn gig-editor-insert
+  ([app] (gig-editor-insert app (get-in @app [:gig-editor :values])))
+  ([app {:keys [id title desc price img sold-out]}]
+    (swap! app
+            assoc-in [:gigs id]
+            { :id       (or id (str "gig-" (random-uuid)))
+              :title    (str/trim title)
+              :desc     (str/trim desc)
+              :img      (str/trim img)
+              :price    (js/parseInt price)
+              :sold-out sold-out})))
+
+
+(defn gig-editor-component
+  [app {:keys [modal values]}]
+  (let [close-modal #(gig-editor-toggle app false)
+        save-and-close (fn []
+                          ;; (gig-editor-insert app )
+                          (gig-editor-insert app )
+                          (close-modal))]
+      [:div.modal (when modal {:class "active"})
+    [:div.modal__overlay]
+    [:div.modal__container
+      [:div.modal__body
+        [form-group values]
+        [form-sold-out values]]
+      [:div.modal__footer
+        [:button.btn.btn--link.float--left
+          {:on-click close-modal}
+          "Cancel"]
+        [:button.btn.btn--secondary
+          {:on-click save-and-close}
+          "Save"]]]]))
+
+#+end_src
+***** я это реализовал таким путём
+но явно с ошибками
+поможешь исправить?
+***** 
+(def gig-values (r/cursor app [:gig-editor :values]))
+
+***** тоесть в моём примере чтоб всё работало
+на основе одного большого атома я могу использовать r/cursor
+не      [gig-editor-component app (r/cursor app [:gig-editor :values])]
 
 **** перенести всё в новую перменную
 **** передеалать всё на основе новой перменной

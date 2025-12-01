@@ -1,4 +1,6 @@
-(ns giggin.components.gig-editor)
+(ns giggin.components.gig-editor
+  (:require [reagent.core :as r]
+            [clojure.string :as str]))
 
 (defn form-group-item
   [{:keys [id type value values]}]
@@ -26,7 +28,7 @@
       [:label.form__switch
        [:input#sold-out {
                 :type :checkbox
-                :checked (:sold-out @values)
+                :checked (:sold-out values)
                 :on-change toggle-checkbox}]
        [:i.form__icon]]]))
 
@@ -56,11 +58,57 @@
           :values values}]])
 
 
-(defn gig-editor
-  [modal values insert-gig]
-  (let [close-modal #(reset! modal false)
+(defn gig-editor-toggle
+  [app & [status]]
+  (swap! app update-in [:gig-editor :modal]
+         #(if (some? status) status (not %))))
+
+
+(defn gig-editor-open
+  ([app]
+   (gig-editor-toggle app true))
+  ([app {:keys [id title desc price img sold-out]}]
+    (swap! app
+          update-in [:gig-editor :values]
+          { :id       (or id (str "gig-" (random-uuid)))
+            :title    (str/trim title)
+            :desc     (str/trim desc)
+            :img      (str/trim img)
+            :price    (js/parseInt price)
+            :sold-out sold-out})
+   (gig-editor-toggle app true)))
+
+(defn gig-editor-new
+  [app]
+  ;; (swap! app
+  ;;           update-in [:gig-editor :values] {})
+  (gig-editor-open app
+                   {:id (str "gig-" (random-uuid))
+                    :title "" :desc "" :price 0 :img "" :sold-out false}))
+
+(defn gig-editor-insert
+  "записывает значение из сруктуры гигэдитора в структуру гиг
+    или если передано значение то записывает переданое в структуру гиг"
+  ([app] (gig-editor-insert app (get-in @app [:gig-editor :values])))
+  ([app {:keys [id title desc price img sold-out]}]
+    (swap! app
+            assoc-in [:gigs id]
+            { :id       (or id (str "gig-" (random-uuid)))
+              :title    (str/trim title)
+              :desc     (str/trim desc)
+              :img      (str/trim img)
+              :price    (js/parseInt price)
+              :sold-out sold-out})))
+
+
+
+(defn gig-editor-component
+  [app]
+  (let [modal (r/cursor app [:gig-editor :modal])
+        values (r/cursor app [:gig-editor :values])
+        close-modal #(gig-editor-toggle app false)
         save-and-close (fn []
-                          (insert-gig @values)
+                          (gig-editor-insert app )
                           (close-modal))]
       [:div.modal (when @modal {:class "active"})
     [:div.modal__overlay]
