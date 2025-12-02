@@ -80,8 +80,6 @@
 
 (defn gig-editor-new
   [app]
-  ;; (swap! app
-  ;;           update-in [:gig-editor :values] {})
   (gig-editor-open app
                    {:id (str "gig-" (random-uuid))
                     :title "" :desc "" :price 0 :img "" :sold-out false}))

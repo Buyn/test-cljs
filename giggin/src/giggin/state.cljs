@@ -4,6 +4,7 @@
 (def orders (r/atom {}))
 
 (def app-state (r/atom {
+                :orders {}
                 :gig-editor {
                      :modal
                        false

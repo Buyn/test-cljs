@@ -20,16 +20,19 @@
 (ns giggin.core
   (:require [reagent.core :as r]
             [giggin.components.gigs :refer [gigs]]
+            [giggin.state :as state ]
             [giggin.components.header :refer [header]]
             [giggin.components.orders :refer [orders]]
             [giggin.components.footer :refer [footer]]))
+
+(defonce app-state state/app-state)
 
 (defn app
   []
   [:div.container
    [header]
-   [gigs]
-   [orders]
+   [gigs app-state]
+   [orders app-state]
    [footer]])
 
 (defn ^:export main
@@ -62,6 +65,7 @@ app
 (def orders (r/atom {}))
 
 (def app-state (r/atom {
+                :orders {}
                 :gig-editor {
                      :modal
                        false
@@ -339,22 +343,25 @@ app
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
             [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
+            [giggin.components.orders :refer [orders-cursor add-to-order]]
             [reagent.core :as r]
             [giggin.helpers :refer [format-price]]))
 
+(defn gigs-cursor [app]
+  (r/cursor app [:gigs]))
+
 (defn gig [app {:keys [id img title price desc] :as el}]
-  (let [add-to-order #(swap! state/orders update id inc)]
     [:div.gig {:key id}
       [:img.gig__artwork {:src img :alt title}]
       [:div.gig__body
         [:div.gig__title
           [:div.btn.btn--primary.float--right.tooltip
             { :data-tooltip "Add to order!"
-              :on-click add-to-order}
+              :on-click #(add-to-order app id)}
             [:i.icon.icon--plus]]
           title]]
       [:p.gig__price (format-price price)]
-      [:p.gig__desc desc]]))
+      [:p.gig__desc desc]])
 
 (defn add-new-gig [app]
   [:div.gig
@@ -364,14 +371,13 @@ app
       [:i.icon.icon--plus]
       [:h1 "Add gig"]]]])
 
-(defn gigs []
-  (let [app state/app-state]
+(defn gigs [app]
     [:main
       [gig-editor-component app]
       [:div.gigs
         [add-new-gig app]
         (for [el (vals (:gigs @app))]
-          (gig app el))]]))
+          (gig app el))]])
 
 
 
@@ -410,8 +416,15 @@ app
 (ns giggin.components.orders
   (:require [giggin.state :as state ]
             [giggin.helpers :refer [format-price]]
+            [reagent.core :as r]
             [giggin.components.checkout-modal :refer [checkout-modal]]))
 
+(defn orders-cursor [app]
+  (r/cursor app [:orders]))
+
+(defn add-to-order
+  [app id]
+  (swap! app update-in [:orders id] inc))
 
 (defn orders-total
   [orders gigs]
@@ -421,13 +434,13 @@ app
        (apply + 0)))
 
 (defn remove-order
-  [id q]
+  [orders id q]
   (if (> q 1)
-    (swap! state/orders update id dec)
-    (swap! state/orders dissoc id)))
+    (swap! orders update id dec)
+    (swap! orders dissoc id)))
 
 (defn order-item
-  [id quant gigs]
+  [orders id quant gigs]
   (let [title (get-in gigs [id :title])
         src   (get-in gigs [id :img])
         price (get-in gigs [id :price])]
@@ -442,15 +455,15 @@ app
           [:div.price (format-price (* quant price))]
           [:button.btn.btn--link.tooltip
                 { :data-tooltip "Remove"
-                  :on-click #(remove-order id quant)}
+                  :on-click #(remove-order orders id quant)}
               [:i.icon.icon--cross]]]]))
 
 
 
 (defn orders
-  []
-  (let [orders state/orders
-        gigs   state/gigs]
+  [app]
+  (let [orders (orders-cursor app)
+        gigs   (r/cursor app [:gigs])]
    [:aside
     [:div.order 
       (if (empty? @orders)
@@ -459,7 +472,7 @@ app
          [:div.subtitle "Click on a + to add an order"]]
         [:div.body
           (for [[id quant] @orders]
-              (order-item id quant @gigs))
+              (order-item orders id quant @gigs))
           [:div.total
             [:hr]
             [:div.item
@@ -3259,7 +3272,7 @@ figure {
 **** DONE сделать комит
 **** DONE собрать убится что всё работает
 **** DONE сделать бранч
-**** передеалать эдитор на основе новой перменной
+**** DONE передеалать эдитор на основе новой перменной
 ***** сорс
 ****** file state.cljs
 (find-file-other-frame "./src/giggin/state.cljs")
@@ -3649,9 +3662,36 @@ https://github.com/binaryage/cljs-devtools/blob/master/docs/faq.md#why-some-cust
 на основе одного большого атома я могу использовать r/cursor
 не      [gig-editor-component app (r/cursor app [:gig-editor :values])]
 
-**** перенести всё в новую перменную
-**** передеалать всё на основе новой перменной
+**** DONE перести ордер в апп стейт
+
+**** DONE изменить код на ордер из апп стейта
+
+**** удалить из из стейта ордр и гиг отдельные от атома
+
+**** DONE раздовать app-state из мейна
+
+
+**** DONE неуверен что правельно преписал
+было
+add-to-order #(swap! state/orders update % inc)
+с вызовом
+               :on-click #(add-to-order id)}
+
+переаисал на 
+(defn add-to-order
+  [app id]
+  (swap! app assoc-in [:order id] inc))
+  и соответсвенно
+              :on-click #(add-to-order app id)}
+
+  для того чтоб оно орентировалось на один большой атом состояниви я вместа нескольки мальньких
+должно добовлять структруктру ордерс новый id если его нет и увеличивать значение на один
+но оно вроде игнорит нажатие - чтото пошло нетак
+
+**** DONE перенести всё в новую перменную
+**** DONE передеалать всё на основе новой перменной
 **** убрать старые переменые
+**** за мержить в меин
 ** TODO Дотренировать приложение до конца
 [[*diff dirs recersiv][diff dirs recersiv]]
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")

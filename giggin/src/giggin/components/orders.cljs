@@ -1,8 +1,16 @@
 (ns giggin.components.orders
   (:require [giggin.state :as state ]
             [giggin.helpers :refer [format-price]]
+            ;; [giggin.components.gigs :refer [gigs-cursor]]
+            [reagent.core :as r]
             [giggin.components.checkout-modal :refer [checkout-modal]]))
 
+(defn orders-cursor [app]
+  (r/cursor app [:orders]))
+
+(defn add-to-order
+  [app id]
+  (swap! app update-in [:orders id] inc))
 
 (defn orders-total
   [orders gigs]
@@ -12,13 +20,13 @@
        (apply + 0)))
 
 (defn remove-order
-  [id q]
+  [orders id q]
   (if (> q 1)
-    (swap! state/orders update id dec)
-    (swap! state/orders dissoc id)))
+    (swap! orders update id dec)
+    (swap! orders dissoc id)))
 
 (defn order-item
-  [id quant gigs]
+  [orders id quant gigs]
   (let [title (get-in gigs [id :title])
         src   (get-in gigs [id :img])
         price (get-in gigs [id :price])]
@@ -33,15 +41,15 @@
           [:div.price (format-price (* quant price))]
           [:button.btn.btn--link.tooltip
                 { :data-tooltip "Remove"
-                  :on-click #(remove-order id quant)}
+                  :on-click #(remove-order orders id quant)}
               [:i.icon.icon--cross]]]]))
 
 
 
 (defn orders
-  []
-  (let [orders state/orders
-        gigs   state/gigs]
+  [app]
+  (let [orders (orders-cursor app)
+        gigs   (r/cursor app [:gigs])]
    [:aside
     [:div.order 
       (if (empty? @orders)
@@ -50,7 +58,7 @@
          [:div.subtitle "Click on a + to add an order"]]
         [:div.body
           (for [[id quant] @orders]
-              (order-item id quant @gigs))
+              (order-item orders id quant @gigs))
           [:div.total
             [:hr]
             [:div.item
