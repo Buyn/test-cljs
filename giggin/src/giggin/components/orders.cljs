@@ -1,7 +1,6 @@
 (ns giggin.components.orders
   (:require [giggin.state :as state ]
             [giggin.helpers :refer [format-price]]
-            ;; [giggin.components.gigs :refer [gigs-cursor]]
             [reagent.core :as r]
             [giggin.components.checkout-modal :refer [checkout-modal]]))
 
