@@ -195,6 +195,29 @@ app
 #+RESULTS:
 : Please reevaluate when nREPL is connected
 ** components
+*** header.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/components/header.cljs
+:END:
+**** file header.cljs
+(find-file-other-frame "./src/giggin/components/header.cljs")
+**** src header.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.header)
+
+(defn header
+  []
+  [:header
+   [:div {:display "flex"}
+    ;; [:img.logo { :src "img/portal-logo.jpg"
+    ;;             :alt "Poratl logo"}]
+    [:img      { :src "img/portal-logo-title.jpg"
+                  :alt "Poratl title logo"}]]])
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
 *** gigs.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/components/gigs.cljs
@@ -202,6 +225,53 @@ app
 **** file gigs.cljs
 (find-file-other-frame "./src/giggin/components/gigs.cljs")
 **** src gigs.cljs
+***** new gig-editor
+#+begin_src clojure :no-expand t :mkdirp yes 
+(ns giggin.components.gigs
+  (:require [giggin.state :as state ]
+            [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
+            [giggin.components.orders :refer [orders-cursor add-to-order]]
+            [reagent.core :as r]
+            [giggin.helpers :refer [format-price]]))
+
+(defn gigs-cursor [app]
+  (r/cursor app [:gigs]))
+
+(defn gig [app {:keys [id img title price desc] :as el}]
+    [:div.gig {:key id}
+      [:img.gig__artwork {:src img
+                          :alt title
+                          :on-click #(gig-editor-open app el)}]
+      [:div.gig__body
+        [:div.gig__title
+          [:div.btn.btn--primary.float--right.tooltip
+            { :data-tooltip "Add to order!"
+              :on-click #(add-to-order app id)}
+            [:i.icon.icon--plus]]
+          title]]
+      [:p.gig__price (format-price price)]
+      [:p.gig__desc desc]])
+
+(defn add-new-gig [app]
+  [:div.gig
+    [:button.add-gig
+        {:on-click #(gig-editor-new app)}
+        [:div.add__title
+      [:i.icon.icon--plus]
+      [:h1 "Add gig"]]]])
+
+(defn gigs [app]
+    [:main
+      [gig-editor-component app]
+      [:div.gigs
+        [add-new-gig app]
+        (for [el (vals (:gigs @app))]
+          (gig app el))]])
+
+
+
+#+end_src
+**** CANCELED arhiv
 ***** CANCELED all
 #+begin_src clojure :no-expand t :mkdirp yes :tangle no
 (ns giggin.components.gigs
@@ -251,73 +321,163 @@ app
 
 #+end_src
 
-***** new gig-editor
-#+begin_src clojure :no-expand t :mkdirp yes 
-(ns giggin.components.gigs
-  (:require [giggin.state :as state ]
-            [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
-            [giggin.components.orders :refer [orders-cursor add-to-order]]
-            [reagent.core :as r]
-            [giggin.helpers :refer [format-price]]))
-
-(defn gigs-cursor [app]
-  (r/cursor app [:gigs]))
-
-(defn gig [app {:keys [id img title price desc] :as el}]
-    [:div.gig {:key id}
-      [:img.gig__artwork {:src img :alt title}]
-      [:div.gig__body
-        [:div.gig__title
-          [:div.btn.btn--primary.float--right.tooltip
-            { :data-tooltip "Add to order!"
-              :on-click #(add-to-order app id)}
-            [:i.icon.icon--plus]]
-          title]]
-      [:p.gig__price (format-price price)]
-      [:p.gig__desc desc]])
-
-(defn add-new-gig [app]
-  [:div.gig
-    [:button.add-gig
-        {:on-click #(gig-editor-new app)}
-        [:div.add__title
-      [:i.icon.icon--plus]
-      [:h1 "Add gig"]]]])
-
-(defn gigs [app]
-    [:main
-      [gig-editor-component app]
-      [:div.gigs
-        [add-new-gig app]
-        (for [el (vals (:gigs @app))]
-          (gig app el))]])
-
-
-
-#+end_src
-*** header.cljs
+*** gig_editor.cljs
 :PROPERTIES:
-:header-args: :tangle ./src/giggin/components/header.cljs
+:header-args: :tangle ./src/giggin/components/gig_editor.cljs
 :END:
-**** file header.cljs
-(find-file-other-frame "./src/giggin/components/header.cljs")
-**** src header.cljs
+**** file gig_editor.cljs
+(find-file-other-frame "./src/giggin/components/gig_editor.cljs")
+**** src gig_editor.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
-(ns giggin.components.header)
+(ns giggin.components.gig-editor
+  (:require [reagent.core :as r]
+            [clojure.string :as str]))
 
-(defn header
-  []
-  [:header
-   [:div {:display "flex"}
-    ;; [:img.logo { :src "img/portal-logo.jpg"
-    ;;             :alt "Poratl logo"}]
-    [:img      { :src "img/portal-logo-title.jpg"
-                  :alt "Poratl title logo"}]]])
+(defn form-group-item
+  [{:keys [id type value values]}]
+  (let [chenge-value-to-atom
+          #(swap! values
+                  assoc
+                    (keyword id)
+                    (.. % -target -value))]
+    [:div.form__group
+   [:label.form__label {:for id} id]
+   [:input.form__input {:type type
+                        :id id
+                        :value value
+                        :on-change chenge-value-to-atom}]]))
+
+(defn form-sold-out
+  [values]
+  (let [toggle-checkbox
+          #(swap! values
+                  assoc
+                    :sold-out
+                    (.. % -target -checked))]
+   [:div.form__group
+      [:label.form__label {:for "sold-out"} "sold-out"]
+      [:label.form__switch
+       [:input#sold-out {
+                :type :checkbox
+                :checked (:sold-out values)
+                :on-change toggle-checkbox}]
+       [:i.form__icon]]]))
+
+
+(defn form-group
+  [values]
+  [:div
+     [form-group-item
+        { :id "title"
+          :type "text"
+          :value (:title @values)
+          :values values}]
+     [form-group-item
+        { :id "desc"
+          :type "text"
+          :value (:desc @values)
+          :values values}]
+     [form-group-item
+        { :id "img"
+          :type "text"
+          :value (:img @values)
+          :values values}]
+     [form-group-item
+        { :id "price"
+          :type "number"
+          :value (:price @values)
+          :values values}]])
+
+
+(defn gig-editor-toggle
+  [app & [status]]
+  (swap! app update-in [:gig-editor :modal]
+         #(if (some? status) status (not %))))
+
+
+(defn gig-editor-open
+  ([app]
+   (gig-editor-toggle app true))
+  ([app {:keys [id title desc price img sold-out] :as el}]
+    ;; (println id)
+    (swap! app
+          ;; update-in [:gig-editor :values]
+          assoc-in [:gig-editor :values]
+          { :id       (or id (str "gig-" (random-uuid)))
+            :title    (str/trim title)
+            :desc     (str/trim desc)
+            :img      (str/trim img)
+            :price    (js/parseInt price)
+            :sold-out sold-out})
+   (gig-editor-toggle app true)))
+
+(defn gig-editor-new
+  [app]
+  (gig-editor-open app
+                   {:id (str "gig-" (random-uuid))
+                    :title "" :desc "" :price 0 :img "" :sold-out false}))
+
+(defn gig-editor-insert
+  "записывает значение из сруктуры гигэдитора в структуру гиг
+    или если передано значение то записывает переданое в структуру гиг"
+  ([app] (gig-editor-insert app (get-in @app [:gig-editor :values])))
+  ([app {:keys [id title desc price img sold-out]}]
+    (swap! app
+            assoc-in [:gigs id]
+            { :id       (or id (str "gig-" (random-uuid)))
+              :title    (str/trim title)
+              :desc     (str/trim desc)
+              :img      (str/trim img)
+              :price    (js/parseInt price)
+              :sold-out sold-out})))
+
+
+
+(defn gig-editor-component
+  [app]
+  (let [modal (r/cursor app [:gig-editor :modal])
+        values (r/cursor app [:gig-editor :values])
+        close-modal #(gig-editor-toggle app false)
+        save-and-close (fn []
+                          (gig-editor-insert app )
+                          (close-modal))]
+      [:div.modal (when @modal {:class "active"})
+    [:div.modal__overlay]
+    [:div.modal__container
+      [:div.modal__body
+        [form-group values]
+        [form-sold-out values]]
+      [:div.modal__footer
+        [:button.btn.btn--link.float--left
+          {:on-click close-modal}
+          "Cancel"]
+        [:button.btn.btn--secondary
+          {:on-click save-and-close}
+          "Save"]]]]))
 
 #+end_src
+**** arhiv
+  ;; (swap! app
+  ;;           update-in [:gig-editor :values] {})
 
-#+RESULTS:
-: Please reevaluate when nREPL is connected
+                          ;; (gig-editor-insert app )
+
+;; (defn gig-editor-toggl
+;;   [app [& status]]
+;;   (swap! app
+;;          assoc-in [:gig-editor :modal]
+;;          not))
+
+;; (defn insert-gig
+;;   [app {:keys [id title desc price img sold-out]}]
+;;     (swap! app
+;;          assoc id { :id (or id (str "gig-" (random-uuid)))
+;;                     :title (str/trim title)
+;;                     :desc (str/trim desc)
+;;                     :img (str/trim img)
+;;                     :price (js/parseInt price)
+;;                     :sold-out sold-out}))
+
 *** orders.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/components/orders.cljs
@@ -462,162 +622,6 @@ app
 
 #+RESULTS:
 : Please reevaluate when nREPL is connected
-*** gig_editor.cljs
-:PROPERTIES:
-:header-args: :tangle ./src/giggin/components/gig_editor.cljs
-:END:
-**** file gig_editor.cljs
-(find-file-other-frame "./src/giggin/components/gig_editor.cljs")
-**** src gig_editor.cljs
-#+begin_src clojure :no-expand t :mkdirp yes
-(ns giggin.components.gig-editor
-  (:require [reagent.core :as r]
-            [clojure.string :as str]))
-
-(defn form-group-item
-  [{:keys [id type value values]}]
-  (let [chenge-value-to-atom
-          #(swap! values
-                  assoc
-                    (keyword id)
-                    (.. % -target -value))]
-    [:div.form__group
-   [:label.form__label {:for id} id]
-   [:input.form__input {:type type
-                        :id id
-                        :value value
-                        :on-change chenge-value-to-atom}]]))
-
-(defn form-sold-out
-  [values]
-  (let [toggle-checkbox
-          #(swap! values
-                  assoc
-                    :sold-out
-                    (.. % -target -checked))]
-   [:div.form__group
-      [:label.form__label {:for "sold-out"} "sold-out"]
-      [:label.form__switch
-       [:input#sold-out {
-                :type :checkbox
-                :checked (:sold-out values)
-                :on-change toggle-checkbox}]
-       [:i.form__icon]]]))
-
-
-(defn form-group
-  [values]
-  [:div
-     [form-group-item
-        { :id "title"
-          :type "text"
-          :value (:title @values)
-          :values values}]
-     [form-group-item
-        { :id "desc"
-          :type "text"
-          :value (:desc @values)
-          :values values}]
-     [form-group-item
-        { :id "img"
-          :type "text"
-          :value (:img @values)
-          :values values}]
-     [form-group-item
-        { :id "price"
-          :type "number"
-          :value (:price @values)
-          :values values}]])
-
-
-(defn gig-editor-toggle
-  [app & [status]]
-  (swap! app update-in [:gig-editor :modal]
-         #(if (some? status) status (not %))))
-
-
-(defn gig-editor-open
-  ([app]
-   (gig-editor-toggle app true))
-  ([app {:keys [id title desc price img sold-out]}]
-    (swap! app
-          update-in [:gig-editor :values]
-          { :id       (or id (str "gig-" (random-uuid)))
-            :title    (str/trim title)
-            :desc     (str/trim desc)
-            :img      (str/trim img)
-            :price    (js/parseInt price)
-            :sold-out sold-out})
-   (gig-editor-toggle app true)))
-
-(defn gig-editor-new
-  [app]
-  (gig-editor-open app
-                   {:id (str "gig-" (random-uuid))
-                    :title "" :desc "" :price 0 :img "" :sold-out false}))
-
-(defn gig-editor-insert
-  "записывает значение из сруктуры гигэдитора в структуру гиг
-    или если передано значение то записывает переданое в структуру гиг"
-  ([app] (gig-editor-insert app (get-in @app [:gig-editor :values])))
-  ([app {:keys [id title desc price img sold-out]}]
-    (swap! app
-            assoc-in [:gigs id]
-            { :id       (or id (str "gig-" (random-uuid)))
-              :title    (str/trim title)
-              :desc     (str/trim desc)
-              :img      (str/trim img)
-              :price    (js/parseInt price)
-              :sold-out sold-out})))
-
-
-
-(defn gig-editor-component
-  [app]
-  (let [modal (r/cursor app [:gig-editor :modal])
-        values (r/cursor app [:gig-editor :values])
-        close-modal #(gig-editor-toggle app false)
-        save-and-close (fn []
-                          (gig-editor-insert app )
-                          (close-modal))]
-      [:div.modal (when @modal {:class "active"})
-    [:div.modal__overlay]
-    [:div.modal__container
-      [:div.modal__body
-        [form-group values]
-        [form-sold-out values]]
-      [:div.modal__footer
-        [:button.btn.btn--link.float--left
-          {:on-click close-modal}
-          "Cancel"]
-        [:button.btn.btn--secondary
-          {:on-click save-and-close}
-          "Save"]]]]))
-
-#+end_src
-**** arhiv
-  ;; (swap! app
-  ;;           update-in [:gig-editor :values] {})
-
-                          ;; (gig-editor-insert app )
-
-;; (defn gig-editor-toggl
-;;   [app [& status]]
-;;   (swap! app
-;;          assoc-in [:gig-editor :modal]
-;;          not))
-
-;; (defn insert-gig
-;;   [app {:keys [id title desc price img sold-out]}]
-;;     (swap! app
-;;          assoc id { :id (or id (str "gig-" (random-uuid)))
-;;                     :title (str/trim title)
-;;                     :desc (str/trim desc)
-;;                     :img (str/trim img)
-;;                     :price (js/parseInt price)
-;;                     :sold-out sold-out}))
-
-
 *** exampls
 /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/admin_panel.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/checkout_modal.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/footer.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/gig_editor.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/gigs.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/header.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/orders.cljs
 ** src resources
@@ -2009,26 +2013,6 @@ jobs:
 ** deps
 npm install
 
-* files giggin
-** files root
-(find-file-other-frame "./.gitignore")
-(find-file-other-frame "./package.json")
-(find-file-other-frame "./shadow-cljs.edn")
-(find-file-other-frame "./giggin.org")
-** core
-(find-file-other-frame "./src/giggin/core.cljs")
-(find-file-other-frame "./src/giggin/state.cljs")
-** resurs
-(find-file-other-frame "./public/css/style.css")
-(find-file-other-frame "./public/img/giggin-icon.png")
-(find-file-other-frame "./public/img/giggin-logo.svg")
-(find-file-other-frame "./public/img/paypal.svg")
-(find-file-other-frame "./public/img/stripe.svg")
-(find-file-other-frame "./public/index.html")
-
-** files other
-find "$PWD" -type f >>filepath.txt
-(find-file-other-frame "filepath.txt")
 * описание
 ** 
 * Docs
@@ -3599,10 +3583,94 @@ add-to-order #(swap! state/orders update % inc)
 **** DONE перенести всё в новую перменную
 **** DONE передеалать всё на основе новой перменной
 **** DONE убрать старые переменые
-**** TODO за мержить в меин
-**** нажатие на изображение оправляет на редактировнаи
+**** DONE за мержить в меин
+**** TODO нажатие на изображение оправляет на редактировнаи
+***** понять почему принт ломает выполнение
+***** понять почему выводится с нулевыми значениями а не с задаными
+предположение
+что мы либо напутали заданием значение
+либо с обнулением 
+тоесть задаём а потом обнуляем всеровно
+***** почему?
+****** src
+******* app-state
+
+(def app-state (r/atom {
+                :orders {}
+                :gig-editor {
+                     :modal
+                       false
+                     :values
+                      {:id (str "gig-" (random-uuid))
+                               :title "" :desc "" :price 0 :img "" :sold-out false}}
+                :gigs {
+                   :gig-01 {:id :gig-01
+                            :title "Macaron"
+                            :artist "Baher Khairy"
+                            :desc "Sweet meringue-based rhythms with smooth and sweet injections of soul"
+                            :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/baher-khairy-97645.jpg"
+                            :price 1000
+                            :sold-out false}
+                   :gig-02 {:id :gig-02
+                            :title "Stairs"
+                            :artist "Brentr De Ranter"
+                            :desc "Stairs to the highets peaks of music."
+                            :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/brent-de-ranter-426248.jpg"
+                            :price 2000
+                            :sold-out false}
+******* gig
+(defn gig [app {:keys [id img title price desc] :as el}]
+    [:div.gig {:key id}
+      [:img.gig__artwork {:src img
+                          :alt title
+                          :on-click #(gig-editor-open app el)}]
+      [:div.gig__body
+        [:div.gig__title
+          [:div.btn.btn--primary.float--right.tooltip
+            { :data-tooltip "Add to order!"
+              :on-click #(add-to-order app id)}
+            [:i.icon.icon--plus]]
+          title]]
+      [:p.gig__price (format-price price)]
+      [:p.gig__desc desc]])
+
+      
+(defn gigs [app]
+    [:main
+      [gig-editor-component app]
+      [:div.gigs
+        [add-new-gig app]
+        (for [el (vals (:gigs @app))]
+          (gig app el))]])
+******* defn gig-editor-open
+(defn gig-editor-open
+  ([app]
+   (gig-editor-toggle app true))
+  ([app {:keys [id title desc price img sold-out] :as el}]
+    ;; (println id)
+    (swap! app
+          update-in [:gig-editor :values]
+          { :id       (or id (str "gig-" (random-uuid)))
+            :title    (str/trim title)
+            :desc     (str/trim desc)
+            :img      (str/trim img)
+            :price    (js/parseInt price)
+            :sold-out sold-out})
+   (gig-editor-toggle app true)))
+
+***** ожидание
+что gig-editor-open откроет редактор со значениями передаными как елемент
+но редактор открвается как если бы перменная валуес из гиг-эдитора была пуста
 **** внести измения из 17
 какие ещё есть
+*** дочитать по тестированию
+** понять могу ли сделать удобное тестирование
+*** сделать одиночный тест
+*** понять как его запустить
+*** как сделать автозапуск после танглинга
+*** как работает авто запуск
+*** как настраивать сют тест 
+*** есть ли удобная команда настройки его на один тест
 ** TODO Дотренировать приложение до конца
 [[*diff dirs recersiv][diff dirs recersiv]]
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
@@ -3895,6 +3963,26 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 ;; (load "~/INI/hydra-cfg.el")
 ;; (load "~/ELs/BuYn/reader.el")
  #+end_src
+* files giggin
+** files root
+(find-file-other-frame "./.gitignore")
+(find-file-other-frame "./package.json")
+(find-file-other-frame "./shadow-cljs.edn")
+(find-file-other-frame "./giggin.org")
+** core
+(find-file-other-frame "./src/giggin/core.cljs")
+(find-file-other-frame "./src/giggin/state.cljs")
+** resurs
+(find-file-other-frame "./public/css/style.css")
+(find-file-other-frame "./public/img/giggin-icon.png")
+(find-file-other-frame "./public/img/giggin-logo.svg")
+(find-file-other-frame "./public/img/paypal.svg")
+(find-file-other-frame "./public/img/stripe.svg")
+(find-file-other-frame "./public/index.html")
+
+** files other
+find "$PWD" -type f >>filepath.txt
+(find-file-other-frame "filepath.txt")
 * 2025-11-17
 ** giggin.org
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/my-cljs-project/giggin/giggin.org")

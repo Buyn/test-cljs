@@ -67,9 +67,11 @@
 (defn gig-editor-open
   ([app]
    (gig-editor-toggle app true))
-  ([app {:keys [id title desc price img sold-out]}]
+  ([app {:keys [id title desc price img sold-out] :as el}]
+    ;; (println id)
     (swap! app
-          update-in [:gig-editor :values]
+          ;; update-in [:gig-editor :values]
+          assoc-in [:gig-editor :values]
           { :id       (or id (str "gig-" (random-uuid)))
             :title    (str/trim title)
             :desc     (str/trim desc)

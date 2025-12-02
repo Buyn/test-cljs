@@ -10,7 +10,9 @@
 
 (defn gig [app {:keys [id img title price desc] :as el}]
     [:div.gig {:key id}
-      [:img.gig__artwork {:src img :alt title}]
+      [:img.gig__artwork {:src img
+                          :alt title
+                          :on-click #(gig-editor-open app el)}]
       [:div.gig__body
         [:div.gig__title
           [:div.btn.btn--primary.float--right.tooltip
