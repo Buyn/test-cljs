@@ -3576,14 +3576,9 @@ https://github.com/binaryage/cljs-devtools/blob/master/docs/faq.md#why-some-cust
 не      [gig-editor-component app (r/cursor app [:gig-editor :values])]
 
 **** DONE перести ордер в апп стейт
-
 **** DONE изменить код на ордер из апп стейта
-
-**** удалить из из стейта ордр и гиг отдельные от атома
-
+**** DONE удалить из из стейта ордр и гиг отдельные от атома
 **** DONE раздовать app-state из мейна
-
-
 **** DONE неуверен что правельно преписал
 было
 add-to-order #(swap! state/orders update % inc)
@@ -3603,8 +3598,11 @@ add-to-order #(swap! state/orders update % inc)
 
 **** DONE перенести всё в новую перменную
 **** DONE передеалать всё на основе новой перменной
-**** убрать старые переменые
-**** за мержить в меин
+**** DONE убрать старые переменые
+**** TODO за мержить в меин
+**** нажатие на изображение оправляет на редактировнаи
+**** внести измения из 17
+какие ещё есть
 ** TODO Дотренировать приложение до конца
 [[*diff dirs recersiv][diff dirs recersiv]]
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
