@@ -3,10 +3,50 @@
 :END:
 * src giggin
 ** src project
+*** shadow-cljs.edn
+:PROPERTIES:
+:header-args: :tangle ./shadow-cljs.edn
+:END:
+**** file shadow-cljs.edn
+(find-file-other-frame "./shadow-cljs.edn")
+**** src shadow-cljs.edn
+#+begin_src clojure :no-expand t :mkdirp yes
+{:source-paths ["src"]
+
+ :dependencies [[binaryage/devtools "0.9.10"]
+                [proto-repl "0.3.1"]
+                [reagent "0.8.0"]]
+
+ :nrepl        {:port 3333}
+
+ :builds
+ {:app {:target :browser
+        :output-dir "public/js"
+        :asset-path "/js"
+
+        :modules
+        {:main
+         {:entries [giggin.core]}}
+
+        :devtools
+        {:after-load  giggin.core/main
+         :http-root   "public"
+         :http-port   3000}}
+
+  :test {:target :node-test
+           :output-to "out/node-tests.js"
+           ;; :ns-regexp "-test$" ; по умолчанию
+           ;; :autorun false
+           }}}
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
 *** other
 (find-file-other-frame "./.gitignore")
 (find-file-other-frame "./package.json")
-(find-file-other-frame "./shadow-cljs.edn")
 (find-file-other-frame "./giggin.org")
 ** src core
 *** core.cljs
@@ -51,6 +91,8 @@
 app
 (app)
 (require '[giggin.components.gigs :refer [gigs]])
+**** test
+[[*core_test.cljs][core_test.cljs]]
 *** state.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/state.cljs
@@ -1749,6 +1791,30 @@ figure {
 (find-file-other-frame "./public/img/giggin-logo.svg")
 (find-file-other-frame "./public/img/paypal.svg")
 (find-file-other-frame "./public/img/stripe.svg")
+* tests giggin
+*** core_test.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/tests/core_test.cljs
+:END:
+**** file core_test
+(find-file-other-frame "./src/tests/core_test")
+**** src core_test
+;; src/giggin/core_test.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns tests.core-test
+  (:require [cljs.test :refer [deftest is]]
+            [giggin.core :as core]))
+
+(deftest example-test
+  (is (= 1 1)))
+
+#+end_src
+
+**** reple
+npx shadow-cljs compile test
+node out/node-tests.js
+
+
 * run giggin
 ** run server and reple
 #+begin_src elisp :results output silent
@@ -2060,6 +2126,248 @@ learn-reagent-course-files/giggin/ $ yarn dev
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
 * TODO
+** TODO Разобрать 18
+*** diff block
+17-refactor-gigs 18-ajax-requests
+
+#+begin_src eshell :dir /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/ :results output replace
+diff -r 17-refactor-gigs 18-ajax-requests
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+diff -r 17-refactor-gigs/src/giggin/components/gig_editor.cljs 18-ajax-requests/src/giggin/components/gig_editor.cljs
+13,47c13,48
+<   [modal values upsert-gig toggle-modal]
+<   [:div.modal (when (:active @modal) {:class "active"})
+<    [:div.modal__overlay]
+<    [:div.modal__container
+<     [:div.modal__body
+<      [form-group {:id "title"
+<                   :type "text"
+<                   :value (:title @values)
+<                   :values values}]
+<      [form-group {:id "desc"
+<                   :type "text"
+<                   :value (:desc @values)
+<                   :values values}]
+<      [form-group {:id "img"
+<                   :type "text"
+<                   :value (:img @values)
+<                   :values values}]
+<      [form-group {:id "price"
+<                   :type "number"
+<                   :value (:price @values)
+<                   :values values}]
+<      [:div.form__group
+<       [:label.form__label {:for "sold-out"} "sold-out"]
+<       [:label.form__switch
+<        [:input {:type :checkbox
+<                 :checked (:sold-out @values)
+<                 :on-change #(swap! values assoc :sold-out (.. % -target -checked))}]
+<        [:i.form__icon]]]]
+<     [:div.modal__footer
+<      [:button.btn.btn--link.float--left
+<       {:on-click #(toggle-modal {:active false :gig {}})}
+<       "Cancel"]
+<      [:button.btn.btn--secondary
+<       {:on-click #(upsert-gig @values)}
+<       "Save"]]]])
+---
+>   [{:keys [modal values upsert-gig toggle-modal initial-values]}]
+>   (let [{:keys [title desc img price sold-out]} @values]
+>     [:div.modal (when (:active @modal) {:class "active"})
+>      [:div.modal__overlay]
+>      [:div.modal__container
+>       [:div.modal__body
+>        [form-group {:id "title"
+>                     :type "text"
+>                     :value title
+>                     :values values}]
+>        [form-group {:id "desc"
+>                     :type "text"
+>                     :value desc
+>                     :values values}]
+>        [form-group {:id "img"
+>                     :type "text"
+>                     :value img
+>                     :values values}]
+>        [form-group {:id "price"
+>                     :type "number"
+>                     :value price
+>                     :values values}]
+>        [:div.form__group
+>         [:label.form__label {:for "sold-out"} "sold-out"]
+>         [:label.form__switch
+>          [:input {:type :checkbox
+>                   :checked sold-out
+>                   :on-change #(swap! values assoc :sold-out (.. % -target -checked))}]
+>          [:i.form__icon]]]]
+>       [:div.modal__footer
+>        [:button.btn.btn--link.float--left
+>         {:on-click #(toggle-modal {:active false :gig initial-values})}
+>         "Cancel"]
+>        [:button.btn.btn--secondary
+>         {:on-click #(upsert-gig @values)}
+>         "Save"]]]]))
+diff -r 17-refactor-gigs/src/giggin/components/gigs.cljs 18-ajax-requests/src/giggin/components/gigs.cljs
+11c11,12
+<         values (r/atom {:id nil :title "" :desc "" :price 0 :img "" :sold-out false})
+---
+>         initial-values {:id nil :title "" :desc "" :price 0 :img "" :sold-out false}
+>         values (r/atom initial-values)
+24c25
+<                      (toggle-modal {:active false :gig {}}))]
+---
+>                      (toggle-modal {:active false :gig initial-values}))]
+30c31
+<          {:on-click #(toggle-modal {:active true :gig {}})}
+---
+>          {:on-click #(toggle-modal {:active true :gig initial-values})}
+34c35,39
+<         [gig-editor modal values upsert-gig toggle-modal]
+---
+>         [gig-editor {:modal modal
+>                      :values values
+>                      :upsert-gig upsert-gig
+>                      :toggle-modal toggle-modal
+>                      :initial-values initial-values}]
+#+end_example
+
+*** CANCELED file
+[[*diff dirs recersiv][diff dirs recersiv]]
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gigs.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gig_editor.cljs")
+*** TODO 
+**** сделать диф блок
+**** перенсти в него конкретно для этого
+**** 
+** TODO Дотренировать приложение до конца
+[[*diff dirs recersiv][diff dirs recersiv]]
+(ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
+* DONE arhiv
+** DONE пройти по видео7
+** DONE пройти по видео8
+** DONE Запуска сервера
+
+(buyn-shell-start "konsole -e /bin/bash --rcfile <(npm run dev)")
+
+"konsole -e /bin/bash --rcfile <(npm run dev)"
+я запускаю сервер в отдельном терменальном окне такой командой.
+серевер запускается но похоже в какомто другом процесе. сервер работает но сообщение в это окно терменала на приходят.
+есть идеи как это поправить?
+** DONE пройти по видео10
+*** DONE сделать отдельный фаил хелпер
+*** DONE сделать формат цен
+*** DONE приминить к ордерс х2
+*** DONE приминить к гигс
+*** неотображать если пустое
+*** 
+** DONE изчать видео
+** DONE push to git
+** DONE открыть проект
+** DONE установить зависимости
+** DONE запустить проек
+** DONE настроить проект 
+** DONE error
+*** src
+(ns giggin.core.components.gigs)
+
+(defn gigs
+  []
+  [:gigs "gigs"])
+  ;; [:header "header"]
+  ;; [:orders "orders"]
+  ;; [:footer "footer"]
+*** error
+(require '[giggin.core.components.gigs :refer [gigs]])
+
+------ REPL Error while processing ---------------------------------------------
+(require '[giggin.core.components.gigs :refer [gigs]])
+The required namespace "giggin.core.components.gigs" is not available, it was required by "giggin/core.cljs".
+
+nil
+giggin.core> 
+*** почему ловлю ошибку?
+помоги понять причину ошибки в Shadow-CLJS репл.
+
+** DONE error web
+*** src
+**** file gigs.cljs
+(find-file-other-frame "./src/giggin/components/gigs.cljs")
+**** src gigs.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.core.components.gigs)
+
+(defn gigs
+  []
+  [:gigs "gigs"])
+  ;; [:header "header"]
+  ;; [:orders "orders"]
+  ;; [:footer "footer"]
+
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+
+**** file core.cljs
+(find-file-other-frame "./src/giggin/core.cljs")
+**** src core.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.core
+  (:require [reagent.core :as r]
+            [giggin.core.components.gigs :refer [gigs]]))
+
+(defn app
+  []
+  [:div.container
+   [:header "header"]
+   ;; [:gigs "gigs"]
+   [gigs]
+   [:orders "orders"]
+   [:footer "footer"]])
+
+(defn ^:export main
+  []
+  (r/render
+    [app]
+    (.getElementById js/document "app")))
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+*** error
+Compilation failed!
+
+The required namespace "giggin.core.components.gigs" is not available, it was required by "giggin/core.cljs".
+*** почему ловлю ошибку?
+помоги понять причину ошибки в Shadow-CLJS в браузере эта ошибка тоже есть.
+** DONE git clone в кложур
+git clone https://github.com/jacekschae/learn-reagent-course-files.git
+git clone git@github.com:jacekschae/learn-reagent-course-files.git
+
+https://github.com/jacekschae/learn-reagent-course-files?tab=readme-ov-file
+/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files
+** DONE сделать проект в туториале
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin
+
+скопироваров из [[*git clone в кложур][git clone в кложур]]
+/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files
+/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin
+** DONE сделать орг learn-reagent-free
+** DONE в туторал
+** DONE сделать сылку в туторалс
+** DONE суопировать и настроить орг
+можно взять за основу пустой
+если его нет
+склонить
+внести измения в орг
 ** DONE спросить ИИ про модальное окно
 *** обесни пожалусто это код
 почимо оно делает модальное окно?
@@ -3159,12 +3467,206 @@ figure {
   z-index: 1;
 }
 #+end_src
-** TODO Разобрать 17
+** DONE понять могу ли сделать удобное тестирование
+*** DONE сделать одиночный тест
+**** вот структура моего приложения
+***** tree
+.
+├── filepath.txt
+├── giggin.org
+├── .gitignore
+├── package.json
+├── package-lock.json
+├── public
+│   ├── css
+│   │   └── style.css
+│   ├── img
+│   │   ├── giggin-icon.png
+│   │   ├── giggin-logo.svg
+│   │   ├── paypal.svg
+│   │   ├── portal-logo.jpg
+│   │   ├── portal-logo-title.jpg
+│   │   └── stripe.svg
+│   ├── index.html
+├── shadow-cljs.edn
+└── src
+    └── giggin
+        ├── components
+        │   ├── checkout_modal.cljs
+        │   ├── footer.cljs
+        │   ├── gig_editor.cljs
+        │   ├── gigs.cljs
+        │   ├── header.cljs
+        │   └── orders.cljs
+        ├── core.cljs
+        ├── helpers.cljs
+        └── state.cljs
+
+**** вот файлы проекта
+***** (find-file-other-frame "./package.json")
+{
+  "name": "Giggin",
+  "version": "0.0.1",
+  "description": "Giggin - find a gig!",
+  "repository": "https://github.com/jacekschae/learn-reagent-course-files.git",
+  "private": true,
+  "scripts": {
+    "dev": "shadow-cljs watch app",
+    "release": "shadow-cljs release app",
+    "clean": "rm -rf target && rm -rf public/js",
+    "clean-win": "rmdir /s /q public/js & rmdir /s /q target"
+  },
+  "devDependencies": {
+    "shadow-cljs": "2.20.2"
+  },
+  "dependencies": {
+    "create-react-class": "15.7.0",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  }
+}
+***** (find-file-other-frame "./shadow-cljs.edn")
+{:source-paths ["src"]
+
+ :dependencies [[binaryage/devtools "0.9.10"]
+                [proto-repl "0.3.1"]
+                [reagent "0.8.0"]]
+
+ :nrepl        {:port 3333}
+
+ :builds
+ {:app {:target :browser
+        :output-dir "public/js"
+        :asset-path "/js"
+
+        :modules
+        {:main
+         {:entries [giggin.core]}}
+
+        :devtools
+        {:after-load  giggin.core/main
+         :http-root   "public"
+         :http-port   3000}}}}
+
+***** (find-file-other-frame "./giggin.org")
+
+**** как сделать одиночный тест?
+и как его сделать авто запуск?
+можно ли его запустить без запуска репла?
+можно ли его запустить отдельным процесом поралельно с запушеным сервером?
+**** 
+**** file core_test
+(find-file-other-frame "./src/tests/core_test")
+**** src core_test
+;; src/giggin/core_test.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns tests.core-test
+  (:require [cljs.test :refer [deftest is]]
+            [giggin.core :as core]))
+
+(deftest example-test
+  (is (= 1 1)))
+
+#+end_src
+**** file shadow-cljs.edn
+(find-file-other-frame "./shadow-cljs.edn")
+**** src shadow-cljs.edn
+#+begin_src clojure :no-expand t :mkdirp yes
+{:source-paths ["src"]
+
+ :dependencies [[binaryage/devtools "0.9.10"]
+                [proto-repl "0.3.1"]
+                [reagent "0.8.0"]]
+
+ :nrepl        {:port 3333}
+
+ :builds
+ {:app {:target :browser
+        :output-dir "public/js"
+        :asset-path "/js"
+
+        :modules
+        {:main
+         {:entries [giggin.core]}}
+
+        :devtools
+        {:after-load  giggin.core/main
+         :http-root   "public"
+         :http-port   3000}}}
+
+   :test  {:target :node-test
+           :output-to "out/node-tests.js"
+           ;; :ns-regexp "-test$" ; по умолчанию
+           ;; :autorun false
+           }}
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+**** result
+
+~/Dev/ClojureScript/tutorials/my-cljs-project/giggin [1] $ npx shadow-cljs compile test
+
+shadow-cljs - config: /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/shadow-cljs.edn
+shadow-cljs - connected to server
+no build with id: :test
+{:build-id :test, :known-builds #{:app :npm}}
+ExceptionInfo: no build with id: :test
+        shadow.cljs.devtools.cli-actual/do-build-commands (cli_actual.clj:45)
+        shadow.cljs.devtools.cli-actual/do-build-commands (cli_actual.clj:38)
+        shadow.cljs.devtools.cli-actual/main/body-fn--16294--auto----16958 (cli_actual.clj:166)
+        shadow.cljs.devtools.cli-actual/main (cli_actual.clj:165)
+        shadow.cljs.devtools.cli-actual/main (cli_actual.clj:132)
+        clojure.core/apply (core.clj:671)
+        clojure.core/apply (core.clj:662)
+        shadow.cljs.devtools.cli-actual/from-remote (cli_actual.clj:210)
+        shadow.cljs.devtools.cli-actual/from-remote (cli_actual.clj:201)
+        clojure.lang.Var.invoke (Var.java:393)
+        shadow.cljs.devtools.cli/from-remote (cli.clj:79)
+        shadow.cljs.devtools.cli/from-remote (cli.clj:77)
+        shadow.user/eval13367 (NO_SOURCE_FILE:1)
+        shadow.user/eval13367 (NO_SOURCE_FILE:1)
+        clojure.lang.Compiler.eval (Compiler.java:7194)
+        clojure.lang.Compiler.eval (Compiler.java:7184)
+        clojure.lang.Compiler.eval (Compiler.java:7149)
+        clojure.core/eval (core.clj:3215)
+        clojure.core/eval (core.clj:3211)
+        shadow.cljs.devtools.server.socket-repl/repl/fn--16873 (socket_repl.clj:61)
+        clojure.main/repl/read-eval-print--9206/fn--9209 (main.clj:437)
+        clojure.main/repl/read-eval-print--9206 (main.clj:437)
+        clojure.main/repl/fn--9215 (main.clj:458)
+        clojure.main/repl (main.clj:458)
+        clojure.main/repl (main.clj:368)
+        shadow.cljs.devtools.server.socket-repl/repl (socket_repl.clj:28)
+        shadow.cljs.devtools.server.socket-repl/repl (socket_repl.clj:26)
+        shadow.cljs.devtools.server.socket-repl/connection-loop (socket_repl.clj:102)
+        shadow.cljs.devtools.server.socket-repl/connection-loop (socket_repl.clj:72)
+        shadow.cljs.devtools.server.socket-repl/start/fn--16888/fn--16889/fn--16891 (socket_repl.clj:142)
+        java.lang.Thread.run (Thread.java:1447)
+
+~/Dev/ClojureScript/tutorials/my-cljs-project/giggin [1] $ 
+**** вот что я сделал
+и получаю ошибку. Сервер запушен
+*** DONE проверить как выглядит фолс
+*** DONE нужно ли компилить
+я сдела через шадов, всё работае, но меня немного напрягает долгое время копиляции.
+и тут возникает вопрос.
+мне же вроде интересна проверка кода на стороне кложура.
+тоесть я вроде не обезательно должен это запускать  на стороне ЖС, а значит и копиляция не нужна?
+
+*** DONE понять как его запустить
+*** DONE как сделать автозапуск после танглинга
+*** DONE как работает авто запуск
+*** DONE как настраивать сют тест 
+*** DONE есть ли удобная команда настройки его на один тест
+** DONE Разобрать 17
 *** file
 [[*diff dirs recersiv][diff dirs recersiv]]
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gigs.cljs")
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gig_editor.cljs")
-*** TODO
+*** DONE 
 **** DONE убится что всё работаег
 **** DONE сделать комит
 **** DONE собрать убится что всё работает
@@ -3584,7 +4086,7 @@ add-to-order #(swap! state/orders update % inc)
 **** DONE передеалать всё на основе новой перменной
 **** DONE убрать старые переменые
 **** DONE за мержить в меин
-**** TODO нажатие на изображение оправляет на редактировнаи
+**** DONE нажатие на изображение оправляет на редактировнаи
 ***** понять почему принт ломает выполнение
 ***** понять почему выводится с нулевыми значениями а не с задаными
 предположение
@@ -3661,147 +4163,43 @@ add-to-order #(swap! state/orders update % inc)
 ***** ожидание
 что gig-editor-open откроет редактор со значениями передаными как елемент
 но редактор открвается как если бы перменная валуес из гиг-эдитора была пуста
-**** внести измения из 17
+**** DONE внести измения из 17
 какие ещё есть
-*** дочитать по тестированию
-** понять могу ли сделать удобное тестирование
-*** сделать одиночный тест
-*** понять как его запустить
-*** как сделать автозапуск после танглинга
-*** как работает авто запуск
-*** как настраивать сют тест 
-*** есть ли удобная команда настройки его на один тест
-** TODO Дотренировать приложение до конца
-[[*diff dirs recersiv][diff dirs recersiv]]
-(ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
-* DONE arhiv
-** DONE пройти по видео7
-** DONE пройти по видео8
-** DONE Запуска сервера
-
-(buyn-shell-start "konsole -e /bin/bash --rcfile <(npm run dev)")
-
-"konsole -e /bin/bash --rcfile <(npm run dev)"
-я запускаю сервер в отдельном терменальном окне такой командой.
-серевер запускается но похоже в какомто другом процесе. сервер работает но сообщение в это окно терменала на приходят.
-есть идеи как это поправить?
-** DONE пройти по видео10
-*** DONE сделать отдельный фаил хелпер
-*** DONE сделать формат цен
-*** DONE приминить к ордерс х2
-*** DONE приминить к гигс
-*** неотображать если пустое
-*** 
-** DONE изчать видео
-** DONE push to git
-** DONE открыть проект
-** DONE установить зависимости
-** DONE запустить проек
-** DONE настроить проект 
-** DONE error
-*** src
-(ns giggin.core.components.gigs)
-
-(defn gigs
-  []
-  [:gigs "gigs"])
-  ;; [:header "header"]
-  ;; [:orders "orders"]
-  ;; [:footer "footer"]
-*** error
-(require '[giggin.core.components.gigs :refer [gigs]])
-
------- REPL Error while processing ---------------------------------------------
-(require '[giggin.core.components.gigs :refer [gigs]])
-The required namespace "giggin.core.components.gigs" is not available, it was required by "giggin/core.cljs".
-
-nil
-giggin.core> 
-*** почему ловлю ошибку?
-помоги понять причину ошибки в Shadow-CLJS репл.
-
-** DONE error web
-*** src
-**** file gigs.cljs
-(find-file-other-frame "./src/giggin/components/gigs.cljs")
-**** src gigs.cljs
-#+begin_src clojure :no-expand t :mkdirp yes
-(ns giggin.core.components.gigs)
-
-(defn gigs
-  []
-  [:gigs "gigs"])
-  ;; [:header "header"]
-  ;; [:orders "orders"]
-  ;; [:footer "footer"]
+**** DONE заменить работу модала
+с просто тру на :active
+>   [:div.modal (when (:active @modal) {:class "active"})
 
 
+<       {:on-click #(reset! modal false)}
+---
+>       {:on-click #(toggle-modal {:active false :gig {}})}
 
-#+end_src
+>   (let [modal (r/atom {:active false})
 
-#+RESULTS:
-: Please reevaluate when nREPL is connected
+<                      (reset! modal false))]
+---
+>                      (toggle-modal {:active false :gig {}}))]
 
-**** file core.cljs
-(find-file-other-frame "./src/giggin/core.cljs")
-**** src core.cljs
-#+begin_src clojure :no-expand t :mkdirp yes
-(ns giggin.core
-  (:require [reagent.core :as r]
-            [giggin.core.components.gigs :refer [gigs]]))
+        toggle-modal (fn
+                       [{:keys [active gig]}]
+                       (swap! modal assoc :active active)
+                       (reset! values gig))
+**** DONE клик по имеджу
 
-(defn app
-  []
-  [:div.container
-   [:header "header"]
-   ;; [:gigs "gigs"]
-   [gigs]
-   [:orders "orders"]
-   [:footer "footer"]])
-
-(defn ^:export main
-  []
-  (r/render
-    [app]
-    (.getElementById js/document "app")))
-
-
-#+end_src
-
-#+RESULTS:
-: Please reevaluate when nREPL is connected
-*** error
-Compilation failed!
-
-The required namespace "giggin.core.components.gigs" is not available, it was required by "giggin/core.cljs".
-*** почему ловлю ошибку?
-помоги понять причину ошибки в Shadow-CLJS в браузере эта ошибка тоже есть.
-** DONE git clone в кложур
-git clone https://github.com/jacekschae/learn-reagent-course-files.git
-git clone git@github.com:jacekschae/learn-reagent-course-files.git
-
-https://github.com/jacekschae/learn-reagent-course-files?tab=readme-ov-file
-/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files
-** DONE сделать проект в туториале
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin
-
-скопироваров из [[*git clone в кложур][git clone в кложур]]
-/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files
-/home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin
-** DONE сделать орг learn-reagent-free
-** DONE в туторал
-** DONE сделать сылку в туторалс
-** DONE суопировать и настроить орг
-можно взять за основу пустой
-если его нет
-склонить
-внести измения в орг
+<            [:img.gig__artwork {:src img :alt title}]
+---
+>            [:img.gig__artwork.gig__edit {:src img
+>                                          :alt title
+>                                          :on-click #(toggle-modal {:active true
+>                                                                    :gig gig})}]
+*** DONE дочитать по тестированию
 * backlog
 * project comands
 :PROPERTIES:
 :header-args: :tangle no
 :END:
 ** diff dirs recersiv
+*** comands
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
 cd /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/
 diff -r 16-update-gig 17-refactor-gigs
@@ -3816,7 +4214,132 @@ diff -r 16-update-gig 17-refactor-gigs
 /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/12-refactor-functions
 /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/13-checkout-modal
 diff -r dir1 dir2
+*** block
+**** 01
+#+begin_src eshell :dir /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/
+diff -r 16-update-gig 17-refactor-gigs
+#+end_src
 
+#+RESULTS:
+#+begin_example
+diff -r 16-update-gig/src/giggin/components/gig_editor.cljs 17-refactor-gigs/src/giggin/components/gig_editor.cljs
+13,14c13,14
+<   [modal values insert-gig]
+<   [:div.modal (when @modal {:class "active"})
+---
+>   [modal values upsert-gig toggle-modal]
+>   [:div.modal (when (:active @modal) {:class "active"})
+43c43
+<       {:on-click #(reset! modal false)}
+---
+>       {:on-click #(toggle-modal {:active false :gig {}})}
+46c46
+<       {:on-click #(insert-gig @values)}
+---
+>       {:on-click #(upsert-gig @values)}
+diff -r 16-update-gig/src/giggin/components/gigs.cljs 17-refactor-gigs/src/giggin/components/gigs.cljs
+10,11c10,11
+<   (let [modal (r/atom false)
+<         values (r/atom {:id (str "gig-" (random-uuid)) :title "" :desc "" :price 0 :img "" :sold-out false})
+---
+>   (let [modal (r/atom {:active false})
+>         values (r/atom {:id nil :title "" :desc "" :price 0 :img "" :sold-out false})
+13,14c13,18
+<         insert-gig (fn [{:keys [id title desc price img sold-out]}]
+<                      (swap! state/gigs assoc id {:id id
+---
+>         toggle-modal (fn
+>                        [{:keys [active gig]}]
+>                        (swap! modal assoc :active active)
+>                        (reset! values gig))
+>         upsert-gig (fn [{:keys [id title desc price img sold-out]}]
+>                      (swap! state/gigs assoc id {:id (or id (str "gig-" (random-uuid)))
+20c24
+<                      (reset! modal false))]
+---
+>                      (toggle-modal {:active false :gig {}}))]
+26c30
+<          {:on-click #(reset! modal true)}
+---
+>          {:on-click #(toggle-modal {:active true :gig {}})}
+30,31c34,35
+<         [gig-editor modal values insert-gig]
+<         (for [{:keys [id img title price desc]} (vals @state/gigs)]
+---
+>         [gig-editor modal values upsert-gig toggle-modal]
+>         (for [{:keys [id img title price desc] :as gig} (vals @state/gigs)]
+33c37,40
+<            [:img.gig__artwork {:src img :alt title}]
+---
+>            [:img.gig__artwork.gig__edit {:src img
+>                                          :alt title
+>                                          :on-click #(toggle-modal {:active true
+>                                                                    :gig gig})}]
+#+end_example
+
+
+**** 02
+#+begin_src eshell
+cd /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/
+diff -r 16-update-gig 17-refactor-gigs
+#+end_src
+
+#+RESULTS:
+#+begin_example
+diff -r 16-update-gig/src/giggin/components/gig_editor.cljs 17-refactor-gigs/src/giggin/components/gig_editor.cljs
+13,14c13,14
+<   [modal values insert-gig]
+<   [:div.modal (when @modal {:class "active"})
+---
+>   [modal values upsert-gig toggle-modal]
+>   [:div.modal (when (:active @modal) {:class "active"})
+43c43
+<       {:on-click #(reset! modal false)}
+---
+>       {:on-click #(toggle-modal {:active false :gig {}})}
+46c46
+<       {:on-click #(insert-gig @values)}
+---
+>       {:on-click #(upsert-gig @values)}
+diff -r 16-update-gig/src/giggin/components/gigs.cljs 17-refactor-gigs/src/giggin/components/gigs.cljs
+10,11c10,11
+<   (let [modal (r/atom false)
+<         values (r/atom {:id (str "gig-" (random-uuid)) :title "" :desc "" :price 0 :img "" :sold-out false})
+---
+>   (let [modal (r/atom {:active false})
+>         values (r/atom {:id nil :title "" :desc "" :price 0 :img "" :sold-out false})
+13,14c13,18
+<         insert-gig (fn [{:keys [id title desc price img sold-out]}]
+<                      (swap! state/gigs assoc id {:id id
+---
+>         toggle-modal (fn
+>                        [{:keys [active gig]}]
+>                        (swap! modal assoc :active active)
+>                        (reset! values gig))
+>         upsert-gig (fn [{:keys [id title desc price img sold-out]}]
+>                      (swap! state/gigs assoc id {:id (or id (str "gig-" (random-uuid)))
+20c24
+<                      (reset! modal false))]
+---
+>                      (toggle-modal {:active false :gig {}}))]
+26c30
+<          {:on-click #(reset! modal true)}
+---
+>          {:on-click #(toggle-modal {:active true :gig {}})}
+30,31c34,35
+<         [gig-editor modal values insert-gig]
+<         (for [{:keys [id img title price desc]} (vals @state/gigs)]
+---
+>         [gig-editor modal values upsert-gig toggle-modal]
+>         (for [{:keys [id img title price desc] :as gig} (vals @state/gigs)]
+33c37,40
+<            [:img.gig__artwork {:src img :alt title}]
+---
+>            [:img.gig__artwork.gig__edit {:src img
+>                                          :alt title
+>                                          :on-click #(toggle-modal {:active true
+>                                                                    :gig gig})}]
+#+end_example
 ** поиск по проекту
 *** 
 **** dropbox in org
@@ -3958,6 +4481,13 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 (org-babel-tangle)
 (evil-close-fold)
 (evil-close-fold)
+(let ((curent-buffer (buffer-name)))
+  (unless (get-buffer "*compilation*")
+    (compile "npx shadow-cljs compile test && node out/node-tests.js"))
+  (select-frame-by-name "*compilation*")
+  (recompile)
+  (select-frame-by-name curent-buffer))
+
 ;; (find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
 ;; (find-file-other-frame "~/INI/hydra-cfg.el")
 ;; (load "~/INI/hydra-cfg.el")
