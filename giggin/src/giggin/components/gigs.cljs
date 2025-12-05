@@ -1,5 +1,5 @@
 (ns giggin.components.gigs
-  (:require [giggin.state :as state ]
+  (:require
             [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
             [giggin.components.orders :refer [orders-cursor add-to-order]]
             [reagent.core :as r]

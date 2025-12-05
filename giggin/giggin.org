@@ -107,10 +107,8 @@ app
 (def app-state (r/atom {
                 :orders {}
                 :gig-editor {
-                     :modal
-                       false
-                     :values
-                      {:id (str "gig-" (random-uuid))
+                     :modal false
+                     :values {:id (str "gig-" (random-uuid))
                                :title "" :desc "" :price 0 :img "" :sold-out false}}
                 :gigs {
                    :gig-01 {:id :gig-01
@@ -267,10 +265,11 @@ app
 **** file gigs.cljs
 (find-file-other-frame "./src/giggin/components/gigs.cljs")
 **** src gigs.cljs
-***** new gig-editor
+***** new gigs
+    ;; [giggin.state :as state ]
 #+begin_src clojure :no-expand t :mkdirp yes 
 (ns giggin.components.gigs
-  (:require [giggin.state :as state ]
+  (:require
             [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
             [giggin.components.orders :refer [orders-cursor add-to-order]]
             [reagent.core :as r]
@@ -431,19 +430,22 @@ app
           :values values}]])
 
 
+;; (defn gig-editor-toggle
+;;   [app & [status]]
+;;   (swap! app update-in [:gig-editor :modal]
+;;          #(if (some? status) status (not %))))
+
 (defn gig-editor-toggle
-  [app & [status]]
-  (swap! app update-in [:gig-editor :modal]
-         #(if (some? status) status (not %))))
+  ([app] (swap! app update-in [:gig-editor :modal] not))
+  ([app status]
+         (swap! app assoc-in [:gig-editor :modal] status)))
 
 
 (defn gig-editor-open
   ([app]
    (gig-editor-toggle app true))
   ([app {:keys [id title desc price img sold-out] :as el}]
-    ;; (println id)
     (swap! app
-          ;; update-in [:gig-editor :values]
           assoc-in [:gig-editor :values]
           { :id       (or id (str "gig-" (random-uuid)))
             :title    (str/trim title)
@@ -520,6 +522,8 @@ app
 ;;                     :price (js/parseInt price)
 ;;                     :sold-out sold-out}))
 
+**** test
+[[*gig_editor_test.cljs][gig_editor_test.cljs]]
 *** orders.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/components/orders.cljs
@@ -1814,7 +1818,63 @@ figure {
 npx shadow-cljs compile test
 node out/node-tests.js
 
+*** gig_editor_test.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/tests/gig_editor_test.cljs
+:END:
+**** file gig_editor_test
+(find-file-other-frame "./src/tests/gig_editor_test.cljs")
+**** src gig_editor_test
+;; src/giggin/gig_editor_test.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns tests.gig-editor-test
+  (:require [cljs.test :refer [deftest is]]
+            [giggin.state :as state ]
+            [reagent.core :as r]
+            [giggin.components.gig-editor :as t]))
 
+(deftest new-edit-test
+  (let [app state/app-state
+        value (r/cursor app [:gig-editor :values])
+        modal (r/cursor app [:gig-editor :modal])
+        init-value    @value
+        test1-id-value (str "gig-" (random-uuid))
+        test1-value   {:id test1-id-value
+                      :title "test" :desc "test" :price 100 :img "100" :sold-out false}]
+    (is (= (not @modal)))
+    (t/gig-editor-new app)
+    (is (= (dissoc @value :id) (dissoc init-value :id)))
+    (is (= @modal true))
+    (t/gig-editor-toggle app false)
+    (is (= @modal false))
+    (t/gig-editor-open app test1-value)
+    (is (= @value test1-value))
+    (is (= @modal true))
+    (t/gig-editor-insert app)
+    (is (= @value test1-value))
+    (is (= (get-in @app [:gigs test1-id-value]) test1-value))
+    (is (= @modal true))
+    (t/gig-editor-new app)
+    (is (= (dissoc @value :id) (dissoc init-value :id)))
+    (is (= @modal true))
+    ))
+
+#+end_src
+
+**** reple
+npx shadow-cljs compile test
+node out/node-tests.js
+
+#+begin_src elisp :results output silent :tangle no
+;; (evil-previous-line)
+;; (org-cycle)
+;; (delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
 * run giggin
 ** run server and reple
 #+begin_src elisp :results output silent
@@ -2126,7 +2186,7 @@ learn-reagent-course-files/giggin/ $ yarn dev
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
 * TODO
-** TODO Разобрать 18
+** DONE Разобрать 18
 *** diff block
 17-refactor-gigs 18-ajax-requests
 
@@ -2235,13 +2295,37 @@ diff -r 17-refactor-gigs/src/giggin/components/gigs.cljs 18-ajax-requests/src/gi
 >                      :initial-values initial-values}]
 #+end_example
 
-*** CANCELED file
+*** file
 [[*diff dirs recersiv][diff dirs recersiv]]
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gigs.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gig_editor.cljs")
-*** TODO 
-**** сделать диф блок
-**** перенсти в него конкретно для этого
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/src/giggin/components/gigs.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/src/giggin/components/gig_editor.cljs")
+18-ajax-requests/src/giggin/components/gigs.cljs
+18-ajax-requests/src/giggin/components/gig_editor.cljs
+*** DONE 
+**** DONE сделать диф блок
+**** DONE перенсти в него конкретно для этого
+**** DONE пройтись по изменениям выписать их как туду для переноса
+**** DONE возможно заменить на
+
+  (let [{:keys [title desc img price sold-out]} @values]
+
+                    :values values}]
+
+<                   :value (:title @values)
+**** DONE сделать нулевый айди
+
+        initial-values {:id nil :title "" :desc "" :price 0 :img "" :sold-out false}
+        всё должно работат но так надёжны
+        проверить что всё работает
+        если нет то повод исправить
+        может даже написать тест
+**** DONE инитал валуе удобно
+поскольку позволяет слатьих раз за разом
+с другой стороны ими иожно обнулять
+проверить сколько раз я их шлю
+**** DONE перенести измения
+**** стестирова деланание тестов на примере гиг-едита
+**** сделать комит
 **** 
 ** TODO Дотренировать приложение до конца
 [[*diff dirs recersiv][diff dirs recersiv]]

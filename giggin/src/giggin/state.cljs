@@ -4,10 +4,8 @@
 (def app-state (r/atom {
                 :orders {}
                 :gig-editor {
-                     :modal
-                       false
-                     :values
-                      {:id (str "gig-" (random-uuid))
+                     :modal false
+                     :values {:id (str "gig-" (random-uuid))
                                :title "" :desc "" :price 0 :img "" :sold-out false}}
                 :gigs {
                    :gig-01 {:id :gig-01

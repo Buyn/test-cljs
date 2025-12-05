@@ -58,19 +58,22 @@
           :values values}]])
 
 
+;; (defn gig-editor-toggle
+;;   [app & [status]]
+;;   (swap! app update-in [:gig-editor :modal]
+;;          #(if (some? status) status (not %))))
+
 (defn gig-editor-toggle
-  [app & [status]]
-  (swap! app update-in [:gig-editor :modal]
-         #(if (some? status) status (not %))))
+  ([app] (swap! app update-in [:gig-editor :modal] not))
+  ([app status]
+         (swap! app assoc-in [:gig-editor :modal] status)))
 
 
 (defn gig-editor-open
   ([app]
    (gig-editor-toggle app true))
   ([app {:keys [id title desc price img sold-out] :as el}]
-    ;; (println id)
     (swap! app
-          ;; update-in [:gig-editor :values]
           assoc-in [:gig-editor :values]
           { :id       (or id (str "gig-" (random-uuid)))
             :title    (str/trim title)
