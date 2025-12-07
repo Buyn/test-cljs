@@ -15,7 +15,8 @@
 
  :dependencies [[binaryage/devtools "0.9.10"]
                 [proto-repl "0.3.1"]
-                [reagent "0.8.0"]]
+                [reagent "0.8.0"]
+                [cljs-ajax "0.7.3"]]
 
  :nrepl        {:port 3333}
 
@@ -63,6 +64,7 @@
             [giggin.state :as state ]
             [giggin.components.header :refer [header]]
             [giggin.components.orders :refer [orders]]
+            [giggin.api :as api]
             [giggin.components.footer :refer [footer]]))
 
 (defonce app-state state/app-state)
@@ -77,6 +79,7 @@
 
 (defn ^:export main
   []
+  (api/fetch-gigs)
   (r/render
     [app]
     (.getElementById js/document "app")))
@@ -228,6 +231,36 @@ app
   [cents]
   (str "$" (/ cents 100)))
 
+
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+*** api.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/api.cljs
+:END:
+**** file api.cljs
+(find-file-other-frame "./src/giggin/api.cljs")
+**** src api.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.api
+  (:require [ajax.core :refer [GET]]))
+
+(defn handler [response]
+  (.log js/console response))
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text)))
+
+(defn fetch-gigs
+  []
+  (GET "https://gist.githubusercontent.com/jacekschae/8c10aa58a6163905fffcec33dd6f5a01/raw/20874f73b2c1d0ad08d828131d6ea8392950780a/gigs.json"
+       {:handler handler
+        :error-handler error-handler
+        :response-format :json
+        :keywords? true}))
 
 
 #+end_src
@@ -1804,10 +1837,12 @@ figure {
 (find-file-other-frame "./src/tests/core_test")
 **** src core_test
 ;; src/giggin/core_test.cljs
+ошибка возникает при попытке подключения кора из-за наличия в нём алдакса
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns tests.core-test
   (:require [cljs.test :refer [deftest is]]
-            [giggin.core :as core]))
+            ;; [giggin.core :as core]
+            ))
 
 (deftest example-test
   (is (= 1 1)))
@@ -2186,147 +2221,124 @@ learn-reagent-course-files/giggin/ $ yarn dev
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
 * TODO
-** DONE Разобрать 18
+** TODO Разобрать 18
+*** TODO 
+**** DONE сделать сорс шадов
+**** DONE добавить фджакс
+**** DONE сделать фаил апи добавить контекст
+**** DONE прогнать на работоспособность
+**** DONE поправить теcт
+***** error
+-*- mode: compilation; default-directory: "~/Dev/ClojureScript/tutorials/my-cljs-project/giggin/" -*-
+Compilation started at Sat Dec  6 20:55:53
+
+npx shadow-cljs compile test && node out/node-tests.js
+shadow-cljs - config: /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/shadow-cljs.edn
+shadow-cljs - connected to server
+[:test] Compiling ...
+[:test] Build completed. (160 files, 92 compiled, 0 warnings, 2.50s)
+
+
+SHADOW import error /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/.shadow-cljs/builds/test/dev/out/cljs-runtime/ajax.xml_http_request.js
+Error: Cannot find module 'xmlhttprequest'
+Require stack:
+- /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/out/node-tests.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1410:15)
+    at defaultResolveImpl (node:internal/modules/cjs/loader:1051:19)
+    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1056:22)
+    at Module._load (node:internal/modules/cjs/loader:1219:37)
+    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:238:24)
+    at Module.require (node:internal/modules/cjs/loader:1493:12)
+    at require (node:internal/modules/helpers:152:16)
+    at /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/.shadow-cljs/builds/test/dev/out/cljs-runtime/ajax/xml_http_request.cljs:31:26
+    at /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/.shadow-cljs/builds/test/dev/out/cljs-runtime/ajax.xml_http_request.js:32:3
+
+Compilation exited abnormally with code 1 at Sat Dec  6 20:55:57, duration 4.87 s
+***** src
+****** file shadow-cljs.edn
+(find-file-other-frame "./shadow-cljs.edn")
+****** src shadow-cljs.edn
+#+begin_src clojure :no-expand t :mkdirp yes
+{:source-paths ["src"]
+
+ :dependencies [[binaryage/devtools "0.9.10"]
+                [proto-repl "0.3.1"]
+                [reagent "0.8.0"]
+                [cljs-ajax "0.7.3"]]
+
+ :nrepl        {:port 3333}
+
+ :builds
+ {:app {:target :browser
+        :output-dir "public/js"
+        :asset-path "/js"
+
+        :modules
+        {:main
+         {:entries [giggin.core]}}
+
+        :devtools
+        {:after-load  giggin.core/main
+         :http-root   "public"
+         :http-port   3000}}
+
+  :test {:target :node-test
+           :output-to "out/node-tests.js"
+           ;; :ns-regexp "-test$" ; по умолчанию
+           ;; :autorun false
+           }}}
+
+
+#+end_src
+***** помоги разобратся
+
+с добовлением в зависимотси ажакса упали тест ранер который до этго работали
+**** прогнать репл
+***** сделать разные запросы
+***** понять что он возврашает
+**** сделать комит
 *** diff block
-17-refactor-gigs 18-ajax-requests
+**** block
+19-ajax-transformations 18-ajax-requests
 
 #+begin_src eshell :dir /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/ :results output replace
-diff -r 17-refactor-gigs 18-ajax-requests
+diff -r 19-ajax-transformations 18-ajax-requests 
 
 #+end_src
 
 #+RESULTS:
 #+begin_example
-diff -r 17-refactor-gigs/src/giggin/components/gig_editor.cljs 18-ajax-requests/src/giggin/components/gig_editor.cljs
-13,47c13,48
-<   [modal values upsert-gig toggle-modal]
-<   [:div.modal (when (:active @modal) {:class "active"})
-<    [:div.modal__overlay]
-<    [:div.modal__container
-<     [:div.modal__body
-<      [form-group {:id "title"
-<                   :type "text"
-<                   :value (:title @values)
-<                   :values values}]
-<      [form-group {:id "desc"
-<                   :type "text"
-<                   :value (:desc @values)
-<                   :values values}]
-<      [form-group {:id "img"
-<                   :type "text"
-<                   :value (:img @values)
-<                   :values values}]
-<      [form-group {:id "price"
-<                   :type "number"
-<                   :value (:price @values)
-<                   :values values}]
-<      [:div.form__group
-<       [:label.form__label {:for "sold-out"} "sold-out"]
-<       [:label.form__switch
-<        [:input {:type :checkbox
-<                 :checked (:sold-out @values)
-<                 :on-change #(swap! values assoc :sold-out (.. % -target -checked))}]
-<        [:i.form__icon]]]]
-<     [:div.modal__footer
-<      [:button.btn.btn--link.float--left
-<       {:on-click #(toggle-modal {:active false :gig {}})}
-<       "Cancel"]
-<      [:button.btn.btn--secondary
-<       {:on-click #(upsert-gig @values)}
-<       "Save"]]]])
+Only in 19-ajax-transformations: shadow-cljs.edn
+Only in 19-ajax-transformations/src/giggin: api.cljs
+diff -r 19-ajax-transformations/src/giggin/core.cljs 18-ajax-requests/src/giggin/core.cljs
+6,7c6
+<             [giggin.components.footer :refer [footer]]
+<             [giggin.api :as api]))
 ---
->   [{:keys [modal values upsert-gig toggle-modal initial-values]}]
->   (let [{:keys [title desc img price sold-out]} @values]
->     [:div.modal (when (:active @modal) {:class "active"})
->      [:div.modal__overlay]
->      [:div.modal__container
->       [:div.modal__body
->        [form-group {:id "title"
->                     :type "text"
->                     :value title
->                     :values values}]
->        [form-group {:id "desc"
->                     :type "text"
->                     :value desc
->                     :values values}]
->        [form-group {:id "img"
->                     :type "text"
->                     :value img
->                     :values values}]
->        [form-group {:id "price"
->                     :type "number"
->                     :value price
->                     :values values}]
->        [:div.form__group
->         [:label.form__label {:for "sold-out"} "sold-out"]
->         [:label.form__switch
->          [:input {:type :checkbox
->                   :checked sold-out
->                   :on-change #(swap! values assoc :sold-out (.. % -target -checked))}]
->          [:i.form__icon]]]]
->       [:div.modal__footer
->        [:button.btn.btn--link.float--left
->         {:on-click #(toggle-modal {:active false :gig initial-values})}
->         "Cancel"]
->        [:button.btn.btn--secondary
->         {:on-click #(upsert-gig @values)}
->         "Save"]]]]))
-diff -r 17-refactor-gigs/src/giggin/components/gigs.cljs 18-ajax-requests/src/giggin/components/gigs.cljs
-11c11,12
-<         values (r/atom {:id nil :title "" :desc "" :price 0 :img "" :sold-out false})
----
->         initial-values {:id nil :title "" :desc "" :price 0 :img "" :sold-out false}
->         values (r/atom initial-values)
-24c25
-<                      (toggle-modal {:active false :gig {}}))]
----
->                      (toggle-modal {:active false :gig initial-values}))]
-30c31
-<          {:on-click #(toggle-modal {:active true :gig {}})}
----
->          {:on-click #(toggle-modal {:active true :gig initial-values})}
-34c35,39
-<         [gig-editor modal values upsert-gig toggle-modal]
----
->         [gig-editor {:modal modal
->                      :values values
->                      :upsert-gig upsert-gig
->                      :toggle-modal toggle-modal
->                      :initial-values initial-values}]
+>             [giggin.components.footer :refer [footer]]))
+19d17
+<   (api/fetch-gigs)
 #+end_example
+**** all
 
+02-app-setup           09-remove-from-order   14-gig-editor     19-ajax-transformations  24-firebase-auth     complete
+05-displaying-gigs     10-order-total         15-save-gig       20-firebase-setup        25-sign-in-sign-out  
+06-list-comprehension  11-format-price        16-update-gig     21-firebase-database     26-security-rules    
+07-add-to-order        12-refactor-functions  17-refactor-gigs  22-subscribe             28-performance-url   
+08-for-over-orders     13-checkout-modal      18-ajax-requests  23-sold-out              29-tips-and-tricks   
 *** file
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/19-ajax-transformations/shadow-cljs.edn")
+(find-file-other-frame 
+"~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/19-ajax-transformations/src/giggin/api.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/19-ajax-transformations/src/giggin/core.cljs")
 [[*diff dirs recersiv][diff dirs recersiv]]
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/src/giggin/components/gigs.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/src/giggin/components/gig_editor.cljs")
-18-ajax-requests/src/giggin/components/gigs.cljs
-18-ajax-requests/src/giggin/components/gig_editor.cljs
-*** DONE 
-**** DONE сделать диф блок
-**** DONE перенсти в него конкретно для этого
-**** DONE пройтись по изменениям выписать их как туду для переноса
-**** DONE возможно заменить на
+19-ajax-transformations/src/giggin: api.cljs
+shadow-cljs.edn
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/shadow-cljs.edn")
 
-  (let [{:keys [title desc img price sold-out]} @values]
-
-                    :values values}]
-
-<                   :value (:title @values)
-**** DONE сделать нулевый айди
-
-        initial-values {:id nil :title "" :desc "" :price 0 :img "" :sold-out false}
-        всё должно работат но так надёжны
-        проверить что всё работает
-        если нет то повод исправить
-        может даже написать тест
-**** DONE инитал валуе удобно
-поскольку позволяет слатьих раз за разом
-с другой стороны ими иожно обнулять
-проверить сколько раз я их шлю
-**** DONE перенести измения
-**** стестирова деланание тестов на примере гиг-едита
-**** сделать комит
-**** 
+19-ajax-transformations/src/giggin/components/gigs.cljs
+19-ajax-transformations/src/giggin/components/gig_editor.cljs
 ** TODO Дотренировать приложение до конца
 [[*diff dirs recersiv][diff dirs recersiv]]
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
@@ -3745,7 +3757,7 @@ ExceptionInfo: no build with id: :test
 *** DONE как работает авто запуск
 *** DONE как настраивать сют тест 
 *** DONE есть ли удобная команда настройки его на один тест
-** DONE Разобрать 17
+** DONE Разобрать 16
 *** file
 [[*diff dirs recersiv][diff dirs recersiv]]
 (find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/17-refactor-gigs/src/giggin/components/gigs.cljs")
@@ -4277,6 +4289,147 @@ add-to-order #(swap! state/orders update % inc)
 >                                          :on-click #(toggle-modal {:active true
 >                                                                    :gig gig})}]
 *** DONE дочитать по тестированию
+** DONE Разобрать 17
+*** diff block
+17-refactor-gigs 18-ajax-requests
+
+#+begin_src eshell :dir /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/ :results output replace
+diff -r 17-refactor-gigs 18-ajax-requests
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+diff -r 17-refactor-gigs/src/giggin/components/gig_editor.cljs 18-ajax-requests/src/giggin/components/gig_editor.cljs
+13,47c13,48
+<   [modal values upsert-gig toggle-modal]
+<   [:div.modal (when (:active @modal) {:class "active"})
+<    [:div.modal__overlay]
+<    [:div.modal__container
+<     [:div.modal__body
+<      [form-group {:id "title"
+<                   :type "text"
+<                   :value (:title @values)
+<                   :values values}]
+<      [form-group {:id "desc"
+<                   :type "text"
+<                   :value (:desc @values)
+<                   :values values}]
+<      [form-group {:id "img"
+<                   :type "text"
+<                   :value (:img @values)
+<                   :values values}]
+<      [form-group {:id "price"
+<                   :type "number"
+<                   :value (:price @values)
+<                   :values values}]
+<      [:div.form__group
+<       [:label.form__label {:for "sold-out"} "sold-out"]
+<       [:label.form__switch
+<        [:input {:type :checkbox
+<                 :checked (:sold-out @values)
+<                 :on-change #(swap! values assoc :sold-out (.. % -target -checked))}]
+<        [:i.form__icon]]]]
+<     [:div.modal__footer
+<      [:button.btn.btn--link.float--left
+<       {:on-click #(toggle-modal {:active false :gig {}})}
+<       "Cancel"]
+<      [:button.btn.btn--secondary
+<       {:on-click #(upsert-gig @values)}
+<       "Save"]]]])
+---
+>   [{:keys [modal values upsert-gig toggle-modal initial-values]}]
+>   (let [{:keys [title desc img price sold-out]} @values]
+>     [:div.modal (when (:active @modal) {:class "active"})
+>      [:div.modal__overlay]
+>      [:div.modal__container
+>       [:div.modal__body
+>        [form-group {:id "title"
+>                     :type "text"
+>                     :value title
+>                     :values values}]
+>        [form-group {:id "desc"
+>                     :type "text"
+>                     :value desc
+>                     :values values}]
+>        [form-group {:id "img"
+>                     :type "text"
+>                     :value img
+>                     :values values}]
+>        [form-group {:id "price"
+>                     :type "number"
+>                     :value price
+>                     :values values}]
+>        [:div.form__group
+>         [:label.form__label {:for "sold-out"} "sold-out"]
+>         [:label.form__switch
+>          [:input {:type :checkbox
+>                   :checked sold-out
+>                   :on-change #(swap! values assoc :sold-out (.. % -target -checked))}]
+>          [:i.form__icon]]]]
+>       [:div.modal__footer
+>        [:button.btn.btn--link.float--left
+>         {:on-click #(toggle-modal {:active false :gig initial-values})}
+>         "Cancel"]
+>        [:button.btn.btn--secondary
+>         {:on-click #(upsert-gig @values)}
+>         "Save"]]]]))
+diff -r 17-refactor-gigs/src/giggin/components/gigs.cljs 18-ajax-requests/src/giggin/components/gigs.cljs
+11c11,12
+<         values (r/atom {:id nil :title "" :desc "" :price 0 :img "" :sold-out false})
+---
+>         initial-values {:id nil :title "" :desc "" :price 0 :img "" :sold-out false}
+>         values (r/atom initial-values)
+24c25
+<                      (toggle-modal {:active false :gig {}}))]
+---
+>                      (toggle-modal {:active false :gig initial-values}))]
+30c31
+<          {:on-click #(toggle-modal {:active true :gig {}})}
+---
+>          {:on-click #(toggle-modal {:active true :gig initial-values})}
+34c35,39
+<         [gig-editor modal values upsert-gig toggle-modal]
+---
+>         [gig-editor {:modal modal
+>                      :values values
+>                      :upsert-gig upsert-gig
+>                      :toggle-modal toggle-modal
+>                      :initial-values initial-values}]
+#+end_example
+
+*** file
+[[*diff dirs recersiv][diff dirs recersiv]]
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/src/giggin/components/gigs.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/src/giggin/components/gig_editor.cljs")
+18-ajax-requests/src/giggin/components/gigs.cljs
+18-ajax-requests/src/giggin/components/gig_editor.cljs
+*** DONE 
+**** DONE сделать диф блок
+**** DONE перенсти в него конкретно для этого
+**** DONE пройтись по изменениям выписать их как туду для переноса
+**** DONE возможно заменить на
+
+  (let [{:keys [title desc img price sold-out]} @values]
+
+                    :values values}]
+
+<                   :value (:title @values)
+**** DONE сделать нулевый айди
+
+        initial-values {:id nil :title "" :desc "" :price 0 :img "" :sold-out false}
+        всё должно работат но так надёжны
+        проверить что всё работает
+        если нет то повод исправить
+        может даже написать тест
+**** DONE инитал валуе удобно
+поскольку позволяет слатьих раз за разом
+с другой стороны ими иожно обнулять
+проверить сколько раз я их шлю
+**** DONE перенести измения
+**** стестирова деланание тестов на примере гиг-едита
+**** сделать комит
+**** 
 * backlog
 * project comands
 :PROPERTIES:
