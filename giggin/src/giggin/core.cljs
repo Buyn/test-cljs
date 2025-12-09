@@ -19,7 +19,7 @@
 
 (defn ^:export main
   []
-  (api/fetch-gigs)
+  (api/fetch-gigs (r/cursor app-state [:gigs]))
   (r/render
     [app]
     (.getElementById js/document "app")))

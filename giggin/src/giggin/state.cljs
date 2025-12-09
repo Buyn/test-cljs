@@ -7,7 +7,8 @@
                      :modal false
                      :values {:id (str "gig-" (random-uuid))
                                :title "" :desc "" :price 0 :img "" :sold-out false}}
-                :gigs {
+                :gigs {}
+                :gigs1 {
                    :gig-01 {:id :gig-01
                             :title "Macaron"
                             :artist "Baher Khairy"

@@ -50,6 +50,7 @@
 (find-file-other-frame "./package.json")
 (find-file-other-frame "./giggin.org")
 ** src core
+(current-buffer)
 *** core.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/core.cljs
@@ -79,7 +80,7 @@
 
 (defn ^:export main
   []
-  (api/fetch-gigs)
+  (api/fetch-gigs (r/cursor app-state [:gigs]))
   (r/render
     [app]
     (.getElementById js/document "app")))
@@ -113,7 +114,8 @@ app
                      :modal false
                      :values {:id (str "gig-" (random-uuid))
                                :title "" :desc "" :price 0 :img "" :sold-out false}}
-                :gigs {
+                :gigs {}
+                :gigs1 {
                    :gig-01 {:id :gig-01
                             :title "Macaron"
                             :artist "Baher Khairy"
@@ -216,6 +218,7 @@ app
 
 (defn f [] (js/console.log "called"))
 (f 1 2 3)
+
 *** helpers.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/helpers.cljs
@@ -248,16 +251,24 @@ app
 (ns giggin.api
   (:require [ajax.core :refer [GET]]))
 
-(defn handler [response]
-  (.log js/console response))
+(defn index-by
+  [key coll]
+  "Transfomr a coll to a map with a given key as a lookup value"
+  (->> coll
+       ;; (map (juxt key identity))
+       (map (juxt #(keyword (key %)) identity))
+       (into {})))
+
+(defn handler [gigs response]
+  (reset! gigs (index-by :id response)))
 
 (defn error-handler [{:keys [status status-text]}]
   (.log js/console (str "something bad happened: " status " " status-text)))
 
 (defn fetch-gigs
-  []
+  [gigs]
   (GET "https://gist.githubusercontent.com/jacekschae/8c10aa58a6163905fffcec33dd6f5a01/raw/20874f73b2c1d0ad08d828131d6ea8392950780a/gigs.json"
-       {:handler handler
+       {:handler #(handler gigs %)
         :error-handler error-handler
         :response-format :json
         :keywords? true}))
@@ -267,6 +278,186 @@ app
 
 #+RESULTS:
 : Please reevaluate when nREPL is connected
+**** reple
+:PROPERTIES:
+:header-args: :tangle no
+:END:
+***** 01
+(ns giggin.api
+  (:require [ajax.core :refer [GET]]))
+
+  (require '[ajax.core :refer [GET]])
+
+(defn handler [response]
+  (.log js/console response)
+  (println "get result - ")
+  (println response))
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text))
+  (println "get erros - ")
+  (println (str "something bad happened: " status " " status-text)))
+
+(defn fetch-gigs
+  []
+  (GET "https://gist.githubusercontent.com/jacekschae/8c10aa58a6163905fffcec33dd6f5a01/raw/20874f73b2c1d0ad08d828131d6ea8392950780a/gigs.json"
+       {:handler handler
+        :error-handler error-handler
+        :response-format :json
+        :keywords? true}))
+
+(fetch-gigs)
+
+(def result (fetch-gigs))
+(println result)
+
+(GET "https://gist.githubusercontent.com/jacekschae/8c10aa58a6163905fffcec33dd6f5a01/raw/20874f73b2c1d0ad08d828131d6ea8392950780a/gigs.json"
+       {:handler handler
+        :error-handler error-handler
+        :response-format :json
+        :keywords? true})
+
+***** 02
+(defonce gigs-atom (atom nil))
+
+(defn handler [response]
+  (reset! gigs response)
+  (js/console.log "gigs loaded:" response))
+
+(defn handler [response]
+  (reset! gigs-atom response)
+  (.log js/console response))
+
+(println @gigs-atom)
+
+(fetch-gigs)
+
+  
+***** block 01
+#+begin_src clojure :tangle no
+(require '[ajax.core :refer [GET]])
+
+(defonce gigs-atom (atom nil))
+
+(defn handler [response]
+  (reset! gigs-atom response)
+  (js/console.log "gigs loaded:" response))
+
+(defn error-handler [{:keys [status status-text]}]
+  (.log js/console (str "something bad happened: " status " " status-text))
+  (println "get erros - ")
+  (println (str "something bad happened: " status " " status-text)))
+
+(defn fetch-gigs
+  []
+  (GET "https://gist.githubusercontent.com/jacekschae/8c10aa58a6163905fffcec33dd6f5a01/raw/20874f73b2c1d0ad08d828131d6ea8392950780a/gigs.json"
+       {:handler handler
+        :error-handler error-handler
+        :response-format :json
+        :keywords? true}))
+
+#+end_src
+
+#+RESULTS:
+: Please reevaluate when nREPL is connected
+
+***** block 02
+#+begin_src clojure :tangle no
+(fetch-gigs)
+
+(println @gigs-atom)
+
+
+#+end_src
+
+***** block 03
+(defn index-by
+  [key coll]
+  "Transfomr a coll to a map with a given key as a lookup value"
+  (->> coll
+       (map (juxt key identity))
+       (into {})))
+#+begin_src clojure :tangle no
+(fetch-gigs)
+
+(println @gigs-atom)
+
+@gigs-atom
+
+(map (juxt key identity) @gigs-atom)
+
+(println (map key @gigs-atom))
+
+@gigs-atom
+(keys @gigs-atom)
+
+(first @gigs-atom)
+
+(def normal-gigs (->> @gigs-atom
+       (map (juxt :id identity))
+       (into {})))
+
+normal-gigs
+(first normal-gigs)
+
+(key (first normal-gigs))
+
+("gig-09" normal-gigs)
+#+end_src
+***** block 04
+(defn index-by
+  [key coll]
+  "Transfomr a coll to a map with a given key as a lookup value"
+  (->> coll
+       (map (juxt key identity))
+       (into {})))
+#+begin_src clojure :tangle no
+(fetch-gigs)
+
+(println @gigs-atom)
+
+@gigs-atom
+
+(map (juxt key identity) @gigs-atom)
+
+(println (map key @gigs-atom))
+
+@gigs-atom
+(keys @gigs-atom)
+
+(first @gigs-atom)
+
+(def normal-gigs (->> @gigs-atom
+       (map (juxt :id identity))
+       (into {})))
+
+(def normal-gigs
+  (->> @gigs-atom
+       (map (juxt #(keyword (:id %)) identity))
+       (into {})))
+
+normal-gigs
+(first normal-gigs)
+
+(keyword (key (first normal-gigs)))
+
+(:gig-09 normal-gigs)
+
+(:img (:gig-09 normal-gigs))
+#+end_src
+**** CANCELED archiv
+
+;; (defn handler [response]
+;;   (.log js/console response))
+
+;; (defn index-by
+;;   [key coll]
+;;   "Transfomr a coll to a map with a given key as a lookup value"
+;;   (->> coll
+;;        (map (juxt key identity))
+;;        (into {})))
+
+
 ** components
 *** header.cljs
 :PROPERTIES:
@@ -1970,6 +2161,8 @@ shadow-cljs cljs-repl app
 
 lein figwheel
 ** connect to nREPL
+(cider-connect-cljs '(:host "localhost" :port 3333 :cljs-repl-type shadow))
+
 (cider)
 (cider-connect-cljs)
 (cider-connect-cljs (:host "localhost" :port 3333 :cljs-repl-type ’shadow))
@@ -2221,104 +2414,131 @@ learn-reagent-course-files/giggin/ $ yarn dev
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
 * TODO
-** TODO Разобрать 18
-*** TODO 
-**** DONE сделать сорс шадов
-**** DONE добавить фджакс
-**** DONE сделать фаил апи добавить контекст
-**** DONE прогнать на работоспособность
-**** DONE поправить теcт
-***** error
--*- mode: compilation; default-directory: "~/Dev/ClojureScript/tutorials/my-cljs-project/giggin/" -*-
-Compilation started at Sat Dec  6 20:55:53
-
-npx shadow-cljs compile test && node out/node-tests.js
-shadow-cljs - config: /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/shadow-cljs.edn
-shadow-cljs - connected to server
-[:test] Compiling ...
-[:test] Build completed. (160 files, 92 compiled, 0 warnings, 2.50s)
-
-
-SHADOW import error /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/.shadow-cljs/builds/test/dev/out/cljs-runtime/ajax.xml_http_request.js
-Error: Cannot find module 'xmlhttprequest'
-Require stack:
-- /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/out/node-tests.js
-    at Module._resolveFilename (node:internal/modules/cjs/loader:1410:15)
-    at defaultResolveImpl (node:internal/modules/cjs/loader:1051:19)
-    at resolveForCJSWithHooks (node:internal/modules/cjs/loader:1056:22)
-    at Module._load (node:internal/modules/cjs/loader:1219:37)
-    at TracingChannel.traceSync (node:diagnostics_channel:322:14)
-    at wrapModuleLoad (node:internal/modules/cjs/loader:238:24)
-    at Module.require (node:internal/modules/cjs/loader:1493:12)
-    at require (node:internal/modules/helpers:152:16)
-    at /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/.shadow-cljs/builds/test/dev/out/cljs-runtime/ajax/xml_http_request.cljs:31:26
-    at /home/buyn/Dev/ClojureScript/tutorials/my-cljs-project/giggin/.shadow-cljs/builds/test/dev/out/cljs-runtime/ajax.xml_http_request.js:32:3
-
-Compilation exited abnormally with code 1 at Sat Dec  6 20:55:57, duration 4.87 s
-***** src
-****** file shadow-cljs.edn
-(find-file-other-frame "./shadow-cljs.edn")
-****** src shadow-cljs.edn
-#+begin_src clojure :no-expand t :mkdirp yes
-{:source-paths ["src"]
-
- :dependencies [[binaryage/devtools "0.9.10"]
-                [proto-repl "0.3.1"]
-                [reagent "0.8.0"]
-                [cljs-ajax "0.7.3"]]
-
- :nrepl        {:port 3333}
-
- :builds
- {:app {:target :browser
-        :output-dir "public/js"
-        :asset-path "/js"
-
-        :modules
-        {:main
-         {:entries [giggin.core]}}
-
-        :devtools
-        {:after-load  giggin.core/main
-         :http-root   "public"
-         :http-port   3000}}
-
-  :test {:target :node-test
-           :output-to "out/node-tests.js"
-           ;; :ns-regexp "-test$" ; по умолчанию
-           ;; :autorun false
-           }}}
-
-
-#+end_src
-***** помоги разобратся
-
-с добовлением в зависимотси ажакса упали тест ранер который до этго работали
-**** прогнать репл
-***** сделать разные запросы
-***** понять что он возврашает
+** DONE Разобрать 19
+*** DONE 
+**** DONE проверить работу через перменную
+**** DONE понять что возврашается
+**** DONE понять что конвертирует функция
 **** сделать комит
 *** diff block
 **** block
-19-ajax-transformations 18-ajax-requests
+20-firebase-setup 19-ajax-transformations 
 
+diff -r 20-firebase-setup 19-ajax-transformations 
 #+begin_src eshell :dir /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/ :results output replace
-diff -r 19-ajax-transformations 18-ajax-requests 
+diff -r 19-ajax-transformations 20-firebase-setup
 
 #+end_src
 
 #+RESULTS:
 #+begin_example
 Only in 19-ajax-transformations: shadow-cljs.edn
-Only in 19-ajax-transformations/src/giggin: api.cljs
-diff -r 19-ajax-transformations/src/giggin/core.cljs 18-ajax-requests/src/giggin/core.cljs
-6,7c6
-<             [giggin.components.footer :refer [footer]]
-<             [giggin.api :as api]))
+diff -r 19-ajax-transformations/src/giggin/api.cljs 20-firebase-setup/src/giggin/api.cljs
+2c2,10
+<   (:require [ajax.core :refer [GET]]))
 ---
->             [giggin.components.footer :refer [footer]]))
-19d17
-<   (api/fetch-gigs)
+>   (:require [ajax.core :refer [GET]]
+>             [giggin.state :as state]))
+> 
+> (defn index-by
+>   [key coll]
+>   "Transfomr a coll to a map with a given key as a lookup value"
+>   (->> coll
+>        (map (juxt key identity))
+>        (into {})))
+5c13
+<   (.log js/console response))
+---
+>   (reset! state/gigs (index-by :id response)))
+diff -r 19-ajax-transformations/src/giggin/state.cljs 20-firebase-setup/src/giggin/state.cljs
+6,90c6
+< (def gigs (r/atom {:gig-01 {:id :gig-01
+<                             :title "Macaron"
+<                             :artist "Baher Khairy"
+<                             :desc "Sweet meringue-based rhythms with smooth and sweet injections of soul"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/baher-khairy-97645.jpg"
+<                             :price 1000
+<                             :sold-out false}
+<                    :gig-02 {:id :gig-02
+<                             :title "Stairs"
+<                             :artist "Brentr De Ranter"
+<                             :desc "Stairs to the highets peaks of music."
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/brent-de-ranter-426248.jpg"
+<                             :price 2000
+<                             :sold-out false}
+<                    :gig-03 {:id :gig-03
+<                             :title "Infusion"
+<                             :artist "Camille Couvez"
+<                             :desc "Introduction of a new elements of music into modern world"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/camille-couvez-424606.jpg"
+<                             :price 3000
+<                             :sold-out false}
+<                    :gig-04 {:id :gig-04
+<                             :title "Books"
+<                             :artist "Cesar-Viteri"
+<                             :desc "A book of music, exploring different music genres across last decade"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/cesar-viteri-426877.jpg"
+<                             :seats 40
+<                             :price 4000
+<                             :sold-out false}
+<                    :gig-05 {:id :gig-05
+<                             :title "White"
+<                             :artist "Dan Schiumarini"
+<                             :desc "Vulnerability and humility exposed with Raps of Dan Schiumarini"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/dan-schiumarini-427769.jpg"
+<                             :price 5000
+<                             :sold-out false}
+<                    :gig-06 {:id :gig-06
+<                             :title "Hustin'"
+<                             :artist "Frank Cordoba"
+<                             :desc "Story of Hip Hop hustle by Frank Cordoba"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/frank-cordoba-425264.jpg"
+<                             :price 6000
+<                             :sold-out false}
+<                    :gig-07 {:id :gig-07
+<                             :title "Pumping"
+<                             :artist "Jakob Owens"
+<                             :desc "Get energized and ready to rock with this fresh and bright work of Jakob Owens"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/jakob-owens-393298.jpg"
+<                             :price 7000
+<                             :sold-out false}
+<                    :gig-08 {:id :gig-08
+<                             :title "Lion"
+<                             :artist "Jakob Puff"
+<                             :desc "An album of wild and brave sounds explored by Jakob Puff"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/jakob-puff-425634.jpg"
+<                             :price 8000
+<                             :sold-out false}
+<                    :gig-09 {:id :gig-09
+<                             :title "ampersand"
+<                             :artist "Kirstyn Paynter"
+<                             :desc "Connect music and words with ampersand and enjoy find out what happens next"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552696/giggin/kirstyn-paynter-424217.jpg"
+<                             :price 9000
+<                             :sold-out false}
+<                    :gig-10 {:id :gig-10
+<                             :title "Taxi"
+<                             :artist "Peter Kasprzyk"
+<                             :desc "Taka a Taxi ride with Peter to explore different beats of the city"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552696/giggin/peter-kasprzyk-111462.jpg"
+<                             :price 9000
+<                             :sold-out false}
+<                    :gig-11 {:id :gig-11
+<                             :title "Plaza De La Juderia"
+<                             :artist "Quino Al"
+<                             :desc "Spanish rhythms from Plaza De La Juderia"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552696/giggin/quino-al-427620.jpg"
+<                             :price 9000
+<                             :sold-out false}
+<                    :gig-12 {:id :gig-12
+<                             :title "Girl"
+<                             :artist "Shine Tang"
+<                             :desc "Shine Tang offers a grand exploration of classical music"
+<                             :img "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552696/giggin/shine-tang-425878.jpg"
+<                             :price 9000
+<                             :sold-out false}}))
+---
+> (def gigs (r/atom {}))
 #+end_example
 **** all
 
@@ -2328,10 +2548,9 @@ diff -r 19-ajax-transformations/src/giggin/core.cljs 18-ajax-requests/src/giggin
 07-add-to-order        12-refactor-functions  17-refactor-gigs  22-subscribe             28-performance-url   
 08-for-over-orders     13-checkout-modal      18-ajax-requests  23-sold-out              29-tips-and-tricks   
 *** file
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/19-ajax-transformations/shadow-cljs.edn")
 (find-file-other-frame 
-"~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/19-ajax-transformations/src/giggin/api.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/19-ajax-transformations/src/giggin/core.cljs")
+"~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/20-firebase-setup/src/giggin/api.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/20-firebase-setup/src/giggin/core.cljs")
 [[*diff dirs recersiv][diff dirs recersiv]]
 19-ajax-transformations/src/giggin: api.cljs
 shadow-cljs.edn
@@ -4718,18 +4937,41 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 (org-babel-tangle)
 (evil-close-fold)
 (evil-close-fold)
-(let ((curent-buffer (buffer-name)))
-  (unless (get-buffer "*compilation*")
-    (compile "npx shadow-cljs compile test && node out/node-tests.js"))
-  (select-frame-by-name "*compilation*")
-  (recompile)
-  (select-frame-by-name curent-buffer))
+;; (let ((curent-buffer (buffer-name)))
+;;   (unless (get-buffer "*compilation*")
+;;     (compile "npx shadow-cljs compile test && node out/node-tests.js"))
+;;   (select-frame-by-name "*compilation*")
+;;   (recompile)
+;;   (select-frame-by-name curent-buffer))
 
 ;; (find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
 ;; (find-file-other-frame "~/INI/hydra-cfg.el")
 ;; (load "~/INI/hydra-cfg.el")
 ;; (load "~/ELs/BuYn/reader.el")
  #+end_src
+
+**** test
+
+#+begin_src elisp
+(let ((origin-buffer (buffer-name)))
+      (if (and my/org-saved-buffer (buffer-live-p my/org-saved-buffer))
+          (progn
+            ;; Переключаемся в сохранённый буфер
+            ;; (switch-to-buffer my/org-saved-buffer)
+            (select-frame-by-name my/org-saved-buffer)
+            (message "Executing in saved buffer: %s" (buffer-name))
+            (org-babel-goto-named-src-block "auto-tangle-block")
+            (org-babel-execute-src-block)
+            ;; Возвращаемся
+            ;; (switch-to-buffer origin-buffer))
+            (select-frame-by-name origin-buffer))
+        ;; Если нет – выполняем тут же
+          (progn (org-babel-goto-named-src-block "auto-tangle-block")
+                 (org-babel-execute-src-block))))
+#+end_src
+
+#+RESULTS:
+
 * files giggin
 ** files root
 (find-file-other-frame "./.gitignore")
