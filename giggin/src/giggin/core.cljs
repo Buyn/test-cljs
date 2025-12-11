@@ -5,6 +5,7 @@
             [giggin.components.header :refer [header]]
             [giggin.components.orders :refer [orders]]
             [giggin.api :as api]
+            [giggin.fb.init :refer [firebase-init]]
             [giggin.components.footer :refer [footer]]))
 
 (defonce app-state state/app-state)
@@ -22,4 +23,5 @@
   (api/fetch-gigs (r/cursor app-state [:gigs]))
   (r/render
     [app]
-    (.getElementById js/document "app")))
+    (.getElementById js/document "app"))
+  (firebase-init))

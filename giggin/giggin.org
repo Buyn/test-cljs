@@ -86,7 +86,6 @@
 (find-file-other-frame "./package.json")
 (find-file-other-frame "./giggin.org")
 ** src core
-(current-buffer)
 *** core.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/core.cljs
@@ -102,6 +101,7 @@
             [giggin.components.header :refer [header]]
             [giggin.components.orders :refer [orders]]
             [giggin.api :as api]
+            [giggin.fb.init :refer [firebase-init]]
             [giggin.components.footer :refer [footer]]))
 
 (defonce app-state state/app-state)
@@ -119,7 +119,8 @@
   (api/fetch-gigs (r/cursor app-state [:gigs]))
   (r/render
     [app]
-    (.getElementById js/document "app")))
+    (.getElementById js/document "app"))
+  (firebase-init))
 
 
 #+end_src
@@ -2425,7 +2426,17 @@ jobs:
           publish_dir: ./resources/public
 
 ** deps
+(buyn-shell-start "konsole")
+
 npm install
+
+npm install firebase
+  npm uninstall firebase
+  npm install firebase@9
+  npm install firebase@latest
+
+ls node_modules/firebase
+
 
 * описание
 ** 
@@ -2476,6 +2487,25 @@ learn-reagent-course-files/giggin/ $ yarn dev
 * TODO
 ** TODO Разобрать 20
 *** TODO
+**** DONE спросить 
+***** src
+(ns giggin.fb.init
+  (:require ["firebase/app" :as firebase]
+            ["firebase/database"]
+            ["firebase/auth"]))
+
+(defn firebase-init
+  []
+  (firebase/initializeApp
+   {:apiKey "your-api-key"
+    :authDomain "your-auth-domain"
+    :databaseURL "your-databse-url"
+    :projectId "your-project-id"}))
+***** хочу освоить
+гугл firebase из кложур скрипта.
+сдела такой фаил инициализации.
+но несем понимаю как добится безопасности.
+тоесть если я такой фаил полужу на сервер это будет не безопасно. поскольку любой кто получит доступ к файлу получается получит доступ к базеданых. Какие варианты сделать безапасно?
 **** сделать комит
 *** diff block
 **** block

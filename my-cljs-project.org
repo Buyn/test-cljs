@@ -3324,17 +3324,17 @@ https://github.com/thdaraujo/re-frame-todo
 https://todomvc.com/
 *** сделать теплат
 https://github.com/Day8/re-frame-template
+*** reagent-figwheel
+https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
+темплат похоже заточен под рефрейм стоит промониторить
+может это вполне путь для ознакомления
+
 *** почитать ре-фрейм сайт?
 *** поискать туториал по ре-фрейму?
 открыть это всё можно в имаксе на ноуте
 и как минимум час вполне можно читать
 можно найти пдф и читать больше
 также вариант планшет + бтарея
-*** reagent-figwheel
-https://github.com/gadfly361/reagent-figwheel/blob/master/README.md
-темплат похоже заточен под рефрейм стоит промониторить
-может это вполне путь для ознакомления
-
 ** ИИ
 Чтожь это выглядит как план.
 взять знакомые технологии.
