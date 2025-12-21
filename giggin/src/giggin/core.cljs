@@ -1,7 +1,7 @@
 (ns giggin.core
   (:require [reagent.core :as r]
             [giggin.components.gigs :refer [gigs]]
-            [giggin.state :as state ]
+            [giggin.state :refer [gigs-cursor] :as state ]
             [giggin.components.header :refer [header]]
             [giggin.components.orders :refer [orders]]
             [giggin.api :as api]
@@ -20,8 +20,9 @@
 
 (defn ^:export main
   []
-  (api/fetch-gigs (r/cursor app-state [:gigs]))
+  (api/fetch-gigs (gigs-cursor app-state))
   (r/render
     [app]
     (.getElementById js/document "app"))
-  (firebase-init))
+  (firebase-init)
+  )

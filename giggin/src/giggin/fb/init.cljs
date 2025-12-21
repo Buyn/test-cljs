@@ -5,8 +5,10 @@
 
 (defn firebase-init
   []
-  (firebase/initializeApp
-   {:apiKey "your-api-key"
-    :authDomain "your-auth-domain"
-    :databaseURL "your-databse-url"
-    :projectId "your-project-id"}))
+  (if (zero? (alength firebase/apps))
+    (firebase/initializeApp
+     #js {:apiKey "your-api-key"
+          :authDomain "your-auth-domain"
+          :databaseURL "your-databse-url"
+          :projectId "your-project-id"})
+    (firebase/app)))

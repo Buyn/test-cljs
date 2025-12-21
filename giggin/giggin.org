@@ -66,13 +66,13 @@
     "clean-win": "rmdir /s /q public/js & rmdir /s /q target"
   },
   "devDependencies": {
-    "shadow-cljs": "2.3.30"
+    "shadow-cljs": "^2.27.5"
   },
   "dependencies": {
-    "create-react-class": "15.6.3",
-    "firebase": "^4.13.1",
-    "react": "16.3.2",
-    "react-dom": "16.3.2"
+    "firebase": "^10.7.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "create-react-class": "^15.7.0"
   }
 }
 
@@ -97,7 +97,7 @@
 (ns giggin.core
   (:require [reagent.core :as r]
             [giggin.components.gigs :refer [gigs]]
-            [giggin.state :as state ]
+            [giggin.state :refer [gigs-cursor] :as state ]
             [giggin.components.header :refer [header]]
             [giggin.components.orders :refer [orders]]
             [giggin.api :as api]
@@ -116,17 +116,17 @@
 
 (defn ^:export main
   []
-  (api/fetch-gigs (r/cursor app-state [:gigs]))
+  (api/fetch-gigs (gigs-cursor app-state))
   (r/render
     [app]
     (.getElementById js/document "app"))
-  (firebase-init))
+  (firebase-init)
+  )
 
 
 #+end_src
 
-#+RESULTS:
-: Please reevaluate when nREPL is connected
+
 **** reple
 (in-ns 'giggin.core)
 app
@@ -144,6 +144,16 @@ app
 #+begin_src clojure :no-expand t :mkdirp yes
 (ns giggin.state
   (:require [reagent.core :as r]))
+
+
+(defn gigs-cursor [app]
+  (r/cursor app [:gigs]))
+
+(defn orders-cursor [app]
+  (r/cursor app [:orders]))
+
+(defn gig-editor-cursor [app]
+  (r/cursor app [:gig-editor]))
 
 (def app-state (r/atom {
                 :orders {}
@@ -531,12 +541,9 @@ normal-gigs
 (ns giggin.components.gigs
   (:require
             [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
-            [giggin.components.orders :refer [orders-cursor add-to-order]]
+            [giggin.components.orders :refer [add-to-order]]
             [reagent.core :as r]
             [giggin.helpers :refer [format-price]]))
-
-(defn gigs-cursor [app]
-  (r/cursor app [:gigs]))
 
 (defn gig [app {:keys [id img title price desc] :as el}]
     [:div.gig {:key id}
@@ -795,11 +802,9 @@ normal-gigs
 (ns giggin.components.orders
   (:require [giggin.state :as state ]
             [giggin.helpers :refer [format-price]]
-            [reagent.core :as r]
+            [giggin.state :refer [orders-cursor gigs-cursor]]
+            [giggin.components.admin-panel :refer [admin-panel]]
             [giggin.components.checkout-modal :refer [checkout-modal]]))
-
-(defn orders-cursor [app]
-  (r/cursor app [:orders]))
 
 (defn add-to-order
   [app id]
@@ -838,13 +843,13 @@ normal-gigs
               [:i.icon.icon--cross]]]]))
 
 
-
 (defn orders
   [app]
   (let [orders (orders-cursor app)
-        gigs   (r/cursor app [:gigs])]
+        gigs   (gigs-cursor app)]
    [:aside
     [:div.order 
+      [admin-panel app]
       (if (empty? @orders)
         [:div.empty
          [:div.title "You don't have any orders."]
@@ -869,8 +874,6 @@ normal-gigs
 
 #+end_src
 
-#+RESULTS:
-: Please reevaluate when nREPL is connected
 *** footer.cljs
 :PROPERTIES:
 :header-args: :tangle ./src/giggin/components/footer.cljs
@@ -928,8 +931,33 @@ normal-gigs
 
 #+RESULTS:
 : Please reevaluate when nREPL is connected
-*** exampls
-/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/admin_panel.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/checkout_modal.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/footer.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/gig_editor.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/gigs.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/header.cljs /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/29-tips-and-tricks/src/giggin/components/orders.cljs
+*** admin_panel.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/components/admin_panel.cljs
+:END:
+**** file admin_panel.cljs
+(find-file-other-frame "./src/giggin/components/admin_panel.cljs")
+**** src admin_panel.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.admin-panel
+  (:require [giggin.state :refer [gigs-cursor]]
+            [giggin.fb.db :refer [db-save!]]))
+
+(defn admin-panel
+  [app]
+  [:div.admin-panel
+   [:button.btn.btn--primary
+    {:styles {:width "100%"}
+     :on-click #(db-save! ["gigs"] (clj->js @(gigs-cursor app)))}
+    "Publish"]])
+
+
+
+#+end_src
+**** archiv
+
+     :on-click #(db-save! ["gigs"] (clj->js @state/gigs))}
+
 ** src other
 *** firebase
 **** fb/init.cljs
@@ -937,9 +965,28 @@ normal-gigs
 :header-args: :tangle ./src/giggin/fb/init.cljs
 :END:
 ***** file
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/21-firebase-database/src/giggin/fb/init.cljs")
+(find-file-other-frame "./src/giggin/fb/init.cljs")
 ***** src fb/init.cljs
 #+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.fb.init
+  (:require ["firebase/app" :as firebase]
+            ["firebase/database"]
+            ["firebase/auth"]))
+
+(defn firebase-init
+  []
+  (if (zero? (alength firebase/apps))
+    (firebase/initializeApp
+     #js {:apiKey "your-api-key"
+          :authDomain "your-auth-domain"
+          :databaseURL "your-databse-url"
+          :projectId "your-project-id"})
+    (firebase/app)))
+
+
+#+end_src
+***** archiv
+
 (ns giggin.fb.init
   (:require ["firebase/app" :as firebase]
             ["firebase/database"]
@@ -953,8 +1000,29 @@ normal-gigs
     :databaseURL "your-databse-url"
     :projectId "your-project-id"}))
 
+**** fb/db.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/giggin/fb/db.cljs
+:END:
+***** file
+(find-file-other-frame "./src/giggin/fb/db.cljs")
+***** src fb/db.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.fb.db
+  (:require ["firebase/app" :refer [database]]
+            [clojure.string :as str]))
+
+(defn db-ref
+  [path]
+  (.ref (database) (str/join "/" path)))
+
+(defn db-save!
+  [path value]
+  (.set (db-ref path) value))
+
 
 #+end_src
+
 ** src resources
 *** index.html
 :PROPERTIES:
@@ -2162,6 +2230,182 @@ node out/node-tests.js
         (evil-quit)
         (switch-to-buffer-other-frame buffer-name-to-close))
 #+end_src
+*** orders_test.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/tests/orders_test.cljs
+:END:
+**** file orders_test
+(find-file-other-frame "./src/tests/orders_test.cljs")
+
+**** src orders_test
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns tests.orders-test
+  (:require [cljs.test :refer [deftest is]]
+            [giggin.state :as state ]
+            [tests.testhelper :refer [hiccup-normalize] ]
+            [reagent.core :as r]
+            [giggin.components.orders :as t]))
+
+
+
+(deftest orders-test
+  (let [app state/app-state
+        ;; modal (r/cursor app [:gig-editor :modal])
+        gigs (state/gigs-cursor app)
+        gig1 (first @gigs)
+        init-value    (t/orders app)
+        ;; test1-id-value (str "gig-" (random-uuid))
+        ;; test1-value   {:id test1-id-value
+        ;;               :title "test" :desc "test" :price 100 :img "100" :sold-out false}
+        ]
+    ;; (println init-value)
+    ;; (is (= init-value [:aside [:div.order [#object[giggin$components$admin_panel$admin_panel] app] [:div.empty [:div.title "You don't have any orders."] [:div.subtitle "Click on a + to add an order"]]]]))
+    (is (= (first init-value) :aside))
+    (is (= (first (second init-value)) :div.order))
+    (is (= (hiccup-normalize init-value)
+       [:aside
+        [:div.order
+         [:__component__ app]
+         [:div.empty
+          [:div.title "You don't have any orders."]
+          [:div.subtitle "Click on a + to add an order"]]]]))
+
+    (is (= (hiccup-normalize init-value)
+       [:aside
+        [:div.order
+         [:__component__ app]
+         [:div.empty
+          [:div.title "You don't have any orders."]
+          [:div.subtitle "Click on a + to add an order"]]]]))
+    ;; (t/gig-editor-new app)
+    ;; (is (= (dissoc @value :id) (dissoc init-value :id)))
+    ;; (is (= @modal true))
+    ))
+
+
+(deftest orders-item-test
+  (let [app state/app-state
+        gigs (state/gigs-cursor app)
+        orders (state/orders-cursor app)
+        ;; modal (r/cursor app [:gig-editor :modal])
+        gig1 (first @gigs)
+        init-value    (t/order-item orders (:id gig1) 1 @gigs)
+        ;; test1-id-value (str "gig-" (random-uuid))
+        ;; test1-value   {:id test1-id-value
+        ;;               :title "test" :desc "test" :price 100 :img "100" :sold-out false}
+        ]
+    (is (= (hiccup-normalize init-value)
+      [:div.item {:key nil}
+        [:div.img [:img {:src nil, :alt nil}]]
+        [:div.content [:p.title " × 1"]]
+        [:div.action
+          [:div.price "$0"]
+          [:button.btn.btn--link.tooltip
+            {:data-tooltip "Remove",
+              :on-click :__fn__}
+            [:i.icon.icon--cross]]]]))
+    ;; (t/gig-editor-new app)
+    ;; (is (= (dissoc @value :id) (dissoc init-value :id)))
+    ;; (is (= @modal true))
+    ))
+
+#+end_src
+**** exampls
+***** 03
+
+(defn strip-components [hiccup]
+  (cond
+    ;; 1️⃣ Reagent-компонент
+    (and (vector? hiccup) (fn? (first hiccup)))
+      (into [:__component__]
+            (map strip-components (rest hiccup)))
+    ;; 2️⃣ hiccup-вектор
+    (vector? hiccup)
+      (mapv strip-components hiccup)
+    ;; 3️⃣ props map (event handlers и т.п.)
+    (map? hiccup)
+      (into {}
+            (for [[k v] hiccup]
+              [k (if (fn? v)
+                  :__fn__
+                  (strip-components v))]))
+    ;; 4️⃣ всё остальное
+    :else hiccup))
+***** 02
+(defn strip-components [hiccup]
+  (cond
+    (and (vector? hiccup) (fn? (first hiccup)))
+      (into [:__component__] (map strip-components (rest hiccup)))
+    (vector? hiccup)
+      (mapv strip-components hiccup)
+    :else hiccup))
+***** 01
+    (is (= (not @modal)))
+    (t/gig-editor-new app)
+    (is (= (dissoc @value :id) (dissoc init-value :id)))
+    (is (= @modal true))
+    (t/gig-editor-toggle app false)
+    (is (= @modal false))
+    (t/gig-editor-open app test1-value)
+    (is (= @value test1-value))
+    (is (= @modal true))
+    (t/gig-editor-insert app)
+    (is (= @value test1-value))
+    (is (= (get-in @app [:gigs test1-id-value]) test1-value))
+    (is (= @modal true))
+    (t/gig-editor-new app)
+    (is (= (dissoc @value :id) (dissoc init-value :id)))
+    (is (= @modal true))
+**** reple
+npx shadow-cljs compile test
+node out/node-tests.js
+
+#+begin_src elisp :results output silent :tangle no
+;; (evil-previous-line)
+;; (org-cycle)
+;; (delete-other-windows)
+(let (buffer-name-to-close (buffer-name))
+        (evil-window-split)
+        (eshell)
+        (evil-quit)
+        (switch-to-buffer-other-frame buffer-name-to-close))
+#+end_src
+*** testhelper.cljs
+:PROPERTIES:
+:header-args: :tangle ./src/tests/testhelper.cljs
+:END:
+**** file orders_test
+(find-file-other-frame "./src/tests/testhelper.cljs")
+
+**** src orders_test
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns tests.testhelper)
+  ;; (:require [cljs.test :refer [deftest is]]
+  ;;           [reagent.core :as r]
+
+
+(defn hiccup-normalize [hiccup]
+  (cond
+    ;; 1️⃣ Reagent-компонент
+    (and (vector? hiccup) (fn? (first hiccup)))
+      (into [:__component__]
+            (map hiccup-normalize (rest hiccup)))
+    ;; 2️⃣ hiccup-вектор
+    (vector? hiccup)
+      (mapv hiccup-normalize hiccup)
+    ;; 3️⃣ props map (event handlers и т.п.)
+    (map? hiccup)
+      (into {}
+            (for [[k v] hiccup]
+              [k (if (fn? v)
+                  :__fn__
+                  (hiccup-normalize v))]))
+    ;; 4️⃣ всё остальное
+    :else hiccup))
+
+
+
+#+end_src
 * run giggin
 ** run server and reple
 #+begin_src elisp :results output silent
@@ -2205,6 +2449,9 @@ rm -rf .cpcache
 lein cljsbuild once
 
 lein deps :refresh
+** compile
+(compile "npx shadow-cljs compile test && node out/node-tests.js")
+
 ** run dev
 npm run dev
 
@@ -2228,6 +2475,8 @@ lein figwheel
 (cider-connect-cljs)
 (cider-connect-cljs (:host "localhost" :port 3333 :cljs-repl-type ’shadow))
 (shadow.cljs.devtools.api/nrepl-select :app)
+** run clean
+npm run clean
 ** git
 *** init
 git init
@@ -2426,6 +2675,7 @@ jobs:
           publish_dir: ./resources/public
 
 ** deps
+*** insatl
 (buyn-shell-start "konsole")
 
 npm install
@@ -2437,7 +2687,30 @@ npm install firebase
 
 ls node_modules/firebase
 
+*** reinstall
+(buyn-shell-start "konsole")
 
+rm package-lock.json
+
+rm -rf node_modules
+
+npm install
+
+ВАЖНО
+
+Если после обновления у тебя появится папка:
+
+public/js
+target/
+
+    "clean": "rm -rf target && rm -rf public/js",
+
+
+
+npm run clean
+их тоже можно удалить (чтобы сборка началась "с нуля").
+
+npx shadow-cljs watch app
 * описание
 ** 
 * Docs
@@ -2485,53 +2758,353 @@ learn-reagent-course-files/giggin/ $ yarn dev
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org]]
 [[file:~/Dropbox/orgs/org-Brain/ClojureScript Idioms.org::*link to turials][link to turials]]
 * TODO
-** TODO Разобрать 20
-*** TODO
-**** DONE спросить 
-***** src
-(ns giggin.fb.init
-  (:require ["firebase/app" :as firebase]
-            ["firebase/database"]
-            ["firebase/auth"]))
+** DONE подченить шадов кложур
+*** DONE взять за основу
+{
+  "name": "Giggin",
+  "version": "0.1.0",
+  "description": "Giggin - find a gig!",
+  "repository": "https://github.com/jacekschae/learn-reagent-course-files.git",
+  "private": true,
 
-(defn firebase-init
-  []
-  (firebase/initializeApp
-   {:apiKey "your-api-key"
-    :authDomain "your-auth-domain"
-    :databaseURL "your-databse-url"
-    :projectId "your-project-id"}))
-***** хочу освоить
-гугл firebase из кложур скрипта.
-сдела такой фаил инициализации.
-но несем понимаю как добится безопасности.
-тоесть если я такой фаил полужу на сервер это будет не безопасно. поскольку любой кто получит доступ к файлу получается получит доступ к базеданых. Какие варианты сделать безапасно?
+  "scripts": {
+    "dev": "shadow-cljs watch app",
+    "release": "shadow-cljs release app",
+    "clean": "rm -rf target && rm -rf public/js",
+    "clean-win": "rmdir /s /q public/js & rmdir /s /q target"
+  },
+
+  "devDependencies": {
+    "shadow-cljs": "^2.27.5"
+  },
+
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+
+    "firebase": "^10.7.1",
+    "create-react-class": "^15.7.0"
+  }
+}
+*** DONE сравнить по строчно
+*** переустановить
+
+rm package-lock.json
+
+rm -rf node_modules
+
+npm install
+
+ВАЖНО
+
+Если после обновления у тебя появится папка:
+
+public/js
+target/
+
+    "clean": "rm -rf target && rm -rf public/js",
+
+
+их тоже можно удалить (чтобы сборка началась "с нуля").
+
+npx shadow-cljs watch app
+
+
+*** перенести в команды
+** TODO Разобрать 21
+*** TODO
+**** DONE diff
+***** 01
+#+begin_src clojure
+          (for [[id quant] @state/orders]
+            [:div.item {:key id}
+             [:div.img
+              [:img {:src (get-in @state/gigs [id :img])
+                     :alt (get-in @state/gigs [id :title])}]]
+             [:div.content
+              [:p.title (str (get-in @state/gigs [id :title]) " \u00D7 " quant)]]
+             [:div.action
+              [:div.price (format-price (* (get-in @state/gigs [id :price]) quant))]
+              [:button.btn.btn--link.tooltip
+               {:data-tooltip "Remove"
+                :on-click #(remove-from-order id)}
+               [:i.icon.icon--cross]]]])]
+
+#+end_src
+***** 02
+#+begin_src clojure
+
+          (doall (for [[id quant] @state/orders]
+                   [:div.item {:key id}
+                    [:div.img
+                     [:img {:src (get-in @state/gigs [id :img])
+                            :alt (get-in @state/gigs [id :title])}]]
+                    [:div.content
+                     [:p.title (str (get-in @state/gigs [id :title]) " \u00D7 " quant)]]
+                    [:div.action
+                     [:div.price (format-price (* (get-in @state/gigs [id :price]) quant))]
+                     [:button.btn.btn--link.tooltip
+                      {:data-tooltip "Remove"
+                       :on-click #(remove-from-order id)}
+                      [:i.icon.icon--cross]]]]))]
+#+end_src
+**** DONE добавить панель
+**** DONE добавит через мои перменные
+**** DONE заменить функчию создания курсоров
+чтоб она была только в стйте
+**** CANCELED убрать остальные упоминания курсора
+заменив регет на стейт с функцией
+**** DONE убедится что работает
+**** DONE подченить ф8 ф8 и ф8 ф7
+***** org-mode <f8>
+#+begin_src elisp
+;;  --------------------------------------
+(define-key org-mode-map (kbd "<f8>") nil)
+
+(defvar my/org-saved-buffer nil
+  "Buffer saved for remote org-babel execution.")
+
+(defun my/org-save-current-buffer ()
+  "Save the current buffer globally to use later."
+  (interactive)
+  (setq my/org-saved-buffer (buffer-name))
+  (message "Saved buffer: %s" (buffer-name)))
+
+(defun my/org-run-remote-or-local-src-block ()
+  "Execute src block either in saved buffer (if exists)
+or locally if not saved."
+  (interactive)
+  (evil-normal-state)
+  (save-excursion
+    (let ((origin-buffer (buffer-name)))
+      (if my/org-saved-buffer
+          (progn
+            ;; Переключаемся в сохранённый буфер
+            ;; (switch-to-buffer my/org-saved-buffer)
+            (select-frame-by-name my/org-saved-buffer)
+            (message "Executing in saved buffer: %s" (buffer-name))
+            (org-babel-goto-named-src-block "auto-tangle-block")
+            (org-babel-execute-src-block)
+            ;; Возвращаемся
+            ;; (switch-to-buffer origin-buffer))
+            ;; (select-frame-by-name origin-buffer)
+            (let* ((frame (get-buffer-window origin-buffer t)))
+                (select-frame-set-input-focus (window-frame frame)))) 
+        ;; Если нет – выполняем тут же
+          (progn (org-babel-goto-named-src-block "auto-tangle-block")
+                 (org-babel-execute-src-block))))))
+
+;; Привязки клавиш
+(with-eval-after-load 'org
+  (define-key org-mode-map (kbd "<f8> <S-f8>") #'my/org-save-current-buffer)
+  (define-key org-mode-map (kbd "<f8> <f8>") #'my/org-run-remote-or-local-src-block))
+
+(define-key org-mode-map (kbd "<f8> <f7>")
+      '(lambda() (interactive)
+        (save-excursion
+          (progn
+            (setq org-src-preserve-indentation t)
+            (untabify (point-min) (point-max))
+            ;; (save-buffer)
+            (save-some-buffers 'no-confirm)
+            ;; (universal-argument)
+            ;; (universal-argument)
+            (org-babel-tangle)
+            ;; (save-buffer)
+            ;; (save-some-buffers 'no-confirm)
+            (org-save-all-org-buffers)
+            (evil-normal-state)
+            (let ((origen-buffer (buffer-name)))
+              (select-frame-by-name "*compilation*")
+              (recompile)
+              (select-frame-by-name origen-buffer))))))
+;; --------------------------------------
+#+end_src
+
+
+***** (setq buf-scretch (buffer-name))
+
+(setq buf-todo (buffer-name))
+(select-frame-by-name buf-todo)
+
+***** (select-frame-by-name "*scratch*")
+(select-frame-by-name "*scratch*")
+
+(set-frame-name NAME)
+***** Вопрос
+столкнулся с непонятной ошибкой.
+я обычно переключаю фреёмы по буферу в нём
+(select-frame-by-name "giggin.org")
+и всё работало хорошо пока не столкнулся с ошибкой
+что он не находит буферы с имене созданых индерект буферов
+(select-frame-by-name "giggin.org::TODO ")
+притом что 
+(buffer-name)
+"giggin.org::TODO "
+***** 
+
+(frame-parameter nil 'name)
+возврашет структуру а строку
+Debugger entered--Lisp error: (wrong-type-argument listp #("TODO " 0 4 (fontified t face (org-todo org-level-1))))
+  car(#("TODO " 0 4 (fontified t face (org-todo org-level-1))))
+  eval((car (frame-parameter nil 'name)) nil)
+
+(substring-no-properties (frame-parameter nil 'name))
+
+(let ((frame-name (substring-no-properties
+                   (frame-parameter nil 'name))))
+  frame-name)
+
+
+(cdr (frame-parameter nil 'name))
+q
+(let* ((buf (get-buffer "giggin.org::TODO "))
+       (win (get-buffer-window buf t)))
+  (when win
+    (select-frame-set-input-focus (window-frame win))))
+
+**** TODO сделать тесты для заказов
+***** DONE несправилось
+(defn strip-components [hiccup]
+  (cond
+    (and (vector? hiccup) (fn? (first hiccup)))
+    (into [:__component__] (map strip-components (rest hiccup)))
+    (vector? hiccup)
+    (mapv strip-components hiccup)
+    :else hiccup))
+
+авот с этим хикапом стрип не справился
+[:div.item {:key nil} [:div.img [:img {:src nil, :alt nil}]] [:div.content [:p.title  × 1]] [:div.action [:div.price $0] [:button.btn.btn--link.tooltip {:data-tooltip Remove, :on-click #object[Function]} [:i.icon.icon--cross]]]]
+это превратилось в 
+оставив обжект
+***** расширить тест ордерс если есть ордер
+посмотреть меняется ли вывод
+***** понять где считается сума убедится
+что считается правельно 
+сделав тест
+***** тест сумарной сумы
+**** понять как рабоатет into
+особенно в этом примере
+
+(defn strip-components [hiccup]
+  (cond
+    ;; 1️⃣ Reagent-компонент
+    (and (vector? hiccup) (fn? (first hiccup)))
+      (into [:__component__]
+            (map strip-components (rest hiccup)))
+    ;; 2️⃣ hiccup-вектор
+    (vector? hiccup)
+      (mapv strip-components hiccup)
+    ;; 3️⃣ props map (event handlers и т.п.)
+    (map? hiccup)
+      (into {}
+            (for [[k v] hiccup]
+              [k (if (fn? v)
+                  :__fn__
+                  (strip-components v))]))
+    ;; 4️⃣ всё остальное
+    :else hiccup))
+
+
+
+**** поправить ошибку сумирования
+**** перенести стрип компонент
+***** в отдельный класс
+test-utils
+hiccup-normalize
+**** сделать тесты для админ понели
+если получится за мокить
+**** понять как работает панель
+***** что делает
+***** как устраена
 **** сделать комит
+*** file
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/22-subscribe/src/giggin/fb/db.cljs")
+
+(find-file-other-frame 
+"~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/22-subscribe/src/giggin/components/admin_panel.cljs")
+
+
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/22-subscribe/src/giggin/fb/init.cljs")
+
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/22-subscribe/src/giggin/components/orders.cljs")
+
+
+
+
+
+[[*diff dirs recersiv][diff dirs recersiv]]
+
 *** diff block
 **** block
-20-firebase-setup 19-ajax-transformations 
 
-diff -r 20-firebase-setup 19-ajax-transformations 
 #+begin_src eshell :dir /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/ :results output replace
-diff -r 20-firebase-setup 21-firebase-database
+diff -r 21-firebase-database 22-subscribe
 
 #+end_src
 
 #+RESULTS:
 #+begin_example
 Only in 21-firebase-database: package.json
-diff -r 20-firebase-setup/src/giggin/core.cljs 21-firebase-database/src/giggin/core.cljs
-7c7,8
-<             [giggin.api :as api]))
+Only in 22-subscribe/src/giggin/components: admin_panel.cljs
+diff -r 21-firebase-database/src/giggin/components/orders.cljs 22-subscribe/src/giggin/components/orders.cljs
+4c4,5
+<             [giggin.components.checkout-modal :refer [checkout-modal]]))
 ---
->             [giggin.api :as api]
->             [giggin.fb.init :refer [firebase-init]]))
-22c23,24
-<     (.getElementById js/document "app")))
+>             [giggin.components.checkout-modal :refer [checkout-modal]]
+>             [giggin.components.admin-panel :refer [admin-panel]]))
+16a18
+>      [admin-panel]
+23,35c25,37
+<          (for [[id quant] @state/orders]
+<            [:div.item {:key id}
+<             [:div.img
+<              [:img {:src (get-in @state/gigs [id :img])
+<                     :alt (get-in @state/gigs [id :title])}]]
+<             [:div.content
+<              [:p.title (str (get-in @state/gigs [id :title]) " \u00D7 " quant)]]
+<             [:div.action
+<              [:div.price (format-price (* (get-in @state/gigs [id :price]) quant))]
+<              [:button.btn.btn--link.tooltip
+<               {:data-tooltip "Remove"
+<                :on-click #(remove-from-order id)}
+<               [:i.icon.icon--cross]]]])]
 ---
->     (.getElementById js/document "app"))
->   (firebase-init))
-Only in 21-firebase-database/src/giggin: fb
+>          (doall (for [[id quant] @state/orders]
+>                   [:div.item {:key id}
+>                    [:div.img
+>                     [:img {:src (get-in @state/gigs [id :img])
+>                            :alt (get-in @state/gigs [id :title])}]]
+>                    [:div.content
+>                     [:p.title (str (get-in @state/gigs [id :title]) " \u00D7 " quant)]]
+>                    [:div.action
+>                     [:div.price (format-price (* (get-in @state/gigs [id :price]) quant))]
+>                     [:button.btn.btn--link.tooltip
+>                      {:data-tooltip "Remove"
+>                       :on-click #(remove-from-order id)}
+>                      [:i.icon.icon--cross]]]]))]
+Only in 22-subscribe/src/giggin/fb: db.cljs
+diff -r 21-firebase-database/src/giggin/fb/init.cljs 22-subscribe/src/giggin/fb/init.cljs
+5c5
+< 
+---
+>             
+8,12c8,14
+<   (firebase/initializeApp
+<    {:apiKey "your-api-key"
+<     :authDomain "your-auth-domain"
+<     :databaseURL "your-databse-url"
+<     :projectId "your-project-id"}))
+---
+>   (if (zero? (alength firebase/apps))
+>     (firebase/initializeApp
+>      #js {:apiKey "your-api-key"
+>           :authDomain "your-auth-domain"
+>           :databaseURL "your-databse-url"
+>           :projectId "your-project-id"})
+>     (firebase/app)))
+\ No newline at end of file
 #+end_example
 **** ranger
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
@@ -2542,21 +3115,10 @@ Only in 21-firebase-database/src/giggin: fb
 06-list-comprehension  11-format-price        16-update-gig     21-firebase-database     26-security-rules    
 07-add-to-order        12-refactor-functions  17-refactor-gigs  22-subscribe             28-performance-url   
 08-for-over-orders     13-checkout-modal      18-ajax-requests  23-sold-out              29-tips-and-tricks   
-*** file
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/21-firebase-database/package.json")
-(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/21-firebase-database/src/giggin/fb/init.cljs")
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/21-firebase-database/src/giggin/core.cljs")
-
-(find-file-other-frame 
-"~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/20-firebase-setup/src/giggin/api.cljs")
-[[*diff dirs recersiv][diff dirs recersiv]]
-19-ajax-transformations/src/giggin: api.cljs
-shadow-cljs.edn
-(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/shadow-cljs.edn")
-
 ** TODO Дотренировать приложение до конца
 [[*diff dirs recersiv][diff dirs recersiv]]
 (ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
+
 * DONE arhiv
 ** DONE пройти по видео7
 ** DONE пройти по видео8
@@ -4209,7 +4771,6 @@ https://github.com/binaryage/cljs-devtools/blob/master/docs/faq.md#why-some-cust
 (ns giggin.components.gigs
   (:require [giggin.state :as state ]
             [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open]]
-            [reagent.core :as r]
             [giggin.helpers :refer [format-price]]))
 
 
@@ -4789,6 +5350,75 @@ shadow-cljs.edn
 
 19-ajax-transformations/src/giggin/components/gigs.cljs
 19-ajax-transformations/src/giggin/components/gig_editor.cljs
+** DONE Разобрать 20
+*** DONE 
+**** DONE спросить 
+***** src
+(ns giggin.fb.init
+  (:require ["firebase/app" :as firebase]
+            ["firebase/database"]
+            ["firebase/auth"]))
+
+(defn firebase-init
+  []
+  (firebase/initializeApp
+   {:apiKey "your-api-key"
+    :authDomain "your-auth-domain"
+    :databaseURL "your-databse-url"
+    :projectId "your-project-id"}))
+***** хочу освоить
+гугл firebase из кложур скрипта.
+сдела такой фаил инициализации.
+но несем понимаю как добится безопасности.
+тоесть если я такой фаил полужу на сервер это будет не безопасно. поскольку любой кто получит доступ к файлу получается получит доступ к базеданых. Какие варианты сделать безапасно?
+**** сделать комит
+*** diff block
+**** block
+20-firebase-setup 19-ajax-transformations 
+
+diff -r 20-firebase-setup 19-ajax-transformations 
+#+begin_src eshell :dir /home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/ :results output replace
+diff -r 20-firebase-setup 21-firebase-database
+
+#+end_src
+
+#+RESULTS:
+#+begin_example
+Only in 21-firebase-database: package.json
+diff -r 20-firebase-setup/src/giggin/core.cljs 21-firebase-database/src/giggin/core.cljs
+7c7,8
+<             [giggin.api :as api]))
+---
+>             [giggin.api :as api]
+>             [giggin.fb.init :refer [firebase-init]]))
+22c23,24
+<     (.getElementById js/document "app")))
+---
+>     (.getElementById js/document "app"))
+>   (firebase-init))
+Only in 21-firebase-database/src/giggin: fb
+#+end_example
+**** ranger
+(ranger "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/")
+**** all
+
+02-app-setup           09-remove-from-order   14-gig-editor     19-ajax-transformations  24-firebase-auth     complete
+05-displaying-gigs     10-order-total         15-save-gig       20-firebase-setup        25-sign-in-sign-out  
+06-list-comprehension  11-format-price        16-update-gig     21-firebase-database     26-security-rules    
+07-add-to-order        12-refactor-functions  17-refactor-gigs  22-subscribe             28-performance-url   
+08-for-over-orders     13-checkout-modal      18-ajax-requests  23-sold-out              29-tips-and-tricks   
+*** file
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/21-firebase-database/package.json")
+(find-file-other-frame "/home/buyn/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/21-firebase-database/src/giggin/fb/init.cljs")
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/21-firebase-database/src/giggin/core.cljs")
+
+(find-file-other-frame 
+"~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/20-firebase-setup/src/giggin/api.cljs")
+[[*diff dirs recersiv][diff dirs recersiv]]
+19-ajax-transformations/src/giggin: api.cljs
+shadow-cljs.edn
+(find-file-other-frame "~/Dev/ClojureScript/tutorials/learn-reagent-course-files/increments/18-ajax-requests/shadow-cljs.edn")
+
 * backlog
 * project comands
 :PROPERTIES:
@@ -4936,6 +5566,30 @@ diff -r 16-update-gig/src/giggin/components/gigs.cljs 17-refactor-gigs/src/giggi
 >                                          :on-click #(toggle-modal {:active true
 >                                                                    :gig gig})}]
 #+end_example
+** compile
+(compile "npx shadow-cljs compile test && node out/node-tests.js")
+#+NAME: compile-block
+#+begin_src emacs-lisp :results output silent :tangle no
+(setq org-src-preserve-indentation t)
+(untabify (point-min) (point-max))
+(save-buffer)
+;; (universal-argument)
+;; (universal-argument)
+(org-babel-tangle)
+(evil-close-fold)
+(evil-close-fold)
+(let ((curent-buffer (buffer-name)))
+  (unless (get-buffer "*compilation*")
+    (compile "npx shadow-cljs compile test && node out/node-tests.js"))
+  (select-frame-by-name "*compilation*")
+  (recompile)
+  (select-frame-by-name curent-buffer))
+
+;; (find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
+;; (find-file-other-frame "~/INI/hydra-cfg.el")
+;; (load "~/INI/hydra-cfg.el")
+;; (load "~/ELs/BuYn/reader.el")
+ #+end_src
 ** поиск по проекту
 *** 
 **** dropbox in org
@@ -5077,12 +5731,12 @@ clojure -m cljs.main --compile my-cljs-project.core --repl
 (org-babel-tangle)
 (evil-close-fold)
 (evil-close-fold)
-;; (let ((curent-buffer (buffer-name)))
-;;   (unless (get-buffer "*compilation*")
-;;     (compile "npx shadow-cljs compile test && node out/node-tests.js"))
-;;   (select-frame-by-name "*compilation*")
-;;   (recompile)
-;;   (select-frame-by-name curent-buffer))
+(let ((curent-buffer (buffer-name)))
+  (unless (get-buffer "*compilation*")
+    (compile "npx shadow-cljs compile test && node out/node-tests.js"))
+  (select-frame-by-name "*compilation*")
+  (recompile)
+  (select-frame-by-name curent-buffer))
 
 ;; (find-file-other-frame "reagent-test/src/learn_cljs/reagent_test.cljs")
 ;; (find-file-other-frame "~/INI/hydra-cfg.el")

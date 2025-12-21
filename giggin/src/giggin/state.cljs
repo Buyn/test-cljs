@@ -1,6 +1,16 @@
 (ns giggin.state
   (:require [reagent.core :as r]))
 
+
+(defn gigs-cursor [app]
+  (r/cursor app [:gigs]))
+
+(defn orders-cursor [app]
+  (r/cursor app [:orders]))
+
+(defn gig-editor-cursor [app]
+  (r/cursor app [:gig-editor]))
+
 (def app-state (r/atom {
                 :orders {}
                 :gig-editor {

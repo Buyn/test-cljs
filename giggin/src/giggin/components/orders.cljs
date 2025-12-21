@@ -1,11 +1,9 @@
 (ns giggin.components.orders
   (:require [giggin.state :as state ]
             [giggin.helpers :refer [format-price]]
-            [reagent.core :as r]
+            [giggin.state :refer [orders-cursor gigs-cursor]]
+            [giggin.components.admin-panel :refer [admin-panel]]
             [giggin.components.checkout-modal :refer [checkout-modal]]))
-
-(defn orders-cursor [app]
-  (r/cursor app [:orders]))
 
 (defn add-to-order
   [app id]
@@ -44,13 +42,13 @@
               [:i.icon.icon--cross]]]]))
 
 
-
 (defn orders
   [app]
   (let [orders (orders-cursor app)
-        gigs   (r/cursor app [:gigs])]
+        gigs   (gigs-cursor app)]
    [:aside
     [:div.order 
+      [admin-panel app]
       (if (empty? @orders)
         [:div.empty
          [:div.title "You don't have any orders."]

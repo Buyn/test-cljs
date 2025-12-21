@@ -1,12 +1,9 @@
 (ns giggin.components.gigs
   (:require
             [giggin.components.gig-editor :refer [gig-editor-component gig-editor-open gig-editor-new]]
-            [giggin.components.orders :refer [orders-cursor add-to-order]]
+            [giggin.components.orders :refer [add-to-order]]
             [reagent.core :as r]
             [giggin.helpers :refer [format-price]]))
-
-(defn gigs-cursor [app]
-  (r/cursor app [:gigs]))
 
 (defn gig [app {:keys [id img title price desc] :as el}]
     [:div.gig {:key id}
