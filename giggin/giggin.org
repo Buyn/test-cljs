@@ -856,7 +856,7 @@ normal-gigs
          [:div.subtitle "Click on a + to add an order"]]
         [:div.body
           (for [[id quant] @orders]
-              (order-item orders id quant @gigs))
+            (order-item orders id quant @gigs))
           [:div.total
             [:hr]
             [:div.item
@@ -2246,40 +2246,61 @@ node out/node-tests.js
             [reagent.core :as r]
             [giggin.components.orders :as t]))
 
-
-
 (deftest orders-test
   (let [app state/app-state
         ;; modal (r/cursor app [:gig-editor :modal])
+        orders (state/orders-cursor app)
         gigs (state/gigs-cursor app)
-        gig1 (first @gigs)
-        init-value    (t/orders app)
+        ;; gig1 (second (first @gigs))
+        gig1 (:gig-05 @gigs)
+        init-value    #(t/orders app)
         ;; test1-id-value (str "gig-" (random-uuid))
         ;; test1-value   {:id test1-id-value
         ;;               :title "test" :desc "test" :price 100 :img "100" :sold-out false}
         ]
-    ;; (println init-value)
-    ;; (is (= init-value [:aside [:div.order [#object[giggin$components$admin_panel$admin_panel] app] [:div.empty [:div.title "You don't have any orders."] [:div.subtitle "Click on a + to add an order"]]]]))
-    (is (= (first init-value) :aside))
-    (is (= (first (second init-value)) :div.order))
-    (is (= (hiccup-normalize init-value)
+    ;; (println @gigs)
+    ;; (println gig1)
+    (is (= (first (init-value)) :aside))
+    (is (= (first (second (init-value))) :div.order))
+    (is (= (hiccup-normalize (init-value))
        [:aside
         [:div.order
-         [:__component__ app]
+         [:__component__ :__ratom__]
          [:div.empty
           [:div.title "You don't have any orders."]
           [:div.subtitle "Click on a + to add an order"]]]]))
-
-    (is (= (hiccup-normalize init-value)
+    (is (= true (empty? @orders)))
+    (t/add-to-order  app (:id gig1))
+    (is (= false (empty? @orders)))
+    ;; (println (hiccup-normalize (t/orders app)))
+    ;; (println "gig1 = " gig1)
+    (is (= 5000 (:price gig1)))
+    (is (= (hiccup-normalize (t/orders app))
        [:aside
         [:div.order
-         [:__component__ app]
-         [:div.empty
-          [:div.title "You don't have any orders."]
-          [:div.subtitle "Click on a + to add an order"]]]]))
-    ;; (t/gig-editor-new app)
-    ;; (is (= (dissoc @value :id) (dissoc init-value :id)))
-    ;; (is (= @modal true))
+         [:__component__ :__ratom__]
+         [:div.body
+          [[:div.item
+            {:key :gig-05}
+            [:div.img
+             [:img {
+                :src "https://res.cloudinary.com/schae/image/upload/f_auto,q_auto/v1519552695/giggin/dan-schiumarini-427769.jpg",
+                :alt "White"}]]
+            [:div.content [:p.title "White × 1"]]
+            [:div.action
+             [:div.price "$50"]
+             [:button.btn.btn--link.tooltip
+              {:data-tooltip "Remove", :on-click :__fn__}
+              [:i.icon.icon--cross]]]]]
+          [:div.total
+           [:hr]
+           [:div.item
+            [:div.content "Total: "]
+            [:div.action [:div.price "$50"]]
+            [:button.btn.btn--link.tooltip
+             {:data-tooltip "Remove all", :on-click :__fn__}
+             [:i.icon.icon--delete]]]
+           [:__component__]]]]]))
     ))
 
 
@@ -2290,9 +2311,6 @@ node out/node-tests.js
         ;; modal (r/cursor app [:gig-editor :modal])
         gig1 (first @gigs)
         init-value    (t/order-item orders (:id gig1) 1 @gigs)
-        ;; test1-id-value (str "gig-" (random-uuid))
-        ;; test1-value   {:id test1-id-value
-        ;;               :title "test" :desc "test" :price 100 :img "100" :sold-out false}
         ]
     (is (= (hiccup-normalize init-value)
       [:div.item {:key nil}
@@ -2379,11 +2397,84 @@ node out/node-tests.js
 
 **** src orders_test
 #+begin_src clojure :no-expand t :mkdirp yes
-(ns tests.testhelper)
-  ;; (:require [cljs.test :refer [deftest is]]
-  ;;           [reagent.core :as r]
+(ns tests.testhelper
+  ;; (:require [reagent.ratom :as ratom])
+  )
 
 
+(defn hiccup-normalize [hiccup]
+  (cond
+    ;; 0️⃣ Reagent atom / cursor / reaction
+    (instance? cljs.core/Atom hiccup)
+      :__atom__
+
+    (satisfies? cljs.core/IAtom hiccup)
+      :__ratom__
+
+    ;; 1️⃣ Reagent-компонент
+    (and (vector? hiccup) (fn? (first hiccup)))
+      (into [:__component__]
+          (map hiccup-normalize (rest hiccup)))
+
+    ;; 2️⃣ hiccup-вектор
+    (vector? hiccup)
+      (mapv hiccup-normalize hiccup)
+
+    ;; 3️⃣ seq / list (важно!)
+    (sequential? hiccup)
+      (map hiccup-normalize hiccup)
+
+    ;; 4️⃣ props map
+    (map? hiccup)
+      (into {}
+          (for [[k v] hiccup]
+            [k (cond
+                 (fn? v) :__fn__
+                 :else   (hiccup-normalize v))]))
+
+
+    ;; 5️⃣ всё остальное
+
+    :else hiccup))
+
+
+
+#+end_src
+
+**** exempl
+***** 03
+    ;; (ratom/ratom? hiccup)
+
+***** 02
+(defn hiccup-normalize [hiccup]
+  (cond
+    ;; 0️⃣ atom / cursor / state
+    (instance? cljs.core/Atom hiccup)
+      :__atom__
+
+    ;; 1️⃣ Reagent-компонент
+    (and (vector? hiccup) (fn? (first hiccup)))
+      (into [:__component__]
+          (map hiccup-normalize (rest hiccup)))
+
+    ;; 2️⃣ hiccup-вектор
+    (vector? hiccup)
+      (mapv hiccup-normalize hiccup)
+
+    ;; 3️⃣ props map (event handlers и т.п.)
+    (map? hiccup)
+      (into {}
+          (for [[k v] hiccup]
+            [k (cond
+                 (fn? v) :__fn__
+                 :else   (hiccup-normalize v))]))
+
+
+    ;; 5️⃣ всё остальное
+    :else hiccup))
+
+
+***** 01
 (defn hiccup-normalize [hiccup]
   (cond
     ;; 1️⃣ Reagent-компонент
@@ -2393,6 +2484,7 @@ node out/node-tests.js
     ;; 2️⃣ hiccup-вектор
     (vector? hiccup)
       (mapv hiccup-normalize hiccup)
+
     ;; 3️⃣ props map (event handlers и т.п.)
     (map? hiccup)
       (into {}
@@ -2400,12 +2492,14 @@ node out/node-tests.js
               [k (if (fn? v)
                   :__fn__
                   (hiccup-normalize v))]))
-    ;; 4️⃣ всё остальное
+
+    ;; 4️⃣ atom / cursor / state
+    (instance? cljs.core/Atom x)
+      :__atom__
+
+    ;; 5️⃣ всё остальное
     :else hiccup))
 
-
-
-#+end_src
 * run giggin
 ** run server and reple
 #+begin_src elisp :results output silent
@@ -2977,13 +3071,17 @@ q
 [:div.item {:key nil} [:div.img [:img {:src nil, :alt nil}]] [:div.content [:p.title  × 1]] [:div.action [:div.price $0] [:button.btn.btn--link.tooltip {:data-tooltip Remove, :on-click #object[Function]} [:i.icon.icon--cross]]]]
 это превратилось в 
 оставив обжект
-***** расширить тест ордерс если есть ордер
+***** DONE расширить тест ордерс если есть ордер
 посмотреть меняется ли вывод
+***** DONE ошибка
+****** 
 ***** понять где считается сума убедится
 что считается правельно 
 сделав тест
+***** кажется вопрос сумой в том что сменился на курсор
+и он обёрнут в вектор
 ***** тест сумарной сумы
-**** понять как рабоатет into
+**** DONE понять как рабоатет into
 особенно в этом примере
 
 (defn strip-components [hiccup]
@@ -3008,7 +3106,7 @@ q
 
 
 **** поправить ошибку сумирования
-**** перенести стрип компонент
+**** DONE перенести стрип компонент
 ***** в отдельный класс
 test-utils
 hiccup-normalize

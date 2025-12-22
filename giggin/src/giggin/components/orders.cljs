@@ -55,7 +55,7 @@
          [:div.subtitle "Click on a + to add an order"]]
         [:div.body
           (for [[id quant] @orders]
-              (order-item orders id quant @gigs))
+            (order-item orders id quant @gigs))
           [:div.total
             [:hr]
             [:div.item
