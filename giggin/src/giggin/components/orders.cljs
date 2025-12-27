@@ -7,7 +7,7 @@
 
 (defn add-to-order
   [app id]
-  (swap! app update-in [:orders id] inc))
+  (swap! app update-in [:orders (keyword id)] inc))
 
 (defn orders-total
   [orders gigs]

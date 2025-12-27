@@ -808,7 +808,7 @@ normal-gigs
 
 (defn add-to-order
   [app id]
-  (swap! app update-in [:orders id] inc))
+  (swap! app update-in [:orders (keyword id)] inc))
 
 (defn orders-total
   [orders gigs]
@@ -950,7 +950,6 @@ normal-gigs
     {:styles {:width "100%"}
      :on-click #(db-save! ["gigs"] (clj->js @(gigs-cursor app)))}
     "Publish"]])
-
 
 
 #+end_src
@@ -3057,7 +3056,7 @@ q
   (when win
     (select-frame-set-input-focus (window-frame win))))
 
-**** TODO сделать тесты для заказов
+**** DONE сделать тесты для заказов
 ***** DONE несправилось
 (defn strip-components [hiccup]
   (cond
@@ -3075,12 +3074,12 @@ q
 посмотреть меняется ли вывод
 ***** DONE ошибка
 ****** 
-***** понять где считается сума убедится
+***** DONE понять где считается сума убедится
 что считается правельно 
 сделав тест
-***** кажется вопрос сумой в том что сменился на курсор
+***** CANCELED кажется вопрос сумой в том что сменился на курсор
 и он обёрнут в вектор
-***** тест сумарной сумы
+***** CANCELED тест сумарной сумы
 **** DONE понять как рабоатет into
 особенно в этом примере
 
@@ -3105,16 +3104,65 @@ q
 
 
 
-**** поправить ошибку сумирования
+**** DONE поправить ошибку сумирования
 **** DONE перенести стрип компонент
 ***** в отдельный класс
 test-utils
 hiccup-normalize
 **** сделать тесты для админ понели
-если получится за мокить
+***** 
+***** ии
+довай сделаем тест если нужно то через мокинг
 **** понять как работает панель
 ***** что делает
 ***** как устраена
+***** SRC
+****** file admin_panel.cljs
+(find-file-other-frame "./src/giggin/components/admin_panel.cljs")
+****** src admin_panel.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.components.admin-panel
+  (:require [giggin.state :refer [gigs-cursor]]
+            [giggin.fb.db :refer [db-save!]]))
+
+(defn admin-panel
+  [app]
+  [:div.admin-panel
+   [:button.btn.btn--primary
+    {:styles {:width "100%"}
+     :on-click #(db-save! ["gigs"] (clj->js @(gigs-cursor app)))}
+    "Publish"]])
+
+
+#+end_src
+
+****** file
+(find-file-other-frame "./src/giggin/fb/db.cljs")
+****** src fb/db.cljs
+#+begin_src clojure :no-expand t :mkdirp yes
+(ns giggin.fb.db
+  (:require ["firebase/app" :refer [database]]
+            [clojure.string :as str]))
+
+(defn db-ref
+  [path]
+  (.ref (database) (str/join "/" path)))
+
+(defn db-save!
+  [path value]
+  (.set (db-ref path) value))
+
+
+#+end_src
+***** TODO Помоги разобратся как работает эта конструуция
+***** да
+(.set (db-ref path) value)
+(.ref (database) (str/join "/" path))
+да мне не доконца понятно как работает эта форма.
+ну то есть я понимаю, что мы вызываем методы внутри обекта дато баз.
+до это мы импортировали обект дато баз - по этому он не вызовет ошибку отсутвия символа.
+а вот откуда компилятор знает что делать с сет и реф? мыже не довали ему таких символов?
+
 **** сделать комит
 *** file
 
